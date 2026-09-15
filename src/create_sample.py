@@ -84,6 +84,15 @@ def create_stratified_sample(
     # Shuffle the final dataset
     sample_df = sample_df.sample(frac=1.0, random_state=random_state).reset_index(drop=True)
 
+    # Sanitize infinite Rate and NaN entries
+    if "Rate" in sample_df.columns:
+        inf_mask = np.isinf(sample_df["Rate"])
+        if inf_mask.any():
+            finite_max = sample_df.loc[~inf_mask, "Rate"].max()
+            sample_df.loc[inf_mask, "Rate"] = finite_max
+
+    sample_df.fillna(0.0, inplace=True)
+
     elapsed = time.time() - start_time
     output_path.parent.mkdir(parents=True, exist_ok=True)
     

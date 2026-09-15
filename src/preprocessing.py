@@ -31,17 +31,27 @@ from src.config import (
 
 def clean_features(df: pd.DataFrame, feature_cols: Optional[List[str]] = None) -> pd.DataFrame:
     """
-    Sanitizes feature columns by replacing infinite values and handling missing entries.
+    Sanitizes feature columns:
+      - Replaces infinite values (from division by zero in packet rate calculation)
+        with the maximum observed finite value in that column.
+      - Replaces NaN values (e.g. sample Std/Variance of single-packet windows) with 0.0.
+      - Enforces float32 precision for memory efficiency.
     """
     cols = feature_cols if feature_cols is not None else FEATURE_COLUMNS
     X = df[cols].copy()
 
-    # Replace inf and -inf with NaN
-    X.replace([np.inf, -np.inf], np.nan, inplace=True)
+    for col in cols:
+        # Check for infinite values
+        col_values = X[col].values
+        inf_mask = np.isinf(col_values)
+        if inf_mask.any():
+            finite_vals = col_values[~inf_mask & ~np.isnan(col_values)]
+            max_val = finite_vals.max() if len(finite_vals) > 0 else 0.0
+            X.loc[inf_mask, col] = max_val
 
-    # Fill NaN with 0.0 or column median
-    if X.isna().any().any():
-        X.fillna(0.0, inplace=True)
+        # Fill any NaN values with 0.0
+        if X[col].isna().any():
+            X[col] = X[col].fillna(0.0)
 
     return X.astype(np.float32)
 
