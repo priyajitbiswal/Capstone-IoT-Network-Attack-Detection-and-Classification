@@ -5,6 +5,7 @@ Supports Logistic Regression, Random Forest, LightGBM, XGBoost, and PyTorch DNN.
 
 from typing import Any, Dict, Literal, Optional
 import numpy as np
+from sklearn.utils.class_weight import compute_class_weight
 from sklearn.linear_model import SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
 import lightgbm as lgb
@@ -53,6 +54,7 @@ class PyTorchDNNWrapper:
         batch_size: int = 2048,
         lr: float = 0.002,
         weight_decay: float = 1e-4,
+        class_weight: Optional[str] = "balanced",
         device: Optional[str] = None,
     ):
         self.input_dim = input_dim
@@ -61,6 +63,7 @@ class PyTorchDNNWrapper:
         self.batch_size = batch_size
         self.lr = lr
         self.weight_decay = weight_decay
+        self.class_weight = class_weight
         self.device = (
             device if device else ("cuda" if torch.cuda.is_available() else "cpu")
         )
@@ -75,6 +78,17 @@ class PyTorchDNNWrapper:
         class_weights: Optional[torch.Tensor] = None,
     ):
         self.model.train()
+
+        if class_weights is None and self.class_weight == "balanced":
+            classes = np.unique(y_train)
+            weights = compute_class_weight(
+                class_weight="balanced", classes=classes, y=y_train
+            )
+            full_weights = np.ones(self.num_classes, dtype=np.float32)
+            for cls_idx, w in zip(classes, weights):
+                full_weights[cls_idx] = w
+            class_weights = torch.tensor(full_weights, dtype=torch.float32)
+
         criterion = nn.CrossEntropyLoss(
             weight=class_weights.to(self.device)
             if class_weights is not None
@@ -194,6 +208,7 @@ def get_model(
             num_classes=num_classes,
             epochs=3,
             batch_size=2048,
+            class_weight=class_weight,
         )
 
     else:

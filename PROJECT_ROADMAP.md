@@ -109,21 +109,18 @@ graph TD
 ---
 
 ### Step 3: Phase 2 &mdash; Functional Category Classification (8 Classes)
-- [ ] **Task 3.1**: Configure 8-class target mapping:
-  - Grouping the 34 raw labels into: `DDoS`, `DoS`, `Mirai`, `Recon`, `Spoofing`, `Web`, `BruteForce`, and `Benign`.
-- [ ] **Task 3.2**: Address multi-class category imbalance:
-  - Compare **Unweighted Baseline** vs. **Balanced Class Weighting** (`compute_class_weight`) vs. **SMOTE** oversampling on minority categories (`Web`, `BruteForce`).
-- [ ] **Task 3.3**: Train and compare candidate models:
-  - Random Forest (Bagging ensemble).
-  - LightGBM (Histogram-based leaf-wise gradient boosting).
-  - XGBoost (Depth-wise gradient boosting).
-  - Deep Neural Network (DNN with Dropout and BatchNorm).
-- [ ] **Task 3.4**: Detailed 8-class evaluation:
-  - Per-class classification reports (Precision, Recall, F1 for each of the 8 classes).
-  - 8x8 normalized Confusion Matrix heatmap (highlighting where minority classes are misclassified).
-  - Macro F1 vs. Accuracy comparison (demonstrating why raw accuracy is misleading on imbalanced datasets).
-- [ ] **Task 3.5**: Save best performing 8-class model to `models_saved/category_8class/`.
-- [ ] **Task 3.6**: Create `notebooks/03_phase2_eight_class_classification.ipynb`.
+- [x] **Task 3.1**: Configure 8-class target mapping:
+  - Grouping 34 raw labels into: `DDoS`, `DoS`, `Mirai`, `Recon`, `Spoofing`, `Web`, `BruteForce`, and `Benign`.
+- [x] **Task 3.2**: Address multi-class category imbalance:
+  - Implemented cost-sensitive balanced class weighting (`compute_class_weight`) for all tree and deep neural network models.
+- [x] **Task 3.3**: Train and compare candidate models (`src/train_category_8class.py`):
+  - Benchmarked SGD Logistic Regression, Random Forest, LightGBM, XGBoost, and PyTorch DNN.
+  - Recorded metrics: Accuracy, Macro F1, Weighted F1, Macro Recall, One-vs-Rest ROC-AUC, latency, and throughput.
+- [x] **Task 3.4**: Detailed 8-class evaluation:
+  - Generated and saved 8&times;8 normalized confusion matrix heatmaps to `results/figures/category8_cm_*.png`.
+  - Saved per-class reports for all models to `results/tables/category8_per_class_reports.json`.
+- [x] **Task 3.5**: Save best performing 8-class models to `models_saved/category_8class/` (`.joblib` and `.pt`).
+- [x] **Task 3.6**: Create and execute `notebooks/03_phase2_eight_class_classification.ipynb` with all rendered tables, plots, and per-class analyses.
 
 ---
 
@@ -180,7 +177,7 @@ graph TD
 | **Step 0: Setup** | Environment & Config | &mdash; |  Completed | `.venv`, `requirements.txt`, `src/config.py` |
 | **Step 1: Data** | Sampling & Loader | &mdash; |  Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
 | **Phase 1** | Binary Detection | 2 |  Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
-| **Phase 2** | Category Detection | 8 | ⏳ Next Up | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix |
-| **Phase 3** | Attack Profile Detection | 34 | ⏳ Pending | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix |
+| **Phase 2** | Category Detection | 8 |  Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
+| **Phase 3** | Attack Profile Detection | 34 | ⏳ Next Up | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix |
 | **Optimization** | Feature Selection & Latency | 18&ndash;22 feats | ⏳ Pending | Latency benchmarks & SHAP ranking |
 | **Synthesis** | Final Capstone Report | All | ⏳ Pending | Master comparative results & figures |
