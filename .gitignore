@@ -1,0 +1,32 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+ENV/
+
+# Large Datasets & Generated Data
+MERGED_CSV/
+data/
+*.csv
+
+# Model Checkpoints & Large Artifacts
+models_saved/
+*.pkl
+*.pt
+*.pth
+*.onnx
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
