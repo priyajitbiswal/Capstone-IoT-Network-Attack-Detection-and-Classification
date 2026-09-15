@@ -1,0 +1,80 @@
+[
+  {
+    "Model": "random_forest",
+    "Feature Set": "Full (39 feats)",
+    "Features Count": 39,
+    "Accuracy (%)": 70.74,
+    "Macro F1": 0.597,
+    "Weighted F1": 0.7103,
+    "Train Time (s)": 14.63,
+    "Latency (us/flow)": 17.6,
+    "Throughput (fps)": 56815,
+    "Acc Delta (%)": 0.0,
+    "Speedup (%)": 0.0
+  },
+  {
+    "Model": "random_forest",
+    "Feature Set": "Reduced (20 feats)",
+    "Features Count": 20,
+    "Accuracy (%)": 68.93,
+    "Macro F1": 0.5783,
+    "Weighted F1": 0.6953,
+    "Train Time (s)": 14.43,
+    "Latency (us/flow)": 15.15,
+    "Throughput (fps)": 65988,
+    "Acc Delta (%)": -1.81,
+    "Speedup (%)": 13.9
+  },
+  {
+    "Model": "lightgbm",
+    "Feature Set": "Full (39 feats)",
+    "Features Count": 39,
+    "Accuracy (%)": 72.83,
+    "Macro F1": 0.6176,
+    "Weighted F1": 0.7343,
+    "Train Time (s)": 86.95,
+    "Latency (us/flow)": 77.36,
+    "Throughput (fps)": 12926,
+    "Acc Delta (%)": 0.0,
+    "Speedup (%)": 0.0
+  },
+  {
+    "Model": "lightgbm",
+    "Feature Set": "Reduced (20 feats)",
+    "Features Count": 20,
+    "Accuracy (%)": 70.8,
+    "Macro F1": 0.5963,
+    "Weighted F1": 0.7159,
+    "Train Time (s)": 67.12,
+    "Latency (us/flow)": 80.09,
+    "Throughput (fps)": 12485,
+    "Acc Delta (%)": -2.03,
+    "Speedup (%)": -3.53
+  },
+  {
+    "Model": "xgboost",
+    "Feature Set": "Full (39 feats)",
+    "Features Count": 39,
+    "Accuracy (%)": 74.12,
+    "Macro F1": 0.6125,
+    "Weighted F1": 0.7263,
+    "Train Time (s)": 102.42,
+    "Latency (us/flow)": 17.01,
+    "Throughput (fps)": 58800,
+    "Acc Delta (%)": 0.0,
+    "Speedup (%)": 0.0
+  },
+  {
+    "Model": "xgboost",
+    "Feature Set": "Reduced (20 feats)",
+    "Features Count": 20,
+    "Accuracy (%)": 72.16,
+    "Macro F1": 0.5886,
+    "Weighted F1": 0.7061,
+    "Train Time (s)": 69.34,
+    "Latency (us/flow)": 12.15,
+    "Throughput (fps)": 82299,
+    "Acc Delta (%)": -1.97,
+    "Speedup (%)": 28.55
+  }
+]

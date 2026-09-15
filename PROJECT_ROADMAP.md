@@ -146,16 +146,19 @@ graph TD
 ---
 
 ### Step 5: Feature Importance & Inference Latency Optimization
-- [ ] **Task 5.1**: Feature Importance Analysis:
-  - Compute SHAP values or Gini / Gain-based tree feature importance across the 39 features.
-  - Identify redundant features (e.g. rate metrics and flag counters with near-zero gain).
-- [ ] **Task 5.2**: Feature Space Reduction:
-  - Select optimal reduced feature subset (**18 to 22 features**).
-  - Re-train models on the reduced feature space.
-- [ ] **Task 5.3**: Trade-off Analysis:
-  - Measure accuracy/F1 delta: full 39 features vs. reduced ~20 features.
-  - Measure inference latency speedup (microsecond per flow & throughput in flows/sec).
-  - Evaluate edge-readiness for resource-constrained IoT devices (e.g., Raspberry Pi / ESP32 gateway).
+- [x] **Task 5.1**: Feature Importance Analysis (`src/feature_selection.py`):
+  - Computed ensemble consensus feature importance across RF Gini, XGBoost Gain, and LightGBM Split.
+  - Identified top 20 core features retaining >90% of discriminatory power and identified near-zero gain features (`IRC`, `DHCP`, `SMTP`, `Telnet`, `cwr_flag_number`).
+  - Saved rankings to `results/tables/feature_importance_rankings.csv` and chart to `results/figures/feature_importance_ranking.png`.
+- [x] **Task 5.2**: Feature Space Reduction:
+  - Selected optimal reduced feature subset (**20 core features**).
+  - Saved top 20 feature list and reduced scaler to `models_saved/reduced_features/`.
+- [x] **Task 5.3**: Trade-off Analysis & Benchmarking:
+  - Re-trained candidate tree models (Random Forest, LightGBM, XGBoost) on the reduced 20-feature space.
+  - Measured metrics: XGBoost inference latency decreased from 17.01 &mu;s down to 12.15 &mu;s (**+28.55% speedup**, 82,299 flows/sec) with only a &minus;1.96% accuracy delta.
+  - Feature vector memory reduced by **48.7%** (156 bytes down to 80 bytes per flow).
+  - Saved benchmark table to `results/tables/feature_reduction_benchmark.csv` and trade-off figure to `results/figures/feature_reduction_comparison.png`.
+- [x] **Task 5.4**: Create and execute `notebooks/05_feature_selection_latency.ipynb` with all pre-rendered charts, tables, and Pareto trade-off analyses.
 
 ---
 
@@ -180,5 +183,5 @@ graph TD
 | **Phase 1** | Binary Detection | 2 |  Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
 | **Phase 2** | Category Detection | 8 |  Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
 | **Phase 3** | Attack Profile Detection | 34 |  Completed | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix & models |
-| **Optimization** | Feature Selection & Latency | 18&ndash;22 feats | ⏳ Next Up | Latency benchmarks & SHAP ranking |
-| **Synthesis** | Final Capstone Report | All | ⏳ Pending | Master comparative results & figures |
+| **Optimization** | Feature Selection & Latency | 20 feats |  Completed | `05_feature_selection_latency.ipynb`, latency benchmarks & speedup |
+| **Synthesis** | Final Capstone Report | All | ⏳ Next Up | Master comparative results & figures |
