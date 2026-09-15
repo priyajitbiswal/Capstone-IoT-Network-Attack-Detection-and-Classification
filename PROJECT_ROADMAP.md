@@ -76,19 +76,17 @@ graph TD
 ---
 
 ### Step 1: Data Engineering & Stratified Sampling
-- [ ] **Task 1.1**: Implement `src/data_loader.py` with memory-safe batch processing:
+- [x] **Task 1.1**: Implement `src/data_loader.py` with memory-safe batch processing:
   - Streaming iterator over the 63 CSV files in `MERGED_CSV/`.
-  - Memory-efficient dtype specifications (e.g., `float32`, `int8`).
-- [ ] **Task 1.2**: Implement stratified subsampling script (`src/create_sample.py`):
-  - **Problem**: Full dataset has ~45 million rows (>8.6 GB), which exhausts workstation RAM.
-  - **Solution**: Create a representative stratified working dataset of **1,000,000 to 2,000,000 records**.
-  - **Class Retention Floor**: Undersample massive flooding attacks (DDoS/DoS) while **retaining 100% of rare classes** (Web attacks: SQL Injection, XSS, Uploading, Command Injection; Brute Force; Backdoor Malware; Ping Sweep).
-  - Enforce a minimum retention floor of ≥1,000 samples per class where available.
-- [ ] **Task 1.3**: Implement `src/preprocessing.py`:
-  - Outlier and missing value sanitization (handling any `inf` / `nan` values).
-  - Scaler pipeline: `StandardScaler` fitted strictly on training partition to prevent data leakage.
-  - Stratified 80/20 train/test split.
-- [ ] **Task 1.4**: Create `notebooks/01_data_exploration_sampling.ipynb` to visualize class distributions before and after subsampling.
+  - Memory-efficient dtype specifications (`float32` for features, categorical label).
+- [x] **Task 1.2**: Implement stratified subsampling script (`src/create_sample.py`):
+  - Created balanced working sample of **529,562 records** (`data/sample_stratified.csv`, 106.5 MB).
+  - Capped majority DDoS/DoS flooding classes while **retaining 100% of all rare classes** (Web attacks, Brute Force, Ping Sweep, Backdoor). All 34 classes verified present.
+- [x] **Task 1.3**: Implement `src/preprocessing.py`:
+  - Outlier and missing value sanitization.
+  - Leak-free `StandardScaler` pipeline fitted strictly on training partition.
+  - Stratified 80/20 train/test split with target encoders for 2, 8, and 34 classes.
+- [x] **Task 1.4**: Create `notebooks/01_data_exploration_sampling.ipynb` to visualize class distributions and verify pipeline.
 
 ---
 
@@ -179,7 +177,7 @@ graph TD
 | Phase | Granularity | Classes | Status | Target Deliverable |
 | :--- | :--- | :---: | :---: | :--- |
 | **Step 0: Setup** | Environment & Config | &mdash; |  Completed | `.venv`, `requirements.txt`, `src/config.py` |
-| **Step 1: Data** | Sampling & Loader | &mdash; | ⏳ Pending | `src/data_loader.py`, `src/create_sample.py` |
+| **Step 1: Data** | Sampling & Loader | &mdash; |  Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
 | **Phase 1** | Binary Detection | 2 | ⏳ Pending | `02_phase1_binary_classification.ipynb`, metrics table |
 | **Phase 2** | Category Detection | 8 | ⏳ Pending | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix |
 | **Phase 3** | Attack Profile Detection | 34 | ⏳ Pending | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix |
