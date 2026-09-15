@@ -1,0 +1,67 @@
+[
+  {
+    "Model": "logistic_regression",
+    "Accuracy": 0.8290955784464608,
+    "Macro F1": 0.6806065759241778,
+    "Weighted F1": 0.8654837732736022,
+    "Macro Precision": 0.6504706734747263,
+    "Macro Recall": 0.8959724283292311,
+    "ROC-AUC": 0.9497757633051791,
+    "PR-AUC": 0.9958428213994805,
+    "Train Time (s)": 7.84,
+    "Latency (us/flow)": 0.2,
+    "Throughput (flows/s)": 5017561
+  },
+  {
+    "Model": "random_forest",
+    "Accuracy": 0.8974913372296129,
+    "Macro F1": 0.764785803533779,
+    "Weighted F1": 0.9147713812695751,
+    "Macro Precision": 0.7096733959868006,
+    "Macro Recall": 0.9302669608478956,
+    "ROC-AUC": 0.9752979309437971,
+    "PR-AUC": 0.9979839449725203,
+    "Train Time (s)": 7.39,
+    "Latency (us/flow)": 8.98,
+    "Throughput (flows/s)": 111314
+  },
+  {
+    "Model": "lightgbm",
+    "Accuracy": 0.8959806633746565,
+    "Macro F1": 0.7632580240147455,
+    "Weighted F1": 0.9137396092555677,
+    "Macro Precision": 0.7083102615079137,
+    "Macro Recall": 0.9320900065619478,
+    "ROC-AUC": 0.9764838855667788,
+    "PR-AUC": 0.9980825001288604,
+    "Train Time (s)": 2.98,
+    "Latency (us/flow)": 1.69,
+    "Throughput (flows/s)": 592764
+  },
+  {
+    "Model": "xgboost",
+    "Accuracy": 0.9527820003210182,
+    "Macro F1": 0.8132678224053664,
+    "Weighted F1": 0.9502903491555958,
+    "Macro Precision": 0.8511272885887259,
+    "Macro Recall": 0.7840306356152911,
+    "ROC-AUC": 0.9747983841522577,
+    "PR-AUC": 0.9979378169861943,
+    "Train Time (s)": 3.61,
+    "Latency (us/flow)": 1.05,
+    "Throughput (flows/s)": 954681
+  },
+  {
+    "Model": "pytorch_dnn",
+    "Accuracy": 0.9465599123809164,
+    "Macro F1": 0.787246135138155,
+    "Weighted F1": 0.9435388068299904,
+    "Macro Precision": 0.8248608587759207,
+    "Macro Recall": 0.7587985079866821,
+    "ROC-AUC": 0.9651333224393084,
+    "PR-AUC": 0.9968736092332817,
+    "Train Time (s)": 57.34,
+    "Latency (us/flow)": 14.5,
+    "Throughput (flows/s)": 68950
+  }
+]

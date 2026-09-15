@@ -91,19 +91,20 @@ graph TD
 ---
 
 ### Step 2: Phase 1 &mdash; Binary Classification (2 Classes: Attack vs. Benign)
-- [ ] **Task 2.1**: Define binary classification baseline models in `src/models.py`:
-  - **Linear Baseline**: Logistic Regression (with class weighting).
-  - **Tree Baseline**: Decision Tree / Random Forest Classifier.
-  - **Gradient Boosted Trees**: LightGBM Classifier & XGBoost Classifier.
-  - **Neural Network Baseline**: Multi-Layer Perceptron (DNN) in PyTorch / scikit-learn.
-- [ ] **Task 2.2**: Train and validate binary models:
-  - Benchmark training duration and per-sample inference latency.
-  - Record performance metrics on test set: Accuracy, Precision, Recall, Macro F1, Weighted F1, and PR-AUC.
-- [ ] **Task 2.3**: Generate binary evaluation reports in `results/`:
-  - Normalized confusion matrix (quantifying False Positive Rate on Benign traffic).
-  - Precision-Recall and ROC curves.
-  - Save trained model checkpoints to `models_saved/binary/`.
-- [ ] **Task 2.4**: Create `notebooks/02_phase1_binary_classification.ipynb` documenting experiments, findings, and decision boundaries.
+- [x] **Task 2.1**: Define binary classification baseline models in `src/models.py`:
+  - Linear Baseline: `SGDClassifier` (log-loss / logistic regression with class weighting).
+  - Tree Baseline: `RandomForestClassifier` (optimized for large tabular flows).
+  - Gradient Boosted Trees: `LGBMClassifier` & `XGBClassifier`.
+  - Neural Network Baseline: `PyTorchTabularDNN` with BatchNorm, Dropout, and AdamW.
+- [x] **Task 2.2**: Train and validate binary models:
+  - Benchmarked training duration and per-sample inference latency.
+  - Recorded performance metrics on 105,913 test instances: Accuracy, Precision, Recall, Macro F1, Weighted F1, ROC-AUC, and PR-AUC.
+- [x] **Task 2.3**: Generate binary evaluation reports in `results/`:
+  - Generated and saved normalized confusion matrix heatmaps to `results/figures/binary_cm_*.png`.
+  - Saved ROC & Precision-Recall curves to `results/figures/binary_roc_pr_*.png`.
+  - Saved trained model checkpoints to `models_saved/binary/` (`.joblib` and `.pt`).
+  - Generated `results/tables/binary_models_benchmark.csv`.
+- [x] **Task 2.4**: Create `notebooks/02_phase1_binary_classification.ipynb` documenting experiments, findings, and decision boundaries. Pre-rendered with all outputs.
 
 ---
 
@@ -178,8 +179,8 @@ graph TD
 | :--- | :--- | :---: | :---: | :--- |
 | **Step 0: Setup** | Environment & Config | &mdash; |  Completed | `.venv`, `requirements.txt`, `src/config.py` |
 | **Step 1: Data** | Sampling & Loader | &mdash; |  Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
-| **Phase 1** | Binary Detection | 2 | ⏳ Pending | `02_phase1_binary_classification.ipynb`, metrics table |
-| **Phase 2** | Category Detection | 8 | ⏳ Pending | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix |
+| **Phase 1** | Binary Detection | 2 |  Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
+| **Phase 2** | Category Detection | 8 | ⏳ Next Up | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix |
 | **Phase 3** | Attack Profile Detection | 34 | ⏳ Pending | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix |
 | **Optimization** | Feature Selection & Latency | 18&ndash;22 feats | ⏳ Pending | Latency benchmarks & SHAP ranking |
 | **Synthesis** | Final Capstone Report | All | ⏳ Pending | Master comparative results & figures |
