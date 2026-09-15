@@ -1,0 +1,200 @@
+[
+  {
+    "Phase": "Phase 1: Binary",
+    "Classes": 2,
+    "Features": 39,
+    "Model": "xgboost",
+    "Accuracy (%)": 95.28,
+    "Macro F1": 0.8133,
+    "Weighted F1": 0.9503,
+    "Latency (us/flow)": 1.05,
+    "Throughput (fps)": 954681
+  },
+  {
+    "Phase": "Phase 1: Binary",
+    "Classes": 2,
+    "Features": 39,
+    "Model": "pytorch_dnn",
+    "Accuracy (%)": 94.66,
+    "Macro F1": 0.7872,
+    "Weighted F1": 0.9435,
+    "Latency (us/flow)": 14.5,
+    "Throughput (fps)": 68950
+  },
+  {
+    "Phase": "Phase 1: Binary",
+    "Classes": 2,
+    "Features": 39,
+    "Model": "random_forest",
+    "Accuracy (%)": 89.75,
+    "Macro F1": 0.7648,
+    "Weighted F1": 0.9148,
+    "Latency (us/flow)": 8.98,
+    "Throughput (fps)": 111314
+  },
+  {
+    "Phase": "Phase 1: Binary",
+    "Classes": 2,
+    "Features": 39,
+    "Model": "lightgbm",
+    "Accuracy (%)": 89.6,
+    "Macro F1": 0.7633,
+    "Weighted F1": 0.9137,
+    "Latency (us/flow)": 1.69,
+    "Throughput (fps)": 592764
+  },
+  {
+    "Phase": "Phase 1: Binary",
+    "Classes": 2,
+    "Features": 39,
+    "Model": "logistic_regression",
+    "Accuracy (%)": 82.91,
+    "Macro F1": 0.6806,
+    "Weighted F1": 0.8655,
+    "Latency (us/flow)": 0.2,
+    "Throughput (fps)": 5017561
+  },
+  {
+    "Phase": "Phase 2: Category",
+    "Classes": 8,
+    "Features": 39,
+    "Model": "xgboost",
+    "Accuracy (%)": 82.87,
+    "Macro F1": 0.6876,
+    "Weighted F1": 0.8241,
+    "Latency (us/flow)": 6.24,
+    "Throughput (fps)": 160318
+  },
+  {
+    "Phase": "Phase 2: Category",
+    "Classes": 8,
+    "Features": 39,
+    "Model": "lightgbm",
+    "Accuracy (%)": 78.82,
+    "Macro F1": 0.6876,
+    "Weighted F1": 0.8039,
+    "Latency (us/flow)": 18.84,
+    "Throughput (fps)": 53087
+  },
+  {
+    "Phase": "Phase 2: Category",
+    "Classes": 8,
+    "Features": 39,
+    "Model": "random_forest",
+    "Accuracy (%)": 78.17,
+    "Macro F1": 0.6814,
+    "Weighted F1": 0.7974,
+    "Latency (us/flow)": 8.65,
+    "Throughput (fps)": 115623
+  },
+  {
+    "Phase": "Phase 2: Category",
+    "Classes": 8,
+    "Features": 39,
+    "Model": "pytorch_dnn",
+    "Accuracy (%)": 73.47,
+    "Macro F1": 0.6165,
+    "Weighted F1": 0.7567,
+    "Latency (us/flow)": 16.56,
+    "Throughput (fps)": 60388
+  },
+  {
+    "Phase": "Phase 2: Category",
+    "Classes": 8,
+    "Features": 39,
+    "Model": "logistic_regression",
+    "Accuracy (%)": 74.48,
+    "Macro F1": 0.6042,
+    "Weighted F1": 0.7532,
+    "Latency (us/flow)": 0.26,
+    "Throughput (fps)": 3817376
+  },
+  {
+    "Phase": "Phase 3: Fine-Grained",
+    "Classes": 34,
+    "Features": 39,
+    "Model": "lightgbm",
+    "Accuracy (%)": 72.83,
+    "Macro F1": 0.6176,
+    "Weighted F1": 0.7343,
+    "Latency (us/flow)": 74.88,
+    "Throughput (fps)": 13355
+  },
+  {
+    "Phase": "Phase 3: Fine-Grained",
+    "Classes": 34,
+    "Features": 39,
+    "Model": "xgboost",
+    "Accuracy (%)": 74.12,
+    "Macro F1": 0.6125,
+    "Weighted F1": 0.7263,
+    "Latency (us/flow)": 13.35,
+    "Throughput (fps)": 74916
+  },
+  {
+    "Phase": "Phase 3: Fine-Grained",
+    "Classes": 34,
+    "Features": 39,
+    "Model": "random_forest",
+    "Accuracy (%)": 70.74,
+    "Macro F1": 0.597,
+    "Weighted F1": 0.7103,
+    "Latency (us/flow)": 8.24,
+    "Throughput (fps)": 121297
+  },
+  {
+    "Phase": "Phase 3: Fine-Grained",
+    "Classes": 34,
+    "Features": 39,
+    "Model": "pytorch_dnn",
+    "Accuracy (%)": 63.61,
+    "Macro F1": 0.5321,
+    "Weighted F1": 0.6382,
+    "Latency (us/flow)": 13.95,
+    "Throughput (fps)": 71693
+  },
+  {
+    "Phase": "Phase 3: Fine-Grained",
+    "Classes": 34,
+    "Features": 39,
+    "Model": "logistic_regression",
+    "Accuracy (%)": 64.61,
+    "Macro F1": 0.528,
+    "Weighted F1": 0.6454,
+    "Latency (us/flow)": 0.41,
+    "Throughput (fps)": 2420194
+  },
+  {
+    "Phase": "Step 5: Optimized Edge",
+    "Classes": 34,
+    "Features": 20,
+    "Model": "random_forest",
+    "Accuracy (%)": 68.93,
+    "Macro F1": 0.5783,
+    "Weighted F1": 0.6953,
+    "Latency (us/flow)": 15.15,
+    "Throughput (fps)": 65988
+  },
+  {
+    "Phase": "Step 5: Optimized Edge",
+    "Classes": 34,
+    "Features": 20,
+    "Model": "lightgbm",
+    "Accuracy (%)": 70.8,
+    "Macro F1": 0.5963,
+    "Weighted F1": 0.7159,
+    "Latency (us/flow)": 80.09,
+    "Throughput (fps)": 12485
+  },
+  {
+    "Phase": "Step 5: Optimized Edge",
+    "Classes": 34,
+    "Features": 20,
+    "Model": "xgboost",
+    "Accuracy (%)": 72.16,
+    "Macro F1": 0.5886,
+    "Weighted F1": 0.7061,
+    "Latency (us/flow)": 12.15,
+    "Throughput (fps)": 82299
+  }
+]

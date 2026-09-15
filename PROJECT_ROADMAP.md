@@ -163,14 +163,14 @@ graph TD
 ---
 
 ### Step 6: Capstone Synthesis, Comparison & Presentation
-- [ ] **Task 6.1**: Master comparative synthesis:
-  - Summary matrix comparing **2-Class vs. 8-Class vs. 34-Class** performance.
-  - Comparison table across all model families (Logistic Regression, Random Forest, LightGBM, XGBoost, DNN).
-- [ ] **Task 6.2**: Visualizations generation:
-  - Multi-panel publication-quality figures saved to `results/figures/`.
-  - Performance vs. Complexity / Latency frontier curves.
-- [ ] **Task 6.3**: Final Capstone Summary Report:
-  - Document key findings, limitations, trade-offs, and defense-ready conclusions.
+- [x] **Task 6.1**: Master comparative synthesis:
+  - Built unified cross-model comparison matrix (`results/tables/capstone_master_comparison.csv` and JSON).
+  - Built executive trajectory matrix (`results/tables/capstone_executive_trajectory.csv`) comparing **2-Class vs. 8-Class vs. 34-Class vs. Reduced-20-Feature** performance.
+- [x] **Task 6.2**: Publication-Grade Visualizations:
+  - Generated multi-panel publication synthesis figure: `results/figures/capstone_master_synthesis.png` (Accuracy trajectory, Macro F1 resilience, Pareto latency frontier, and IoT line-rate throughput).
+- [x] **Task 6.3**: Final Capstone Presentation Notebook:
+  - Created and executed `notebooks/06_capstone_synthesis_presentation.ipynb` with all pre-rendered charts, tables, minority defense benchmarks, and multi-tier IoT deployment blueprints.
+- [x] **Task 6.4**: Documented comprehensive project insights ledger in `PROJECT_INSIGHTS.md`.
 
 ---
 
@@ -184,4 +184,4 @@ graph TD
 | **Phase 2** | Category Detection | 8 |  Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
 | **Phase 3** | Attack Profile Detection | 34 |  Completed | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix & models |
 | **Optimization** | Feature Selection & Latency | 20 feats |  Completed | `05_feature_selection_latency.ipynb`, latency benchmarks & speedup |
-| **Synthesis** | Final Capstone Report | All | ⏳ Next Up | Master comparative results & figures |
+| **Synthesis** | Final Capstone Report | All |  Completed | `06_capstone_synthesis_presentation.ipynb`, `PROJECT_INSIGHTS.md` |
