@@ -3,7 +3,6 @@ Data loading utilities for CICIoT2023 dataset.
 Provides memory-efficient readers, streaming chunk iterators, and dtype optimizations.
 """
 
-import glob
 from pathlib import Path
 from typing import Generator, List, Optional, Union
 import numpy as np

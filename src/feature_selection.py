@@ -25,7 +25,7 @@ from src.config import (
 )
 from src.evaluate import evaluate_predictions, measure_inference_latency
 from src.models import get_model
-from src.preprocessing import clean_features, encode_labels, prepare_dataset
+from src.preprocessing import clean_features, encode_labels
 
 
 def compute_feature_importances(

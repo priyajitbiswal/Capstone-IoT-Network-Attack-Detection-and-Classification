@@ -18,7 +18,6 @@ from src.config import (
     MODELS_DIR,
     SAMPLE_FILE,
     TABLES_DIR,
-    THIRTY_FOUR_CLASSES,
 )
 from src.evaluate import (
     evaluate_predictions,

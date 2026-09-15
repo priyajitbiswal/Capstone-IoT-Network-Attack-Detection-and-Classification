@@ -22,7 +22,7 @@ from sklearn.metrics import (
     roc_curve,
 )
 
-from src.config import FIGURES_DIR, TABLES_DIR
+from src.config import FIGURES_DIR
 
 
 def evaluate_predictions(

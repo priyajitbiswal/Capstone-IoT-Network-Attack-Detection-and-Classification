@@ -3,7 +3,7 @@ Model definitions and factory for tabular network intrusion detection.
 Supports Logistic Regression, Random Forest, LightGBM, XGBoost, and PyTorch DNN.
 """
 
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal, Optional
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.linear_model import SGDClassifier

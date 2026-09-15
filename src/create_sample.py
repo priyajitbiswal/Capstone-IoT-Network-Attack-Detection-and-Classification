@@ -5,7 +5,6 @@ Retains 100% of rare attack vectors while undersampling massive flooding attacks
 """
 
 import argparse
-from collections import Counter
 from pathlib import Path
 import time
 import numpy as np

@@ -237,5 +237,4 @@ def plot_master_synthesis_figure(master_df: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
-    from typing import Tuple
     generate_master_synthesis()

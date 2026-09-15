@@ -14,7 +14,6 @@ from tabulate import tabulate
 import torch
 
 from src.config import (
-    BINARY_CLASSES,
     FIGURES_DIR,
     MODELS_DIR,
     SAMPLE_FILE,
