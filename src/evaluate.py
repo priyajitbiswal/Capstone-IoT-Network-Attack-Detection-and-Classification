@@ -140,15 +140,27 @@ def plot_confusion_matrix(
         cm_display = cm
         fmt = "d"
 
-    plt.figure(
-        figsize=(
-            10 if len(class_names) <= 10 else 16,
-            8 if len(class_names) <= 10 else 14,
-        )
-    )
+    if len(class_names) > 20:
+        fig_size = (22, 18)
+        annot_kws = {"size": 6.5}
+        fmt = ".1%" if normalize else "d"
+        tick_size = 8
+    elif len(class_names) > 10:
+        fig_size = (16, 14)
+        annot_kws = {"size": 8}
+        fmt = ".2%" if normalize else "d"
+        tick_size = 9
+    else:
+        fig_size = (10, 8)
+        annot_kws = {"size": 10}
+        fmt = ".2%" if normalize else "d"
+        tick_size = 10
+
+    plt.figure(figsize=fig_size)
     sns.heatmap(
         cm_display,
         annot=True,
+        annot_kws=annot_kws,
         fmt=fmt,
         cmap=cmap,
         xticklabels=class_names,
@@ -157,11 +169,11 @@ def plot_confusion_matrix(
         linewidths=0.5,
         linecolor="lightgray",
     )
-    plt.title(title, fontsize=14, fontweight="bold", pad=15)
+    plt.title(title, fontsize=15, fontweight="bold", pad=15)
     plt.xlabel("Predicted Class", fontsize=12, labelpad=10)
     plt.ylabel("True Class", fontsize=12, labelpad=10)
-    plt.xticks(rotation=45, ha="right")
-    plt.yticks(rotation=0)
+    plt.xticks(rotation=45, ha="right", fontsize=tick_size)
+    plt.yticks(rotation=0, fontsize=tick_size)
     plt.tight_layout()
 
     if save_path:

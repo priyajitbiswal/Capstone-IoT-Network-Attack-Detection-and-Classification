@@ -125,22 +125,23 @@ graph TD
 ---
 
 ### Step 4: Phase 3 &mdash; Fine-Grained Attack Classification (34 Classes)
-- [ ] **Task 4.1**: Configure 34-class label encoder:
+- [x] **Task 4.1**: Configure 34-class label encoder:
   - Full evaluation across all 33 individual attack profiles + Benign traffic.
-- [ ] **Task 4.2**: Advanced model training:
-  - Hyperparameter tuning for top performing model (e.g., LightGBM / XGBoost).
-  - Train Deep Neural Network (PyTorch) with Focal Loss to penalize minority misclassification.
-  - *(Optional / Advanced)*: Hybrid 1D-CNN + LSTM architecture to evaluate spatial and sequential feature representations.
-- [ ] **Task 4.3**: Comprehensive 34-class evaluation:
-  - Full 34-class classification report (macro, micro, and weighted averages).
-  - High-resolution 34x34 confusion matrix heatmap.
+- [x] **Task 4.2**: Train and compare candidate models (`src/train_attack_34class.py`):
+  - Benchmarked SGD Logistic Regression, Random Forest, LightGBM, XGBoost, and PyTorch DNN across all 34 classes.
+  - Implemented cost-sensitive balanced class weighting to prevent minority class starvation.
+- [x] **Task 4.3**: Comprehensive 34-class evaluation:
+  - Full 34-class classification report (accuracy, macro, micro, and weighted averages).
+  - High-resolution 34x34 normalized confusion matrix heatmaps saved to `results/figures/attack34_cm_*.png`.
   - Specific deep-dive into stealthy minority vectors:
     - `SQLINJECTION`, `XSS`, `COMMANDINJECTION`, `BROWSERHIJACKING`, `UPLOADING_ATTACK`
-    - `DICTIONARYBRUTEFORCE`
-    - `BACKDOOR_MALWARE`
-    - `RECON-PINGSWEEP`
-- [ ] **Task 4.4**: Save model artifacts and predictions to `models_saved/attack_34class/`.
-- [ ] **Task 4.5**: Create `notebooks/04_phase3_thirtyfour_class_classification.ipynb`.
+    - `DICTIONARYBRUTEFORCE`, `BACKDOOR_MALWARE`, `RECON-PINGSWEEP`
+    - Saved minority benchmark table to `results/tables/attack34_minority_attacks_benchmark.csv`.
+- [x] **Task 4.4**: Save model artifacts and predictions to `models_saved/attack_34class/`:
+  - Exported all 5 model checkpoints (`.joblib` and `.pt`) and `attack34_scaler.joblib`.
+  - Exported benchmark table to `results/tables/attack34_models_benchmark.csv` and JSON.
+  - Exported per-class reports to `results/tables/attack34_per_class_reports.json`.
+- [x] **Task 4.5**: Create and execute `notebooks/04_phase3_thirtyfour_class_classification.ipynb` with all pre-rendered charts, tables, confusion matrix displays, and 2 &rarr; 8 &rarr; 34 progression trajectory.
 
 ---
 
@@ -178,6 +179,6 @@ graph TD
 | **Step 1: Data** | Sampling & Loader | &mdash; |  Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
 | **Phase 1** | Binary Detection | 2 |  Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
 | **Phase 2** | Category Detection | 8 |  Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
-| **Phase 3** | Attack Profile Detection | 34 | ⏳ Next Up | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix |
-| **Optimization** | Feature Selection & Latency | 18&ndash;22 feats | ⏳ Pending | Latency benchmarks & SHAP ranking |
+| **Phase 3** | Attack Profile Detection | 34 |  Completed | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix & models |
+| **Optimization** | Feature Selection & Latency | 18&ndash;22 feats | ⏳ Next Up | Latency benchmarks & SHAP ranking |
 | **Synthesis** | Final Capstone Report | All | ⏳ Pending | Master comparative results & figures |

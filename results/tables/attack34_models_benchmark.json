@@ -1,0 +1,62 @@
+[
+  {
+    "Model": "logistic_regression",
+    "Accuracy": 0.6460963243416766,
+    "Macro F1": 0.527955693741082,
+    "Weighted F1": 0.6453644497051972,
+    "Macro Precision": 0.5388742467185261,
+    "Macro Recall": 0.5532739739802853,
+    "ROC-AUC (OVR)": 0.9635360638480881,
+    "Train Time (s)": 206.22,
+    "Latency (us/flow)": 0.41,
+    "Throughput (flows/s)": 2420194
+  },
+  {
+    "Model": "random_forest",
+    "Accuracy": 0.7074202411413141,
+    "Macro F1": 0.597023440128854,
+    "Weighted F1": 0.7103215372204789,
+    "Macro Precision": 0.6271102531419824,
+    "Macro Recall": 0.6329670471535838,
+    "ROC-AUC (OVR)": 0.9788604701186213,
+    "Train Time (s)": 12.6,
+    "Latency (us/flow)": 8.24,
+    "Throughput (flows/s)": 121297
+  },
+  {
+    "Model": "lightgbm",
+    "Accuracy": 0.7282864237628998,
+    "Macro F1": 0.6176217367615364,
+    "Weighted F1": 0.7342996614859308,
+    "Macro Precision": 0.619634440356701,
+    "Macro Recall": 0.6524579038401201,
+    "ROC-AUC (OVR)": 0.9822563481108436,
+    "Train Time (s)": 73.13,
+    "Latency (us/flow)": 74.88,
+    "Throughput (flows/s)": 13355
+  },
+  {
+    "Model": "xgboost",
+    "Accuracy": 0.7412498937807446,
+    "Macro F1": 0.6124749719268271,
+    "Weighted F1": 0.7262515154780685,
+    "Macro Precision": 0.7017511812100691,
+    "Macro Recall": 0.6044748942261481,
+    "ROC-AUC (OVR)": 0.9814399972450881,
+    "Train Time (s)": 86.63,
+    "Latency (us/flow)": 13.35,
+    "Throughput (flows/s)": 74916
+  },
+  {
+    "Model": "pytorch_dnn",
+    "Accuracy": 0.6360881100525904,
+    "Macro F1": 0.5320555845548062,
+    "Weighted F1": 0.6382169831168478,
+    "Macro Precision": 0.5656617416083684,
+    "Macro Recall": 0.571032400265849,
+    "ROC-AUC (OVR)": 0.9714772108731263,
+    "Train Time (s)": 74.76,
+    "Latency (us/flow)": 13.95,
+    "Throughput (flows/s)": 71693
+  }
+]

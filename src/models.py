@@ -147,33 +147,40 @@ def get_model(
     input_dim: int = 39,
     class_weight: Optional[str] = "balanced",
     random_state: int = 42,
+    **kwargs: Any,
 ) -> Any:
     """
     Factory function returning an initialized model instance.
+    Supports overriding default hyperparameters via **kwargs.
     """
     if model_name == "logistic_regression":
-        # Scalable logistic regression via stochastic gradient descent (log-loss)
+        max_iter = kwargs.get("max_iter", 100)
         return SGDClassifier(
             loss="log_loss",
-            max_iter=100,
+            max_iter=max_iter,
             class_weight=class_weight,
             random_state=random_state,
         )
 
     elif model_name == "random_forest":
+        n_estimators = kwargs.get("n_estimators", 50)
+        max_depth = kwargs.get("max_depth", 15)
         return RandomForestClassifier(
-            n_estimators=50,
-            max_depth=15,
+            n_estimators=n_estimators,
+            max_depth=max_depth,
             class_weight=class_weight,
             random_state=random_state,
             n_jobs=-1,
         )
 
     elif model_name == "lightgbm":
+        n_estimators = kwargs.get("n_estimators", 100)
+        learning_rate = kwargs.get("learning_rate", 0.05)
+        num_leaves = kwargs.get("num_leaves", 31)
         return lgb.LGBMClassifier(
-            n_estimators=100,
-            learning_rate=0.05,
-            num_leaves=31,
+            n_estimators=n_estimators,
+            learning_rate=learning_rate,
+            num_leaves=num_leaves,
             class_weight=class_weight,
             random_state=random_state,
             n_jobs=-1,
@@ -181,20 +188,23 @@ def get_model(
         )
 
     elif model_name == "xgboost":
+        n_estimators = kwargs.get("n_estimators", 100)
+        learning_rate = kwargs.get("learning_rate", 0.05)
+        max_depth = kwargs.get("max_depth", 6)
         if num_classes == 2:
             return xgb.XGBClassifier(
-                n_estimators=100,
-                learning_rate=0.05,
-                max_depth=6,
+                n_estimators=n_estimators,
+                learning_rate=learning_rate,
+                max_depth=max_depth,
                 random_state=random_state,
                 n_jobs=-1,
                 eval_metric="logloss",
             )
         else:
             return xgb.XGBClassifier(
-                n_estimators=100,
-                learning_rate=0.05,
-                max_depth=6,
+                n_estimators=n_estimators,
+                learning_rate=learning_rate,
+                max_depth=max_depth,
                 random_state=random_state,
                 n_jobs=-1,
                 eval_metric="mlogloss",
@@ -203,11 +213,15 @@ def get_model(
             )
 
     elif model_name == "pytorch_dnn":
+        epochs = kwargs.get("epochs", 3)
+        batch_size = kwargs.get("batch_size", 2048)
+        lr = kwargs.get("lr", 0.002)
         return PyTorchDNNWrapper(
             input_dim=input_dim,
             num_classes=num_classes,
-            epochs=3,
-            batch_size=2048,
+            epochs=epochs,
+            batch_size=batch_size,
+            lr=lr,
             class_weight=class_weight,
         )
 
