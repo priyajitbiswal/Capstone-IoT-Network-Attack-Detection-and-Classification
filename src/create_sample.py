@@ -5,13 +5,14 @@ Retains 100% of rare attack vectors while undersampling massive flooding attacks
 """
 
 import argparse
+from collections import Counter
 from pathlib import Path
 import time
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from src.config import DATA_DIR, DATASET_DIR, SAMPLE_FILE, TARGET_COLUMN
+from src.config import DATASET_DIR, SAMPLE_FILE, TARGET_COLUMN
 from src.data_loader import get_feature_dtypes, list_csv_files
 
 

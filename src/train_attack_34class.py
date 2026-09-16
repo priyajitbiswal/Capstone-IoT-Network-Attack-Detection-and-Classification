@@ -6,9 +6,8 @@ Evaluates multi-class models across all 33 distinct attack profiles + Benign tra
 import json
 from pathlib import Path
 import time
-from typing import Dict, List, Optional
+from typing import List, Optional
 import joblib
-import numpy as np
 import pandas as pd
 from tabulate import tabulate
 import torch

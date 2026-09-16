@@ -7,7 +7,6 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import seaborn as sns
 from sklearn.metrics import (
     accuracy_score,
@@ -21,8 +20,6 @@ from sklearn.metrics import (
     roc_auc_score,
     roc_curve,
 )
-
-from src.config import FIGURES_DIR
 
 
 def evaluate_predictions(
