@@ -17,13 +17,36 @@
   float: true,
   [
     #align(center)[
-      #text(size: 17pt, weight: "bold")[Hierarchical Multi-Tier Network Intrusion Detection and Edge Latency Optimization on the CICIoT2023 Benchmark]
-      #v(0.8em)
-      #text(size: 11pt, weight: "semibold")[Capstone Research Project] \
-      #text(size: 9.5pt, style: "italic")[Department of Computer Science & Engineering, Advanced Network Security Laboratory] \
-      #text(size: 8.5pt)[Email: priyajitbiswal91\@gmail.com]
+      #text(size: 17pt, weight: "bold")[IoT Network Attack Detection and Classification]
+      #v(0.5em)
+      #text(size: 10.5pt, weight: "semibold")[Team Archon --- CS4999: Capstone Project] \
+      #v(0.4em)
+      #grid(
+        columns: (1fr, 1fr, 1fr),
+        align: center,
+        [
+          #text(weight: "bold")[Priyajit Biswal] \
+          #text(size: 8.5pt)[23011102068] \
+          #text(size: 8pt)[priyajit23110510\@snuchennai.edu.in]
+        ],
+        [
+          #text(weight: "bold")[Rohit K Manoj] \
+          #text(size: 8.5pt)[23011102073] \
+          #text(size: 8pt)[rohit23110492\@snuchennai.edu.in]
+        ],
+        [
+          #text(weight: "bold")[Rishab Rajeev] \
+          #text(size: 8.5pt)[23011102072] \
+          #text(size: 8pt)[rishab23110023\@snuchennai.edu.in]
+        ]
+      )
+      #v(0.35em)
+      #text(size: 8.5pt)[
+        *Faculty In Charge:* Dr. Vegesna S M Srinivasavarma (srinivasv\@snuchennai.edu.in) \
+        *Department of Computer Science & Engineering, Shiv Nadar University Chennai*
+      ]
     ]
-    #v(1.2em)
+    #v(0.8em)
     #rect(
       width: 100%,
       stroke: 0.5pt + luma(180),
