@@ -1,0 +1,238 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[left=1.5in,right=1in,top=1in,bottom=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{tabularx}
+
+\onehalfspacing
+\renewcommand{\arraystretch}{1.3}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+% =========================================================
+% TITLE PAGE
+% =========================================================
+
+\begin{titlepage}
+
+\centering
+{\large \textbf{Shiv Nadar University-Chennai}}\\[0.1cm]
+{\normalsize Kalavakkam, Tamil Nadu - 603110, India}\\[0.1cm]
+{\normalsize Website: \texttt{www.snuchennai.edu.in}}
+
+\vspace{0.2cm}
+\hrule
+\vspace{0.8cm}
+
+\begin{center}
+
+{\large \textbf{Department of Computer Science and Engineering}}\\[0.8cm]
+
+{\large \textbf{CAPSTONE PROJECT REPORT}}\\[0.3cm]
+
+{\large \textbf{Phase 1 - Review 2}}\\[0.8cm]
+
+{\Large \textbf{IoT Network Attack Detection and Classification}}\\[0.8cm]
+
+{\large \textbf{Submitted by}}\\[0.4cm]
+
+\begin{tabular}{p{7cm}p{5.5cm}}
+\toprule
+\centering \textbf{Student Name} &
+\centering \arraybackslash \textbf{Registration Number}\\
+\midrule
+\centering Priyajit Biswal &
+\centering \arraybackslash 23011102068\\
+\centering Rohit K Manoj &
+\centering \arraybackslash 23011102073\\
+\centering Rishab Rajeev &
+\centering \arraybackslash 23011102072\\
+\bottomrule
+\end{tabular}
+
+\vfill
+
+{\large \textbf{Under the guidance of}}\\[0.2cm]
+{\large \textbf{Dr.\ Vegesna S M Srinivasavarma}}\\
+Associate Professor\\
+Department of Computer Science and Engineering\\
+\vspace{0.6cm}
+
+\begin{tabular}{c}
+Approved By: \\
+(Guide Signature with Date) \\
+ \\
+\shortstack{\rule{5cm}{0.4pt}\\
+Dr.\ Vegesna S M Srinivasavarma\\
+Project Guide}
+\end{tabular}
+
+\vfill
+
+\end{center}
+\end{titlepage}
+
+% =========================================================
+% CHAPTER 1: INTRODUCTION
+% =========================================================
+
+\pagenumbering{arabic}
+
+\chapter{Introduction}
+
+\section{Background}
+The pervasive deployment of the Internet of Things (IoT) across industrial automation, smart healthcare, intelligent transportation, and connected smart environments has transformed modern computing infrastructure. Projections estimate that by 2030, over 30 billion interconnected smart devices will operate worldwide. However, the architectural design of typical IoT edge endpoints is inherently constrained by low computational budgets, limited memory storage, and stripped-down protocol stacks. Furthermore, security protocols such as TLS/SSL are frequently truncated or entirely omitted at the endpoint level to conserve operational power.
+
+Consequently, IoT infrastructure has emerged as an attractive target for modern cyber threats. Compromised IoT nodes are regularly enslaved into massive botnet armies (such as Mirai and Bashlite) capable of generating multi-gigabit volumetric denial-of-service floods. Concurrently, malicious actors exploit weak web configuration interfaces on edge gateways using targeted application-layer attacks, including SQL Injection (SQLi), Cross-Site Scripting (XSS), Command Injection, and unauthorized backdoor malware.
+
+Traditional enterprise Network Intrusion Detection Systems (NIDS) rely either on deterministic signature-matching rules (e.g., Snort, Zeek) or centralized deep neural networks. In high-throughput IoT gateway environments operating at 1~Gbps to 10~Gbps line rates, both paradigms encounter critical operational bottlenecks. Signature engines cannot generalize to polymorphic or zero-day attack patterns and incur significant CPU overhead during deep packet inspection. Meanwhile, monolithic deep learning models require heavy matrix multiplications and excessive memory bandwidth, introducing multi-millisecond inference latencies that rapidly overwhelm edge gateway buffer queues. There is a pressing necessity for an intelligent, multi-tier intrusion detection architecture that balances line-rate packet processing with fine-grained diagnostic attribution.
+
+\section{Problem Statement}
+Securing high-speed IoT networks using data-driven machine learning models presents three core technical challenges:
+\begin{enumerate}
+    \item \textbf{The Throughput vs.\ Granularity Trade-Off:} Existing network intrusion detection systems are polarized between fast binary filters (which only decide whether traffic is normal or malicious without providing forensic insight) and monolithic multi-class deep learning models (which identify attack categories but incur significant computational overhead). In high-throughput environments, packet evaluation budgets are extremely tight; computational delays quickly trigger hardware buffer overflows, packet queuing, and packet drops.
+    \item \textbf{Severe Class Skew and Minority Exploit Blindness:} Modern IoT benchmark traffic is heavily skewed. High-volume volumetric floods (DDoS/DoS) represent the overwhelming majority of total flows, whereas stealthy application exploits (SQL Injection, Command Injection, Backdoors) constitute a tiny fraction of traffic. Standard machine learning algorithms optimize for global accuracy, resulting in the neglect of minority classes and causing severe recall degradation on critical web exploits. Moreover, standard synthetic balancing techniques (such as SMOTE) distort the physical kinematics and temporal sequencing of network packet flows.
+    \item \textbf{Feature Dimensionality vs.\ Edge Gateway Resource Limits:} Common flow extractors generate dozens of statistical metrics per connection. Maintaining active state tables and computing higher-order statistical features on embedded edge routers (e.g., ARM Cortex architectures) severely strains SRAM, L3 cache, and CPU cycles.
+\end{enumerate}
+
+\section{Objectives}
+The primary objective of this project is to formulate and design an adaptive, edge-to-cloud multi-tier intrusion detection and classification architecture for IoT networks. The specific sub-objectives are:
+\begin{enumerate}
+    \item \textbf{Design an Adaptive Three-Tier Diagnostic Hierarchy:} Decouple line-rate emergency packet shedding from compute-intensive forensic attribution by structuring inspection into:
+    \begin{itemize}
+        \item \emph{Tier 1 (Edge Ingress):} A lightweight linear filter for fast line-rate binary screening.
+        \item \emph{Tier 2 (Gateway Triage):} An optimized multi-class ensemble for 8-class functional category grouping.
+        \item \emph{Tier 3 (Cloud Core):} A high-capacity diagnostic model for fine-grained 34-class forensic attribution.
+    \end{itemize}
+    \item \textbf{Formulate a Loss-Space Cost-Sensitive Weighting Scheme:} Prevent the starvation of rare, stealthy application exploits under severe class imbalance by incorporating inverse-frequency loss penalties without distorting physical flow dynamics with synthetic artifacts.
+    \item \textbf{Establish a Tri-Model Consensus Feature Pruning Strategy:} Synthesize feature importance across Random Forest Gini impurity, XGBoost information gain, and LightGBM split frequency to prune redundant protocol counters down to an optimal core subset, reducing memory footprint and accelerating inference latency.
+    \item \textbf{Evaluate Cross-Tier Trade-Offs on the CICIoT2023 Benchmark:} Empirically benchmark candidate architectures (SGD Linear, Random Forest, LightGBM, XGBoost, and Tabular DNNs) across classification metrics, inference latency, and packet throughput.
+\end{enumerate}
+
+\section{Scope}
+The scope of this project encompasses:
+\begin{itemize}
+    \item \textbf{Dataset Focus:} Investigation is grounded on the state-of-the-art \textbf{CICIoT2023} benchmark dataset developed by the Canadian Institute for Cybersecurity, comprising 46.6 million flow records across 33 distinct attack profiles and benign traffic generated in a realistic 105-device IoT testbed.
+    \item \textbf{Deployment Horizon:} The architectural blueprint is designed for deployment across distributed IoT topologies, where low-power edge gateways (e.g., smart home routers, industrial IoT border switches) interface with upstream enterprise cloud management systems.
+    \item \textbf{Input Modality:} Model inference is restricted to flow-level statistical metadata and protocol flags (39 extracted attributes), ensuring privacy preservation by abstaining from full payload inspection.
+    \item \textbf{Assumptions \& Boundaries:} It is assumed that packet capture appliances provide streaming statistical flow vectors. Cryptographic payload decryption is outside the scope of flow-based telemetry.
+\end{itemize}
+
+% =========================================================
+% CHAPTER 2: LITERATURE REVIEW
+% =========================================================
+
+\chapter{Literature Review}
+
+\section{Existing Work}
+Research in Network Intrusion Detection Systems (NIDS) has progressed through multiple benchmark eras. Early detection models were evaluated on legacy corpora such as KDD99 and NSL-KDD; however, these datasets suffered from severe synthetic regularities and lacked modern IoT protocols. The UNSW-NB15 and CSE-CIC-IDS2018 datasets introduced modern attack variations but were collected predominantly in enterprise workstation environments rather than constrained IoT topologies.
+
+To address IoT-specific behaviors, Koroniotis et al.\ (2019) introduced the \textbf{BoT-IoT} dataset, capturing botnet attacks within a smart home testbed using MQTT and CoAP protocols. While BoT-IoT provided realistic botnet behavior, over 99.9\% of its flow instances comprised synthetic DoS/DDoS floods, leaving legitimate background traffic severely underrepresented. Al-Hawawreh et al.\ (2018) developed anomaly detection models for Industrial IoT (IIoT) telemetry from SCADA systems, demonstrating effective detection using deep autoencoders, albeit with high computational latency unsuitable for high-throughput edge buffers. Concurrently, Mirsky et al.\ (2018) developed \textbf{Kitsune}, demonstrating sub-microsecond online anomaly detection on streaming packets using an ensemble of autoencoders (KitNET), but restricted detection strictly to binary decisions without multi-class attack triage. Ferrag et al.\ (2022) created \textbf{Edge-IIoTset}, establishing a comprehensive multi-vector benchmark covering 14 attacks across IoT and IIoT environments for centralized and federated learning architectures.
+
+In 2023, the Canadian Institute for Cybersecurity (CIC) released \textbf{CICIoT2023} (Neto et al., 2023), establishing a comprehensive benchmark covering 33 modern attacks executed across 105 physical IoT devices. Initial baseline evaluations reported by Neto et al.\ utilized standard algorithms (Random Forest, Decision Trees, and Logistic Regression) primarily for binary detection and broad 7-class category grouping. However, existing literature on CICIoT2023 has predominantly focused on monolithic model training on arbitrary data splits, largely bypassing the real-world operational challenges of line-rate edge deployment, extreme minority exploit starvation, and computational latency optimization.
+
+\section{Comparison of Existing Approaches}
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of Existing Approaches in IoT Intrusion Detection}
+\label{tab:lit_comparison}
+\small
+\begin{tabular}{@{}p{3.2cm}p{3.5cm}p{4cm}p{4cm}@{}}
+\toprule
+\textbf{Reference} & \textbf{Approach / Model} & \textbf{Main Strength} & \textbf{Main Limitation}\\
+\midrule
+\textbf{Neto et al.\ (2023)} \newline \cite{ciciot2023} & Baseline ML (Random Forest, Decision Tree, Logistic Regression) on CICIoT2023 & Evaluated on a comprehensive 105-device modern IoT testbed with 33 attacks & Focused on centralized offline evaluation; did not address edge line-rate constraints or fine-grained 34-class minority attribution. \\
+\addlinespace
+\textbf{Koroniotis et al.\ (2019)} \cite{botiot} & Deep Learning (RNNs, SVM) on BoT-IoT dataset & Captured realistic IoT botnet attack behaviors (Mirai, Bashlite) & Severe synthetic volumetric skew ($>99.9\%$ floods); lacks normal baseline realism and modern web exploits. \\
+\addlinespace
+\textbf{Al-Hawawreh et al.\ (2018)} \cite{alhawawreh2018} & Deep Autoencoders (DAE) on industrial IoT telemetry & Targeted industrial IoT telemetry and SCADA protocols & Heavy computational latency; oriented toward industrial telemetry rather than high-speed consumer edge gateways. \\
+\addlinespace
+\textbf{Ferrag et al.\ (2020)} \cite{ferrag2020} & Convolutional Neural Networks (CNN) \& Deep Feed-Forward (DNN) & High detection rates on multi-class enterprise datasets (UNSW-NB15) & Tested on legacy corporate topologies; severe performance collapse on extreme minority attack vectors. \\
+\addlinespace
+\textbf{Mirsky et al.\ (2018)} \cite{kitsune} & Ensemble of Autoencoders (KitNET) with feature mapping & Sub-microsecond online anomaly detection on streaming packets on embedded hardware & Operates strictly as a binary anomaly detector; unable to classify specific attack vectors or isolate stealthy web exploits. \\
+\addlinespace
+\textbf{Ferrag et al.\ (2022)} \cite{edgeiiot} & Centralized ML and Federated Learning (FL) on Edge-IIoTset & Comprehensive benchmark covering 14 attacks across IoT and IIoT devices & Attack traffic originated from external attacking workstations rather than compromised peer IoT hardware; heavy feature dimensionality. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Research Gap}
+Based on a systematic review of the literature and empirical analysis of IoT network dynamics, this project identifies three critical research gaps:
+
+\subsection*{Research Gap 1 (RG-1): The Granularity vs.\ Line-Rate Latency Dilemma ("Fast but Dumb" vs.\ "Smart but Too Slow")}
+Existing IoT NIDS frameworks exhibit an irreconcilable trade-off between inspection throughput and diagnostic specificity. 
+A simple binary classifier (`Attack' vs.\ `Benign') operates with low latency near line-rate, but it is functionally blind—it signals an alarm without identifying the threat nature, preventing automated remediation. 
+Conversely, multi-class deep learning architectures provide granular attack attribution but incur substantial computational and latency overheads per sample. 
+In high-speed networks, packet evaluation budgets are extremely tight; deploying a monolithic multi-class model directly on edge packet ingress risks saturating hardware buffer queues, triggering packet drops, network jitter, and connection timeouts.
+
+\subsection*{Research Gap 2 (RG-2): Severe Multi-Class Skew and Minority Exploit Starvation ("The Needle in a Haystack")}
+Real-world IoT network traffic is characterized by profound class skew. In benchmark corpora such as CICIoT2023, volumetric flooding attacks (DDoS/DoS) account for the overwhelming majority of network flows, whereas targeted, stealthy application-layer exploits (SQL Injection, Command Injection, Browser Hijacking, Backdoors) account for a tiny fraction of overall traffic. 
+Under standard empirical risk minimization, machine learning models minimize global error by defaulting to majority flood predictions, yielding deceptively high overall accuracy while suffering severe recall degradation on critical application-layer attacks. 
+Furthermore, conventional oversampling techniques such as SMOTE create synthetic records via linear interpolation in continuous feature space, generating unphysical packets with impossible protocol flag combinations and distorted timing intervals.
+
+\subsection*{Research Gap 3 (RG-3): High Feature Dimensionality vs.\ Edge Gateway Resource Budgets ("Feature Bloat on Weak Hardware")}
+Standard network flow telemetry tools record dozens of statistical metrics per connection (including packet size moments, inter-arrival time standard deviations, and protocol flags). 
+Resource-constrained IoT edge devices (e.g., residential Wi-Fi gateways, ARM-based industrial routers) possess restricted SRAM and limited cache sizes. 
+Maintaining active state tables and computing higher-order aggregations across numerous features for high-concurrency connections leads to CPU exhaustion and high memory latency. 
+Moreover, existing feature reduction approaches rely on single-criterion linear techniques (such as PCA) that produce composite features that still require calculating all raw metrics upstream, failing to reduce edge computational load.
+
+\section{Research Gap-to-Motivation Mapping}
+To address each identified research gap systematically, this project formulates an explicit one-to-one mapping between the research gap, the underlying engineering cause, our core motivation, and the proposed technical solution:
+
+\begin{table}[ht]
+\centering
+\caption{Research Gap to Motivation and Proposed Solution Mapping}
+\label{tab:gap_mapping}
+\small
+\begin{tabular}{@{}p{3.2cm}p{3.2cm}p{3.8cm}p{4.5cm}@{}}
+\toprule
+\textbf{Research Gap} & \textbf{Root Cause in Literature} & \textbf{Project Motivation} & \textbf{Proposed Technical Solution}\\
+\midrule
+\textbf{RG-1: Granularity vs.\ Latency Dilemma} \newline \emph{(Fast vs.\ Smart)} & Monolithic models perform all detection tasks simultaneously at the packet boundary. & Decouple line-rate emergency packet shedding from compute-intensive root-cause forensics. & \textbf{Adaptive Three-Tier Hierarchy:} \newline $\bullet$ \textbf{Tier 1:} Lightweight linear filter (`SGD Logistic Regression') for fast line-rate binary screening. \newline $\bullet$ \textbf{Tier 2:} Gateway ensemble (`LightGBM/XGBoost') for 8-class functional triage. \newline $\bullet$ \textbf{Tier 3:} Deep model (`XGBoost/DNN') in cloud core for 34-class fine-grained attribution. \\
+\addlinespace
+\textbf{RG-2: Severe Class Skew} \newline \emph{(Needle in a Haystack)} & Loss functions treat all errors equally; synthetic SMOTE data corrupts real packet timing. & Enforce heavy penalties on lethal exploit misclassifications without generating unphysical fake flows. & \textbf{Loss-Space Cost-Sensitive Class Weighting:} \newline Scale loss gradients inversely proportional to class frequencies: \newline $W_c = \frac{N_{\text{total}}}{K \cdot N_c}$ \newline Rare exploits (SQLi, Command Injection) exert strong gradient updates during model optimization without synthetic artifacts. \\
+\addlinespace
+\textbf{RG-3: Feature Bloat on Weak Hardware} \newline \emph{(Resource Budgets)} & Redundant protocol counters (IRC, Telnet) saturate memory cache and increase decision tree depth. & Prune protocol noise and reduce memory footprint while preserving multi-vector discriminatory capacity. & \textbf{Tri-Model Consensus Feature Pruning:} \newline Aggregate feature importance across Random Forest (Gini), XGBoost (Gain), and LightGBM (Split Count). \newline Prune redundant features to identify an optimal core subset, aiming to significantly reduce memory footprint and accelerate inference latency while preserving classification performance. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{thebibliography}{99}
+
+\bibitem{ciciot2023}
+E.~C.~P.~Neto, S.~Dadkhah, R.~Ferreira, A.~Zohourian, R.~Lu, and A.~A.~Ghorbani, ``CICIoT2023: A Real-Time Dataset and Benchmark for Large-Scale Attacks in IoT Environment,'' \emph{Sensors}, vol.~23, no.~13, p.~5941, 2023, doi: 10.3390/s23135941.
+
+\bibitem{botiot}
+N.~Koroniotis, N.~Moustafa, E.~Sitnikova, and B.~Turnbull, ``Towards developing network intrusion detection systems using deep learning for IoT based smart environments,'' \emph{Future Generation Computer Systems}, vol.~100, pp.~255--267, 2019, doi: 10.1016/j.future.2019.05.041.
+
+\bibitem{alhawawreh2018}
+M.~Al-Hawawreh, N.~Moustafa, and E.~Sitnikova, ``Identification of malicious activities in industrial internet of things based on deep learning models,'' \emph{Journal of Information Security and Applications}, vol.~41, pp.~1--11, 2018, doi: 10.1016/j.jisa.2018.05.002.
+
+\bibitem{ferrag2020}
+M.~A.~Ferrag, L.~Maglaras, S.~Moschoyiannis, and H.~Janicke, ``Deep learning for cyber security intrusion detection: Approaches, datasets, and comparative study,'' \emph{Journal of Information Security and Applications}, vol.~50, p.~102419, 2020, doi: 10.1016/j.jisa.2019.102419.
+
+\bibitem{kitsune}
+Y.~Mirsky, T.~Doitshman, Y.~Elovici, and A.~Shabtai, ``Kitsune: An ensemble of autoencoders for online network intrusion detection,'' in \emph{Proceedings of the Network and Distributed System Security Symposium (NDSS)}, 2018, doi: 10.14722/ndss.2018.23204.
+
+\bibitem{edgeiiot}
+M.~A.~Ferrag, O.~Friha, D.~Hamouda, L.~Maglaras, and H.~Janicke, ``Edge-IIoTset: A new comprehensive realistic cyber security dataset of IoT and IIoT applications for centralized and federated learning,'' \emph{IEEE Access}, vol.~10, pp.~40281--40306, 2022, doi: 10.1109/ACCESS.2022.3165809.
+
+\end{thebibliography}
+
+\end{document}
