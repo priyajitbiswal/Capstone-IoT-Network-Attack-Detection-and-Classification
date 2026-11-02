@@ -45,10 +45,25 @@ LABEL_MAPPING_8CLASSES = {
 st.markdown(
     """
     <style>
+    /* Hide default Streamlit header overlay that clips top border */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+    #MainMenu {
+        visibility: hidden !important;
+    }
+    footer {
+        visibility: hidden !important;
+    }
+    .stDeployButton {
+        display: none !important;
+    }
+    
     /* Global layout & typography */
     .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 2rem;
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 96% !important;
     }
     h1, h2, h3, h4 {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -56,13 +71,15 @@ st.markdown(
         letter-spacing: -0.02em;
     }
     
-    /* Header Card */
+    /* Header Card - Full 4-Sided Border with Clearance */
     .header-card {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        border: 1px solid #334155;
+        border: 1px solid #334155 !important;
         border-radius: 8px;
         padding: 20px 24px;
+        margin-top: 0.5rem;
         margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
     }
     .header-title {
         color: #f8fafc;
@@ -91,6 +108,54 @@ st.markdown(
         color: #34d399;
         border: 1px solid #059669;
         margin-left: 10px;
+    }
+    
+    /* Native Streamlit Bordered Container Styling */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #0b1120 !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 8px !important;
+        padding: 16px 20px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* Button primary styling: Executive Slate/Blue instead of bright red */
+    button[kind="primary"], .stButton > button[kind="primary"] {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+        border: 1px solid #3b82f6 !important;
+        font-weight: 600 !important;
+        border-radius: 6px !important;
+        padding: 0.5rem 1rem !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+    button[kind="primary"]:hover, .stButton > button[kind="primary"]:hover {
+        background-color: #1d4ed8 !important;
+        border-color: #60a5fa !important;
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.45) !important;
+    }
+    button[kind="primary"]:active, .stButton > button[kind="primary"]:active {
+        background-color: #1e40af !important;
+    }
+    
+    /* Tab Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        border-bottom: 1px solid #1e293b;
+        padding-bottom: 4px;
+        margin-bottom: 16px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        font-weight: 500;
+        font-size: 14px;
+        color: #94a3b8;
+        border-radius: 4px 4px 0 0;
+        padding: 8px 16px;
+        border: none;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #38bdf8 !important;
+        border-bottom: 2px solid #38bdf8 !important;
     }
     
     /* Control Box */
@@ -304,8 +369,7 @@ with tab_live:
     st.caption("Inject multi-stage network flows to evaluate wire-speed flood suppression versus stateful minority exploit detection.")
     
     # Clean Control Card
-    with st.container():
-        st.markdown('<div class="control-card">', unsafe_allow_html=True)
+    with st.container(border=True):
         col_c1, col_c2, col_c3 = st.columns([3, 1, 1])
         
         with col_c1:
@@ -333,12 +397,11 @@ with tab_live:
             run_btn = st.button("Start Ingress Simulation", type="primary", use_container_width=True)
         with btn_col2:
             st.markdown(
-                '<div style="color: #64748b; font-size: 13px; padding-top: 8px;">'
+                '<div style="color: #64748b; font-size: 13px; padding-top: 10px;">'
                 'Real-time packet streaming from CICIoT2023 dataset partitions without synthetic oversampling.'
                 '</div>',
                 unsafe_allow_html=True
             )
-        st.markdown('</div>', unsafe_allow_html=True)
         
     if run_btn:
         # Build scenario flow set
@@ -482,26 +545,27 @@ with tab_single:
     st.markdown("### Targeted Flow Profiler")
     st.caption("Inspect single network flow vectors across the 3-Tier detection swimlane.")
     
-    col_t1, col_t2 = st.columns([3, 1])
-    with col_t1:
-        target_choice = st.selectbox(
-            "Select Flow Signature to Ingest:",
-            [
-                "BENIGN (Normal IoT Sensor Telemetry)",
-                "SQLINJECTION (Web Database Query Exploit)",
-                "COMMANDINJECTION (Host Remote Command Execution)",
-                "DICTIONARYBRUTEFORCE (Telnet/SSH Password Attack)",
-                "MIRAI-GREETH_FLOOD (IoT Botnet Command & Control)",
-                "DDOS-SYN_FLOOD (TCP Volumetric Bandwidth Exhaustion)",
-                "RECON-PORTSCAN (Attacker Network Reconnaissance)",
-                "DNS_SPOOFING (DNS Cache Poisoning Attack)",
-                "BROWSERHIJACKING (Web Portal Attack)"
-            ]
-        )
-    with col_t2:
-        st.write("")
-        st.write("")
-        ingest_single_btn = st.button("Inspect Ingress Flow", type="primary", use_container_width=True)
+    with st.container(border=True):
+        col_t1, col_t2 = st.columns([3, 1])
+        with col_t1:
+            target_choice = st.selectbox(
+                "Select Flow Signature to Ingest:",
+                [
+                    "BENIGN (Normal IoT Sensor Telemetry)",
+                    "SQLINJECTION (Web Database Query Exploit)",
+                    "COMMANDINJECTION (Host Remote Command Execution)",
+                    "DICTIONARYBRUTEFORCE (Telnet/SSH Password Attack)",
+                    "MIRAI-GREETH_FLOOD (IoT Botnet Command & Control)",
+                    "DDOS-SYN_FLOOD (TCP Volumetric Bandwidth Exhaustion)",
+                    "RECON-PORTSCAN (Attacker Network Reconnaissance)",
+                    "DNS_SPOOFING (DNS Cache Poisoning Attack)",
+                    "BROWSERHIJACKING (Web Portal Attack)"
+                ]
+            )
+        with col_t2:
+            st.write("")
+            st.write("")
+            ingest_single_btn = st.button("Inspect Ingress Flow", type="primary", use_container_width=True)
         
     tag_clean = target_choice.split(" ")[0].strip()
     matches = data_df[data_df["Label"].str.upper() == tag_clean.upper()]
@@ -576,13 +640,14 @@ with tab_batch:
     st.markdown("### Batch Flow Telemetry")
     st.caption("Random batch sampling across all 34 CICIoT2023 attack classes.")
     
-    col_b1, col_b2 = st.columns([3, 1])
-    with col_b1:
-        b_size = st.slider("Select Batch Size:", min_value=10, max_value=50, value=20, step=5)
-    with col_b2:
-        st.write("")
-        st.write("")
-        run_batch_btn = st.button("Execute Batch Analysis", type="primary", use_container_width=True)
+    with st.container(border=True):
+        col_b1, col_b2 = st.columns([3, 1])
+        with col_b1:
+            b_size = st.slider("Select Batch Size:", min_value=10, max_value=50, value=20, step=5)
+        with col_b2:
+            st.write("")
+            st.write("")
+            run_batch_btn = st.button("Execute Batch Analysis", type="primary", use_container_width=True)
         
     sample_batch = data_df.sample(b_size, random_state=random.randint(1, 999999))
     batch_records = []
