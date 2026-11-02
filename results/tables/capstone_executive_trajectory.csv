@@ -1,0 +1,5 @@
+Phase,Classes,Features,Accuracy (%),Macro F1,Latency (us/flow),Throughput (fps)
+Phase 1: Binary,2,39,95.28,0.8133,1.05,954681
+Phase 2: Category,8,39,82.87,0.6876,6.24,160318
+Phase 3: Fine-Grained,34,39,74.12,0.6125,13.35,74916
+Step 5: Optimized Edge,34,20,72.16,0.5886,12.15,82299

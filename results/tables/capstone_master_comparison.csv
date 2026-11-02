@@ -1,0 +1,19 @@
+Phase,Classes,Features,Model,Accuracy (%),Macro F1,Weighted F1,Latency (us/flow),Throughput (fps)
+Phase 1: Binary,2,39,xgboost,95.28,0.8133,0.9503,1.05,954681
+Phase 1: Binary,2,39,pytorch_dnn,94.66,0.7872,0.9435,14.5,68950
+Phase 1: Binary,2,39,random_forest,89.75,0.7648,0.9148,8.98,111314
+Phase 1: Binary,2,39,lightgbm,89.6,0.7633,0.9137,1.69,592764
+Phase 1: Binary,2,39,logistic_regression,82.91,0.6806,0.8655,0.2,5017561
+Phase 2: Category,8,39,xgboost,82.87,0.6876,0.8241,6.24,160318
+Phase 2: Category,8,39,lightgbm,78.82,0.6876,0.8039,18.84,53087
+Phase 2: Category,8,39,random_forest,78.17,0.6814,0.7974,8.65,115623
+Phase 2: Category,8,39,pytorch_dnn,73.47,0.6165,0.7567,16.56,60388
+Phase 2: Category,8,39,logistic_regression,74.48,0.6042,0.7532,0.26,3817376
+Phase 3: Fine-Grained,34,39,lightgbm,72.83,0.6176,0.7343,74.88,13355
+Phase 3: Fine-Grained,34,39,xgboost,74.12,0.6125,0.7263,13.35,74916
+Phase 3: Fine-Grained,34,39,random_forest,70.74,0.597,0.7103,8.24,121297
+Phase 3: Fine-Grained,34,39,pytorch_dnn,63.61,0.5321,0.6382,13.95,71693
+Phase 3: Fine-Grained,34,39,logistic_regression,64.61,0.528,0.6454,0.41,2420194
+Step 5: Optimized Edge,34,20,random_forest,68.93,0.5783,0.6953,15.15,65988
+Step 5: Optimized Edge,34,20,lightgbm,70.8,0.5963,0.7159,80.09,12485
+Step 5: Optimized Edge,34,20,xgboost,72.16,0.5886,0.7061,12.15,82299

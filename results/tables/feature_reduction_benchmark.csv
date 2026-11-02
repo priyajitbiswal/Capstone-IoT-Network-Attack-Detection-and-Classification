@@ -1,0 +1,7 @@
+Model,Feature Set,Features Count,Accuracy (%),Macro F1,Weighted F1,Train Time (s),Latency (us/flow),Throughput (fps),Acc Delta (%),Speedup (%)
+random_forest,Full (39 feats),39,70.74,0.597,0.7103,14.63,17.6,56815,0.0,0.0
+random_forest,Reduced (20 feats),20,68.93,0.5783,0.6953,14.43,15.15,65988,-1.81,13.9
+lightgbm,Full (39 feats),39,72.83,0.6176,0.7343,86.95,77.36,12926,0.0,0.0
+lightgbm,Reduced (20 feats),20,70.8,0.5963,0.7159,67.12,80.09,12485,-2.03,-3.53
+xgboost,Full (39 feats),39,74.12,0.6125,0.7263,102.42,17.01,58800,0.0,0.0
+xgboost,Reduced (20 feats),20,72.16,0.5886,0.7061,69.34,12.15,82299,-1.97,28.55

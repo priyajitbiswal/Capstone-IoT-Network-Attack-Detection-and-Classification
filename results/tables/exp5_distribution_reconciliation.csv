@@ -1,0 +1,5 @@
+Model,Evaluation Regime,Accuracy,Macro F1,Weighted F1
+XGBoost Hist,Stratified Balanced (Our Sample),0.74265,0.6270089575438771,0.7356990410979007
+XGBoost Hist,Natural Distribution (Literature Stream),0.7640774096986734,0.6270089575438771,0.7761441600982308
+LightGBM,Stratified Balanced (Our Sample),0.7435,0.6266809210187381,0.7389964301075711
+LightGBM,Natural Distribution (Literature Stream),0.7679626316568039,0.6266809210187381,0.7813784151429088

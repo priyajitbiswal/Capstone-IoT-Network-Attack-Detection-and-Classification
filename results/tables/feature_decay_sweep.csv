@@ -1,0 +1,12 @@
+Step,Feature_Count,Cumulative_Info_Pct,Accuracy_Pct,Macro_F1,Acc_Delta_Pct,Features_List
+1,39,100.0,73.08,0.5901,0.0,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std; TCP; fin_flag_number; syn_flag_number; ack_flag_number; HTTPS; Min; HTTP; rst_flag_number; Tot size; Variance; DNS; SSH; rst_count; ARP; IPv; DHCP; ece_flag_number; LLC; IGMP; IRC; cwr_flag_number; SMTP; Telnet
+2,36,99.91,73.02,0.5932,-0.05,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std; TCP; fin_flag_number; syn_flag_number; ack_flag_number; HTTPS; Min; HTTP; rst_flag_number; Tot size; Variance; DNS; SSH; rst_count; ARP; IPv; DHCP; ece_flag_number; LLC; IGMP; IRC
+3,32,99.55,73.06,0.5872,-0.01,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std; TCP; fin_flag_number; syn_flag_number; ack_flag_number; HTTPS; Min; HTTP; rst_flag_number; Tot size; Variance; DNS; SSH; rst_count; ARP; IPv; DHCP
+4,28,97.57,72.99,0.5905,-0.09,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std; TCP; fin_flag_number; syn_flag_number; ack_flag_number; HTTPS; Min; HTTP; rst_flag_number; Tot size; Variance; DNS; SSH
+5,24,92.23,72.84,0.5859,-0.23,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std; TCP; fin_flag_number; syn_flag_number; ack_flag_number; HTTPS; Min; HTTP; rst_flag_number
+6,20,83.68,70.95,0.563,-2.13,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std; TCP; fin_flag_number; syn_flag_number; ack_flag_number
+7,16,73.5,71.2,0.5708,-1.87,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count; IAT; psh_flag_number; ack_count; Std
+8,12,60.66,67.34,0.5314,-5.73,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP; Number; Time_To_Live; Rate; fin_count
+9,8,45.53,60.25,0.4584,-12.83,Protocol Type; syn_count; Max; Header_Length; Tot sum; ICMP; AVG; UDP
+10,4,27.59,58.81,0.437,-14.26,Protocol Type; syn_count; Max; Header_Length
+11,2,16.94,29.19,0.1576,-43.89,Protocol Type; syn_count

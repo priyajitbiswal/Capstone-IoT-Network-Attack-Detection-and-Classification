@@ -1,0 +1,5 @@
+Training & Test Regime,Classes,Flood Cap,Accuracy,Macro F1,Weighted F1,Train Time (s)
+1. Capped Stratified Dataset (Baseline),34,"Capped at 25,000",0.2565,0.1875800450766289,0.23298616605851197,14.16
+2. Natural Un-Capped Stream (LightGBM),34,NO CAP (Natural),0.2283,0.1271496430424984,0.2209043363890279,16.08
+3. Natural Un-Capped Stream (Random Forest),34,NO CAP (Natural),0.77995,0.6048745323115907,0.7626451499381739,1.93
+4. Natural Un-Capped Stream (XGBoost Hist),34,NO CAP (Natural),0.7825,0.5884455568486487,0.7709753663496245,19.9

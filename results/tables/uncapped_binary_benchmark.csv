@@ -1,0 +1,4 @@
+Model Architecture,Accuracy (%),Precision (Attack),Recall (Attack),Attack F1,Weighted F1,ROC-AUC,Train Time (s),Inference Latency (µs/flow)
+Random Forest,99.17%,99.59%,99.55%,0.9957,0.9917,0.9977,1.23s,2.97 µs
+XGBoost (Hist),99.15%,99.65%,99.48%,0.9956,0.9916,0.9976,0.59s,0.65 µs
+LightGBM,99.18%,99.66%,99.51%,0.9958,0.9919,0.9977,0.53s,1.19 µs

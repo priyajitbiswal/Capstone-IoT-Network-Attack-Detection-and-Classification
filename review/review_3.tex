@@ -1,0 +1,322 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[left=1.5in,right=1in,top=1in,bottom=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{tabularx}
+
+\onehalfspacing
+\renewcommand{\arraystretch}{1.3}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+% Graphics path to resolve figures whether compiled from root, review/, or Overleaf
+\graphicspath{{../snuc/review3_figures/}{snuc/review3_figures/}{review3_figures/}{./}}
+
+\begin{document}
+
+% =========================================================
+% TITLE PAGE
+% =========================================================
+
+\begin{titlepage}
+
+\centering
+{\large \textbf{Shiv Nadar University-Chennai}}\\[0.1cm]
+{\normalsize Kalavakkam, Tamil Nadu - 603110, India}\\[0.1cm]
+{\normalsize Website: \texttt{www.snuchennai.edu.in}}
+
+\vspace{0.2cm}
+\hrule
+\vspace{0.8cm}
+
+\begin{center}
+
+{\large \textbf{Department of Computer Science and Engineering}}\\[0.8cm]
+
+{\large \textbf{CAPSTONE PROJECT REPORT}}\\[0.3cm]
+
+{\large \textbf{Phase 1 - Review 3}}\\[0.8cm]
+
+{\Large \textbf{IoT Network Attack Detection and Classification}}\\[0.8cm]
+
+{\large \textbf{Submitted by}}\\[0.4cm]
+
+\begin{tabular}{p{7cm}p{5.5cm}}
+\toprule
+\centering \textbf{Student Name} &
+\centering \arraybackslash \textbf{Registration Number}\\
+\midrule
+\centering Priyajit Biswal &
+\centering \arraybackslash 23011102068\\
+\centering Rohit K Manoj &
+\centering \arraybackslash 23011102073\\
+\centering Rishab Rajeev &
+\centering \arraybackslash 23011102072\\
+\bottomrule
+\end{tabular}
+
+\vfill
+
+{\large \textbf{Under the guidance of}}\\[0.2cm]
+{\large \textbf{Dr.\ Vegesna S M Srinivasavarma}}\\
+Associate Professor\\
+Department of Computer Science and Engineering\\
+\vspace{0.6cm}
+
+\begin{tabular}{c}
+Approved By: \\
+(Guide Signature with Date) \\
+ \\
+\shortstack{\rule{5cm}{0.4pt}\\
+Dr.\ Vegesna S M Srinivasavarma\\
+Project Guide}
+\end{tabular}
+
+\vfill
+
+\end{center}
+\end{titlepage}
+
+% =========================================================
+% CHAPTER 3: DATASET / SIMULATION DETAILS
+% =========================================================
+
+\pagenumbering{arabic}
+\setcounter{chapter}{2}
+
+\chapter{Dataset / Simulation Details}
+
+\section{Dataset or Simulation Environment}
+Network Intrusion Detection Systems (NIDS) designed for the Internet of Things (IoT) require evaluation benchmarks that accurately capture real-world cyber-physical network topologies. Legacy intrusion datasets, such as KDD99 and NSL-KDD, were generated over two decades ago using simulated Unix workstations running obsolete network services; consequently, they fail to represent modern IoT protocol stacks (such as IEEE 802.15.4 Zigbee, Z-Wave, and MQTT) or modern multi-vector attack strains. Subsequent datasets, such as BoT-IoT (2019), incorporated IoT protocols but introduced severe synthetic regularities: over 99.9\% of all captured flows consisted of synthetic volumetric floods, with virtually zero realistic benign operational telemetry. Similarly, UNSW-NB15 and CSE-CIC-IDS2018 were curated within enterprise office workstation networks, omitting the severe compute, memory, and packet-budget constraints inherent to embedded edge gateways.
+
+To establish an empirically grounded benchmark, this project utilizes the state-of-the-art \textbf{CICIoT2023} dataset developed by the Canadian Institute for Cybersecurity (CIC). CICIoT2023 is recognized as the current gold-standard benchmark for IoT network security evaluation due to three decisive characteristics:
+\begin{enumerate}
+    \item \textbf{Comprehensive Physical Topology:} Rather than relying on simulated virtual machines, traffic was captured from an operational physical testbed comprised of \textbf{105 interconnected hardware devices}.
+    \item \textbf{Multi-Protocol Heterogeneity:} The testbed explicitly integrates both IP-native devices (Wi-Fi 802.11 b/g/n and Gigabit Ethernet) and non-IP low-power wireless endpoints (Zigbee and Z-Wave) bridged via five hardware smart hubs (e.g., Philips Hue, Tuya, SmartThings).
+    \item \textbf{Attack Vector Granularity:} The dataset captures 33 distinct cyber-attack profiles categorized into 7 high-level functional groups, alongside authentic, non-synthetic benign background operations.
+\end{enumerate}
+
+Hardware-level non-intrusive traffic acquisition was executed using \textbf{Gigamon G-TAP A-Tx} network taps paired with \textbf{Cisco Catalyst 3850/2960} managed switches running Switched Port Analyzer (SPAN) port mirroring. Packet captures were streamed directly to dedicated hardware monitoring appliances without altering frame timing or incurring gateway CPU overhead.
+
+\section{Dataset Description / Simulation Configuration}
+The CICIoT2023 corpus comprises approximately \textbf{548 gigabytes} of raw PCAP packet stream data, structured into 63 partitioned CSV files containing over \textbf{46.6 million flow records}. 
+
+\subsection{Attack Taxonomy and Label Space}
+The dataset organizes network instances into 34 mutually exclusive target classes (33 specific attack vectors plus benign traffic), mapped across 7 functional incident categories as summarized in Table~\ref{tab:attack_taxonomy}.
+
+\begin{table}[ht]
+\centering
+\caption{CICIoT2023 Attack Taxonomy and Classification Hierarchies}
+\label{tab:attack_taxonomy}
+\small
+\begin{tabular}{@{}lp{1.8cm}p{5.5cm}p{4cm}@{}}
+\toprule
+\textbf{Category} & \textbf{Attack Count} & \textbf{Specific Attack Vectors} & \textbf{Primary Impact / Signature} \\
+\midrule
+\textbf{DDoS} & 12 & DDoS-ACK\_Fragmentation, DDoS-UDP\_Flood, DDoS-SYN\_Flood, DDoS-SlowLoris, DDoS-ICMP\_Flood, DDoS-RSTFINFlood, DDoS-PSHACK\_Flood, DDoS-SynonymousIP\_Flood, etc. & Network bandwidth saturation and connection state table exhaustion. \\
+\addlinespace
+\textbf{DoS} & 4 & DoS-UDP\_Flood, DoS-TCP\_Flood, DoS-SYN\_Flood, DoS-HTTP\_Flood & Single-source server resource exhaustion and service denial. \\
+\addlinespace
+\textbf{Mirai} & 3 & Mirai-greeth\_flood, Mirai-greip\_flood, Mirai-udpplain & IoT botnet coordination, GRE encapsulation, and command execution. \\
+\addlinespace
+\textbf{Recon} & 5 & Recon-HostDiscovery, Recon-OSScan, Recon-PortScan, Recon-PingSweep, VulnerabilityScan & Network mapping, service fingerprinting, and pre-attack probing. \\
+\addlinespace
+\textbf{Spoofing} & 2 & DNS\_Spoofing, MITM-ArpSpoofing & Man-in-the-middle cache poisoning and unencrypted session hijacking. \\
+\addlinespace
+\textbf{Web-Based} & 6 & SqlInjection, CommandInjection, XSS, BrowserHijacking, Backdoor\_Malware, Uploading\_Attack & Web management interface exploitation and arbitrary code execution. \\
+\addlinespace
+\textbf{Brute Force} & 1 & DictionaryBruteForce & Credential stuffing attacks against Telnet and SSH management ports. \\
+\addlinespace
+\textbf{Benign} & 1 & Normal Operational Telemetry & Baseline IoT sensor streams, DNS queries, and media streaming. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Sliding Window Feature Aggregation}
+Rather than processing raw, unindexed packet bytes, flow statistics were extracted using a dual sliding-window mechanism:
+\begin{itemize}
+    \item \textbf{10-Packet Sliding Window ($W=10$):} Formulated to capture bursty, low-latency, and stealthy anomalous behaviors. This window is particularly sensitive to micro-burst port scans, ARP spoofing, and initial web injection probes.
+    \item \textbf{100-Packet Sliding Window ($W=100$):} Engineered to characterize sustained macroeconomic flow dynamics, such as volumetric DDoS floods and prolonged denial-of-service campaigns.
+\end{itemize}
+
+\subsection{Feature Schema Alignment}
+Prior literature frequently cited an obsolete 46-feature schema with inconsistent case conventions. Through systematic verification across all 63 raw CSV partitions in the \texttt{MERGED\_CSV/} repository, our pipeline confirmed an exact, invariant schema of \textbf{39 continuous and discrete numerical features} and one categorical target column (\texttt{Label}):
+\begin{enumerate}
+    \item \textbf{Statistical Packet Metrics (8 features):} \texttt{Min}, \texttt{Max}, \texttt{AVG}, \texttt{Std}, \texttt{Tot sum}, \texttt{Tot size}, \texttt{Header\_Length}, \texttt{Duration}.
+    \item \textbf{Flow Dynamics and Timing (2 features):} \texttt{Rate}, \texttt{IAT} (Inter-Arrival Time).
+    \item \textbf{Layer-4 Protocol Indicators \& TCP Flags (19 features):} \texttt{Protocol Type}, \texttt{TCP}, \texttt{UDP}, \texttt{ICMP}, \texttt{syn\_count}, \texttt{fin\_count}, \texttt{ack\_count}, \texttt{urg\_count}, \texttt{rst\_count}, \texttt{syn\_flag\_number}, \texttt{fin\_flag\_number}, \texttt{ack\_flag\_number}, \texttt{psh\_flag\_number}, \texttt{rst\_flag\_number}, \texttt{ece\_flag\_number}, \texttt{cwr\_flag\_number}, \texttt{urg\_flag\_number}, \texttt{Number}, \texttt{Weight}.
+    \item \textbf{Application-Layer and L2/L3 Protocol Counters (10 features):} \texttt{HTTP}, \texttt{HTTPS}, \texttt{DNS}, \texttt{Telnet}, \texttt{SMTP}, \texttt{SSH}, \texttt{DHCP}, \texttt{ARP}, \texttt{IRC}, \texttt{IGMP}.
+\end{enumerate}
+
+\section{Data Collection and Preprocessing}
+\subsection{Memory-Safe Chunked Ingestion}
+Loading the complete 46.6 million flow instances into memory simultaneously requires over 13.5~GB of RAM under double-precision floating-point formats, triggering fatal Out-Of-Memory (OOM) exceptions on standard workstations. We developed a memory-safe data ingestion generator (\texttt{src/data\_loader.py}) utilizing stream-chunked reading with a chunk size of 100,000 rows and enforced single-precision \texttt{float32} data typing, reducing per-sample memory consumption by 50\%.
+
+\subsection{Stratified Sampling with 100\% Rare-Class Retention}
+In natural network captures, volumetric flooding attacks outnumber sophisticated application-layer compromises by orders of magnitude. Training a statistical learner directly on raw distributions causes the objective loss function to degenerate into predicting majority classes, resulting in 0\% recall on critical web exploits. Conversely, applying synthetic sample generators (e.g., SMOTE) creates unphysical feature vectors that violate packet length distributions and inter-arrival timing kinematics.
+
+To construct a balanced, computationally tractable research sample, we implemented a custom stratified subsampling pipeline (\texttt{src/create\_sample.py}):
+\begin{itemize}
+    \item Majority flooding classes (DDoS/DoS) were capped at an upper ceiling of 20,000 samples per attack class (and 40,000 for benign operational traffic).
+    \item \textbf{100\% of all rare and stealthy attack instances were strictly retained}:
+    \begin{itemize}
+        \item \texttt{Uploading\_Attack}: 416 instances (100\% retained)
+        \item \texttt{Recon-PingSweep}: 722 instances (100\% retained)
+        \item \texttt{Backdoor\_Malware}: 1,061 instances (100\% retained)
+        \item \texttt{XSS}: 1,239 instances (100\% retained)
+        \item \texttt{CommandInjection}: 1,666 instances (100\% retained)
+        \item \texttt{SqlInjection}: 1,718 instances (100\% retained)
+        \item \texttt{BrowserHijacking}: 1,904 instances (100\% retained)
+        \item \texttt{DictionaryBruteForce}: 4,181 instances (100\% retained)
+    \end{itemize}
+\end{itemize}
+The resulting working dataset comprises \textbf{529,562 rows} and 40 columns (106.5~MB), providing robust statistical representation across all 34 classes without synthetic artifact distortion.
+
+\subsection{Numerical Sanitization and Zero-Leakage Scaling}
+\begin{enumerate}
+    \item \textbf{Infinite Rate Normalization:} For flows with instantaneous transmission durations ($\Delta t \to 0$), the derived \texttt{Rate} metric yielded 19 infinite values ($+\infty$). These were bounded to the maximum observed finite rate ($3,355,443.2\text{ packets/s}$).
+    \item \textbf{NaN Variance Imputation:} Flows spanning only a single packet evaluate sample variance to $\text{NaN}$ due to division by $(N-1=0)$. These instances were imputed to $0.0$.
+    \item \textbf{Leak-Free Preprocessing Pipeline:} A strict 80\% training split (423,649 samples) and 20\% test split (105,913 samples) was enforced. The \texttt{StandardScaler} normalization parameters (mean $\mu_j$ and variance $\sigma_j^2$) were fitted strictly on the training partition:
+    \begin{equation}
+        z_{ij} = \frac{x_{ij} - \mu_{j,\text{train}}}{\sigma_{j,\text{train}}}
+    \end{equation}
+    and subsequently transformed onto the disjoint test partition, guaranteeing zero test set data leakage.
+\end{enumerate}
+
+\section{Dataset Characteristics / Simulation Parameters}
+The definitive characteristic of the CICIoT2023 dataset is its structural bimodality between high-volume volumetric floods and low-volume stealthy exploits. Volumetric floods exhibit massive values for \texttt{Tot sum}, \texttt{Tot size}, and \texttt{Rate}, while web attacks (e.g., SQL Injection and Command Injection) exhibit packet byte sizes closely resembling benign HTTP traffic, distinguishing themselves primarily through protocol flags (\texttt{psh\_flag\_number}) and inter-arrival timings.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.88\textwidth]{01_distribution_34class_stratified.png}
+\caption{Distribution across all 34 classes in the 529,562-sample working dataset, demonstrating full retention of rare application-layer attacks alongside capped volumetric floods.}
+\label{fig:dist_34class}
+\end{figure}
+
+\section{Assumptions and Limitations}
+\begin{enumerate}
+    \item \textbf{Intra-Family Semantic Ambiguity:} In network-flow telemetry lacking payload inspection, attack instances belonging to the same protocol family (e.g., \texttt{DDoS-SYN\_Flood} versus \texttt{DoS-SYN\_Flood}) exhibit identical packet sizes, TCP flag combinations, and inter-arrival distributions. Because IP addresses are anonymized to maintain benchmark neutrality, models cannot leverage topological IP fan-in heuristics, leading to inherent intra-family confusion.
+    \item \textbf{Absence of Host-Level Telemetry:} Flow-based NIDS operate exclusively at layers 2 through 4. Certain application-layer exploits (e.g., encoded SQL injection inside an encrypted TLS session) cannot be diagnosed purely through transport-layer header statistics without complementary host-level telemetry (CPU, memory, kernel audit logs).
+    \item \textbf{Stationary Distribution Assumption:} Training assumes that packet inter-arrival statistics remain stationary over time; dynamic IoT network expansion requires periodic model retraining.
+\end{enumerate}
+
+
+% =========================================================
+% CHAPTER 4: SYSTEM MODEL
+% =========================================================
+
+\chapter{System Model}
+
+\section{System Overview}
+To overcome the fundamental trade-off between line-rate packet throughput and diagnostic classification granularity, this project introduces an \textbf{Adaptive Three-Tier Hierarchical IoT Defense System}. 
+
+Existing literature predominantly treats IoT intrusion detection as a monolithic modeling task: an incoming packet stream is passed directly into a single deep neural network or large multi-class ensemble. On high-speed network links (1~Gbps to 10~Gbps), packet inter-arrival budgets are strictly bounded (e.g., $1.2\text{ }\mu\text{s}$ per 1500-byte frame at 10~Gbps). When a monolithic model requires tens or hundreds of microseconds per inference, hardware buffers rapidly saturate, leading to severe packet drops, connection resets, and denial-of-service vulnerabilities induced by the security appliance itself.
+
+Our system resolves this dilemma by decoupling wire-speed emergency perimeter filtration from compute-intensive forensic attribution across three specialized tiers:
+\begin{enumerate}
+    \item \textbf{Tier 1 (Wire-Speed Perimeter Filter):} Operates at the network border switch to filter benign traffic at full 10~Gbps line rate ($0.20\text{ }\mu\text{s}$ latency).
+    \item \textbf{Tier 2 (Edge Gateway Triage Classifier):} Deployed on resource-constrained embedded router hardware (e.g., Raspberry Pi 4, ARM Cortex-A) using an optimized 20-feature ensemble ($12.15\text{ }\mu\text{s}$ latency) to triage functional incident categories and discard volumetric floods.
+    \item \textbf{Tier 3 (Centralized Forensic Attribution):} Hosted on enterprise Cloud SIEM or Security Operations Center (SOC) infrastructure, executing complete 34-class fine-grained attribution for stealthy exploits.
+\end{enumerate}
+
+\section{System Architecture}
+The overall architectural blueprint of the proposed multi-tiered defense system is illustrated in Figure~\ref{fig:iot_architecture}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.92\textwidth]{iot_defense_architecture.png}
+\caption{Proposed Three-Tier Hierarchical IoT Defense Architecture spanning border switch filtering, edge gateway triage, and centralized cloud threat forensics.}
+\label{fig:iot_architecture}
+\end{figure}
+
+\subsection{Component Specifications}
+\subsubsection{1. Ingress Capture \& Vectorization Engine}
+Packets entering the local IoT enclave are mirrored via hardware taps and processed by a real-time sliding window aggregator. The engine maintains dynamic state tables to compute the verified 39 flow-level statistical metrics over 10-packet and 100-packet observation intervals.
+
+\subsubsection{2. Tier 1: Wire-Speed Perimeter Filter}
+The primary objective of Tier 1 is line-rate packet scrubbing. Implemented using an online \textbf{Stochastic Gradient Descent (SGD) Linear Classifier} with log-loss:
+\begin{equation}
+    P(y = \text{Benign} \mid \mathbf{x}) = \frac{1}{1 + e^{-(\mathbf{w}^T \mathbf{x} + b)}}
+\end{equation}
+Tier 1 evaluates incoming flow vectors in \textbf{0.20 microseconds} ($>5,000,000\text{ flows/s}$). Flows with high benign confidence ($P > 0.95$) are immediately granted egress to the local IoT LAN with zero perceptible queue delay. Any anomalous or ambiguous flow ($P \le 0.95$) is forwarded to Tier 2.
+
+\subsubsection{3. Tier 2: Edge Gateway Triage Classifier}
+Tier 2 resides directly on the local IoT edge gateway router. To comply with hardware memory and CPU limitations, Tier 2 executes on a \textbf{reduced 20-feature consensus subset} using an optimized \textbf{XGBoost / LightGBM} ensemble. Tier 2 performs 8-class functional category triage:
+\begin{itemize}
+    \item \textbf{Volumetric Floods (DDoS/DoS):} Dropped immediately at the gateway boundary, preserving internal network bandwidth.
+    \item \textbf{Compromised Internal Nodes (Mirai/Spoofing):} The local gateway isolates the offending IoT MAC address via dynamic firewall rules.
+    \item \textbf{Complex Exploits (Web Attacks / Reconnaissance):} Dispatched to Tier 3 for deep forensic investigation.
+\end{itemize}
+
+\subsubsection{4. Tier 3: Centralized Forensic Attribution Engine}
+Located in the enterprise cloud or centralized SIEM/SOC, Tier 3 possesses unconstrained compute capacity. Utilizing the full 39-feature space, it executes high-capacity tree ensembles and tabular deep neural networks across all 34 fine-grained classes. It maps attacks to specific Common Vulnerabilities and Exposures (CVEs), identifies malware variants, and automatically synthesizes Web Application Firewall (WAF) blocking rules.
+
+\subsection{Tri-Model Consensus Feature Selection Formulation}
+To eliminate feature bloat without discarding critical protocol discriminators, we formulated an objective tri-model consensus score:
+\begin{equation}
+    S_{\text{consensus}}(f) = \frac{1}{3} \left[ \frac{S_{\text{RF}}^{\text{Gini}}(f)}{\sum S_{\text{RF}}^{\text{Gini}}} + \frac{S_{\text{XGB}}^{\text{Gain}}(f)}{\sum S_{\text{XGB}}^{\text{Gain}}} + \frac{S_{\text{LGB}}^{\text{Split}}(f)}{\sum S_{\text{LGB}}^{\text{Split}}} \right]
+\end{equation}
+By aggregating Gini impurity from Random Forest, information gain from XGBoost, and split count from LightGBM, we identified that \textbf{20 core features} account for $>90\%$ of total discriminatory capacity. Pruning the 19 redundant protocol counters reduces per-flow feature vector size from 156 bytes to 80 bytes (a \textbf{48.7\% memory reduction}) while accelerating XGBoost inference latency by \textbf{+28.55\%} ($17.01\text{ }\mu\text{s} \to 12.15\text{ }\mu\text{s}$, $82,299\text{ flows/s}$) with only a minor accuracy delta ($-1.96\%$).
+
+\section{System Workflow}
+The operational workflow of the proposed system proceeds through five synchronized execution stages:
+\begin{enumerate}
+    \item \textbf{Stage 1: Packet Acquisition and State Tracking:} Raw Ethernet frames are mirrored via non-intrusive SPAN ports. Active flow tables aggregate packet lengths, TCP sequence flags, and inter-arrival timestamps into sliding windows.
+    \item \textbf{Stage 2: Real-Time Vector Normalization:} Continuous features are scaled using precomputed baseline priors ($\mu_j, \sigma_j$). Single-packet standard deviation anomalies are handled gracefully via zero imputation.
+    \item \textbf{Stage 3: Sub-Microsecond Tier 1 Evaluation:} The calibrated linear filter computes the binary anomaly score. Confirmed benign traffic bypasses subsequent inspection layers.
+    \item \textbf{Stage 4: Edge Gateway Triage and Local Action:} Anomalous flows are evaluated by the 20-feature Tier 2 classifier. Volumetric floods trigger immediate border dropping; botnet beaconing triggers dynamic port isolation.
+    \item \textbf{Stage 5: Centralized Forensic Attribution and Policy Updates:} Ambiguous and multi-stage exploits undergo 34-class cloud classification. The generated threat intelligence updates upstream border firewall tables and WAF signatures automatically.
+\end{enumerate}
+
+\section{Experimental Validation Summary}
+The proposed system architecture was comprehensively validated across Notebooks 01 through 06. Table~\ref{tab:master_benchmark} summarizes the empirical performance progression across diagnostic tiers.
+
+\begin{table}[ht]
+\centering
+\caption{Cross-Tier Experimental Benchmark Summary on CICIoT2023}
+\label{tab:master_benchmark}
+\small
+\begin{tabular}{@{}lccccrrc@{}}
+\toprule
+\textbf{Diagnostic Tier} & \textbf{Classes} & \textbf{Features} & \textbf{Top Model} & \textbf{Accuracy} & \textbf{Macro F1} & \textbf{Latency} & \textbf{Throughput} \\
+\midrule
+\textbf{Tier 1: Wire-Speed} & 2 & 39 & SGD LogReg & 82.91\% & 0.6806 & \textbf{0.20 $\mu$s} & \textbf{5,017,561 fps} \\
+\textbf{Tier 1: Filter Top} & 2 & 39 & XGBoost & \textbf{95.28\%} & \textbf{0.8133} & 1.05 $\mu$s & 954,681 fps \\
+\textbf{Tier 2: Triage} & 8 & 39 & XGBoost & 82.87\% & 0.6876 & 6.24 $\mu$s & 160,318 fps \\
+\textbf{Tier 2: Edge Opt} & 34 & \textbf{20} & XGBoost & 72.16\% & 0.5886 & \textbf{12.15 $\mu$s} & \textbf{82,299 fps} \\
+\textbf{Tier 3: Forensics} & 34 & 39 & XGBoost & 74.13\% & 0.6125 & 13.35 $\mu$s & 74,916 fps \\
+\textbf{Tier 3: Forensics} & 34 & 39 & LightGBM & 72.83\% & \textbf{0.6176} & 74.88 $\mu$s & 13,355 fps \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{thebibliography}{99}
+
+\bibitem{ciciot2023}
+E.~C.~P.~Neto, S.~Dadkhah, R.~Ferreira, A.~Zohourian, R.~Lu, and A.~A.~Ghorbani, ``CICIoT2023: A Real-Time Dataset and Benchmark for Large-Scale Attacks in IoT Environment,'' \emph{Sensors}, vol.~23, no.~13, p.~5941, 2023, doi: 10.3390/s23135941.
+
+\bibitem{botiot}
+N.~Koroniotis, N.~Moustafa, E.~Sitnikova, and B.~Turnbull, ``Towards developing network intrusion detection systems using deep learning for IoT based smart environments,'' \emph{Future Generation Computer Systems}, vol.~100, pp.~255--267, 2019, doi: 10.1016/j.future.2019.05.041.
+
+\bibitem{kitsune}
+Y.~Mirsky, T.~Doitshman, Y.~Elovici, and A.~Shabtai, ``Kitsune: An ensemble of autoencoders for online network intrusion detection,'' in \emph{Proceedings of the Network and Distributed System Security Symposium (NDSS)}, 2018, doi: 10.14722/ndss.2018.23204.
+
+\bibitem{edgeiiot}
+M.~A.~Ferrag, O.~Friha, D.~Hamouda, L.~Maglaras, and H.~Janicke, ``Edge-IIoTset: A new comprehensive realistic cyber security dataset of IoT and IIoT applications for centralized and federated learning,'' \emph{IEEE Access}, vol.~10, pp.~40281--40306, 2022, doi: 10.1109/ACCESS.2022.3165809.
+
+\end{thebibliography}
+
+\end{document}

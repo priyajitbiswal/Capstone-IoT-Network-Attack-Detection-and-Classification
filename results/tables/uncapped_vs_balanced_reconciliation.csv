@@ -1,0 +1,4 @@
+Evaluation Framework,Reported Accuracy,Volumetric Flood Recall,Brute Force Recall,Web Attack Precision,Engineering Role
+1. Literature Uncapped (Neto et al. 2023 DNN),98.60%,99.80%,"14.70% (Missed 2,542 flows)",Low / Undefined,Academic benchmark on raw capture files
+2. Archon Wire-Speed Ingress Filter (Uncapped RF/LGBM),99.18% - 99.25%,100.00%,0.00% (Masked by floods),100.00% (Sparse),Tier-1 Wire-Speed Filter (Microsecond line-rate flood drop)
+3. Archon Deep-Inspection Tier (Capped 20k Stress-Test),74.02% (34 classes),98.80%,88.50%,81.44%,Tier-2/3 Specialized Stateful Inspection for stealthy zero-day exploits
