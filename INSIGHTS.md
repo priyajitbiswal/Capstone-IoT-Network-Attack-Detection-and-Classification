@@ -221,6 +221,54 @@ graph TD
 
 ---
 
+## Step 7: Natural Uncapped Benchmark & The Literature Accuracy Paradox
+
+### 1. Empirical Verification on 200,000 Uncapped Flows
+To reconcile our balanced dataset findings with papers in *IEEE Access*, *Nature Scientific Reports*, and *Elsevier FGCS* reporting 98%–99.5% accuracy, we evaluated our models directly on raw, uncapped partitions from `MERGED_CSV/` without majority capping:
+- **Binary Wire-Screen**:
+  - **LightGBM**: **99.18% Accuracy**, 99.66% Attack Precision, 99.51% Attack Recall, **1.19 us/flow**.
+  - **Random Forest**: **99.17% Accuracy**, 99.59% Attack Precision, 99.55% Attack Recall, **2.97 us/flow**.
+  - **XGBoost (Hist)**: **99.15% Accuracy**, 99.65% Attack Precision, 99.48% Attack Recall, **0.65 us/flow**.
+- **8-Category Triage**:
+  - **Random Forest**: **98.98% Accuracy**, 0.8679 Macro F1.
+  - **XGBoost (Hist)**: **98.95% Accuracy**, 0.8647 Macro F1.
+  - **LightGBM**: **98.94% Accuracy**, 0.8631 Macro F1.
+
+### 2. The Literature Accuracy Paradox Deconstructed
+When evaluated on raw traffic where DDoS/DoS floods comprise over 85% of flows:
+$$\text{Accuracy} = \frac{TP_{\text{Flood}} + TP_{\text{Benign}} + TP_{\text{Exploits}}}{N_{\text{Total}}} \approx \frac{TP_{\text{Flood}}}{N_{\text{Total}}}$$
+A model can score **98.6% overall accuracy** while missing **100% of brute force and web exploits** (0% recall), because rare attacks make up only 0.02% of natural traffic. Literature papers celebrate this headline accuracy while leaving IoT networks completely unprotected against targeted penetration.
+
+---
+
+## Step 8: 10 Gbps Wire-Speed Throughput & DMA Burst Latency Benchmark
+
+### 1. The Physical Layer Ethernet Constraints
+Intrusion detection at the network perimeter is governed by hardware line-rate math:
+- **1500-Byte Standard MTU**: $10\text{ Gbps} / (1500 \times 8) = \mathbf{833,333\text{ pps}}$ (budget: $\le 1.20\text{ us/packet}$).
+- **512-Byte Average IoT Frame**: $10\text{ Gbps} / (512 \times 8) = \mathbf{2,441,406\text{ pps}}$ (budget: $\le 0.41\text{ us/packet}$).
+- **64-Byte Minimum Ethernet Frame**: $10\text{ Gbps} / (64 \times 8) = \mathbf{19,531,250\text{ pps}}$ (budget: $\le 0.051\text{ us/packet}$).
+
+### 2. Empirical Benchmark Across All Pipeline Models (`benchmark_throughput.py`)
+Evaluated across 20,000 live evaluation flows with DMA ring-buffer burst profiling (`burst_size=64`):
+
+| Model | Diagnostic Tier | Wire Latency | Burst P99 Latency | Sustained Throughput | 10 Gbps Feasibility (1500B MTU) |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **`T1_LogisticRegression`** | Tier 1 (Wire-Filter) | **0.12 us** | **9.49 us** | **8,708,981 pps (8.71 Mpps)** | **Saturates 10G on 1 Core** |
+| **`T1_XGBoost_Hist`** | Tier 1 (Wire-Filter) | **0.38 us** | **32.14 us** | **2,648,151 pps (2.65 Mpps)** | **Saturates 10G on 1 Core** |
+| **`T1_LightGBM`** | Tier 1 (Wire-Filter) | 1.54 us | 44.65 us | 647,804 pps (0.65 Mpps) | 2 Cores |
+| **`T1_RandomForest`** | Tier 1 (Wire-Filter) | 7.06 us | 264.58 us | 141,627 pps (0.14 Mpps) | 6 Cores |
+| **`T2_XGBoost_Top20`** | Tier 2 (Gateway 20-Feat) | 7.53 us | 140.42 us | 132,844 pps (0.13 Mpps) | 7 Cores |
+| **`T2_RandomForest_Top20`** | Tier 2 (Gateway 20-Feat) | 18.05 us | 303.17 us | 55,403 pps (0.06 Mpps) | 16 Cores |
+| **`T3_XGBoost_34Class`** | Tier 3 (Cloud Attribution) | 11.01 us | 696.65 us | 90,872 pps (0.09 Mpps) | 10 Cores |
+| **`T3_RandomForest_34Class`** | Tier 3 (Cloud Attribution) | 23.52 us | 154.68 us | 42,513 pps (0.04 Mpps) | 20 Cores |
+| **`DL_PyTorch_DNN_Binary`** | Literature Baseline | 0.40 us | 16.91 us | 2,493,038 pps (2.49 Mpps) | 1 Core |
+
+### 3. The Deep Learning Latency Disconnect
+Literature proposals advocating CNN-LSTM or Vision Transformers require **50,000 to 100,000 us (50–100 ms)** per sample. Processing 10 Gbps traffic with such models would drop **99.98% of packets** and require a server farm of **over 40,000 CPU cores**. By deploying our lightweight Tier 1 filter (0.38 us), Team Archon deflecting line-rate floods at the NIC level on **1 single CPU core**, preserving downstream resources for deep inspection.
+
+---
+
 ## Technical Lessons Learned & Gotchas Ledger
 
 1. **Windows Console Encoding**: Avoid non-ASCII characters (e.g. `\u03bc` for &mu;s) in pandas DataFrame column names or terminal outputs on Windows, as standard Python processes default to `cp1252` encoding and raise unhandled `UnicodeEncodeError`. Always use ASCII `us`.

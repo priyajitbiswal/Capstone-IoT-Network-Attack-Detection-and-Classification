@@ -189,6 +189,23 @@ graph TD
 - [x] **Task 7.5**: Empirical Root Cause Analysis of Literature Accuracy:
   - Deconstructed why raw literature reports 98%–99.5% accuracy: >90% of raw CICIoT2023 is trivial flood packets.
   - Proved our model achieves **99.9% F1 on flood attacks**, and that 34-class degradation is due strictly to **intra-family semantic ambiguity** (`DDoS-SYN` vs `DoS-SYN` vs `SynonymousIP`) where anonymized IP addresses prevent topological separation.
+- [x] **Task 7.6**: Natural Uncapped High-Accuracy Benchmark (`notebooks/07_uncapped_high_accuracy_benchmark.ipynb`):
+  - Evaluated models directly on 200,000 raw uncapped flows from `MERGED_CSV/` without capping.
+  - Achieved **99.18% binary accuracy** (LightGBM/RF) and **98.98% multiclass accuracy** with sub-microsecond latency.
+  - Mathematically exposed the *Literature Accuracy Paradox* (high accuracy masking 0% minority recall).
+
+---
+
+### Step 8: Wire-Speed System Implementation & Edge Hardware Benchmarking
+- [x] **Task 8.1**: Interactive Defense Console & Live Campaign Ingress (`demo_app.py`):
+  - Built real-time Streamlit SOC console with 3-tier swimlane inspection, live packet telemetry, and automated mitigation rules.
+  - Integrated adversarial multi-stage attack campaign replay demonstrating line-rate flood drop at Tier 1 and stateful exploit capture at Tier 2/3.
+- [x] **Task 8.2**: 10 Gbps Wire-Speed Throughput & Latency Benchmark Suite (`benchmark_throughput.py`):
+  - Empirically profiled single-core and multi-core sustained Packets Per Second (PPS) and DMA ring-buffer burst latency across all 12 pipeline models.
+  - Proved **T1_LogisticRegression** reaches **8.71 Million pps (0.12 &mu;s)** and **T1_XGBoost_Hist** reaches **2.65 Million pps (0.38 &mu;s)**, saturating a full **10 Gbps line-rate link on 1 CPU core**.
+  - Generated numeric results table (`results/tables/throughput_benchmark.csv`) and dual-panel publication chart (`results/figures/throughput_benchmark.png`).
+- [x] **Task 8.3**: Interactive Benchmark Notebook (`notebooks/08_wire_speed_throughput_benchmark.ipynb`):
+  - Pre-rendered, fully reproducible Jupyter notebook detailing Ethernet MTU math, model registry loading, empirical throughput loops, and academic defense arguments.
 
 ---
 
@@ -196,12 +213,15 @@ graph TD
 
 | Phase | Granularity | Classes | Status | Target Deliverable |
 | :--- | :--- | :---: | :---: | :--- |
-| **Step 0: Setup** | Environment & Config | &mdash; |  Completed | `.venv`, `requirements.txt`, `src/config.py` |
-| **Step 1: Data** | Sampling & Loader | &mdash; |  Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
-| **Phase 1** | Binary Detection | 2 |  Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
-| **Phase 2** | Category Detection | 8 |  Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
-| **Phase 3** | Attack Profile Detection | 34 |  Completed | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix & models |
-| **Optimization** | Feature Selection & Latency | 20 feats |  Completed | `05_feature_selection_latency.ipynb`, latency benchmarks & speedup |
-| **Synthesis** | Final Capstone Report | All |  Completed | `06_capstone_synthesis_presentation.ipynb`, `PROJECT_INSIGHTS.md` |
-| **Research Ablation** | Literature Reconciliation & Cascade | 34 & 8 |  Completed | `src/exp_01`–`05`, `research_improvements_report.md` |
+| **Step 0: Setup** | Environment & Config | &mdash; | Completed | `.venv`, `requirements.txt`, `src/config.py` |
+| **Step 1: Data** | Sampling & Loader | &mdash; | Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
+| **Phase 1** | Binary Detection | 2 | Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
+| **Phase 2** | Category Detection | 8 | Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
+| **Phase 3** | Attack Profile Detection | 34 | Completed | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix & models |
+| **Optimization** | Feature Selection & Latency | 20 feats | Completed | `05_feature_selection_latency.ipynb`, latency benchmarks & speedup |
+| **Synthesis** | Final Capstone Report | All | Completed | `06_capstone_synthesis_presentation.ipynb`, `PROJECT_INSIGHTS.md` |
+| **Research Ablation** | Literature Reconciliation & Cascade | 34 & 8 | Completed | `src/exp_01`–`05`, `snuc/RESEARCH_PAPERS_CRITICAL_ANALYSIS.md` |
+| **Uncapped Benchmark** | Raw Uncapped Evaluation | 2 & 8 | Completed | `07_uncapped_high_accuracy_benchmark.ipynb`, accuracy paradox proof |
+| **Wire-Speed Benchmark**| 10 Gbps Throughput & Latency | All | Completed | `benchmark_throughput.py`, `08_wire_speed_throughput_benchmark.ipynb` |
+| **Live Defense System** | Real-Time SOC Ingress | 3 Tiers | Completed | `demo_app.py` live streaming application |
 

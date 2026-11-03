@@ -117,6 +117,8 @@ All notebooks are self-contained, reproducible, and committed with **100% pre-re
 | [**04_phase3_thirtyfour_class_classification.ipynb**](notebooks/04_phase3_thirtyfour_class_classification.ipynb) | Fine-grained classification (34 classes), minority vector deep-dive, 34&times;34 heatmaps | High-precision resolution of Web exploits & Brute Force |
 | [**05_feature_selection_latency.ipynb**](notebooks/05_feature_selection_latency.ipynb) | Multi-model consensus feature ranking, 39 &rarr; 20 feature reduction, Pareto analysis | +28.55% latency speedup, 48.7% RAM savings on edge devices |
 | [**06_capstone_synthesis_presentation.ipynb**](notebooks/06_capstone_synthesis_presentation.ipynb) | Master synthesis, cross-model comparison, three-tier IoT gateway architecture | Defense-ready presentation notebook with all key findings |
+| [**07_uncapped_high_accuracy_benchmark.ipynb**](notebooks/07_uncapped_high_accuracy_benchmark.ipynb) | Natural uncapped stream benchmark, replicating literature 99.18% accuracy | Mathematical deconstruction of the Literature Accuracy Paradox |
+| [**08_wire_speed_throughput_benchmark.ipynb**](notebooks/08_wire_speed_throughput_benchmark.ipynb) | Empirical 10 Gbps throughput & latency benchmark across all 3 tiers + DL baselines | Proves 2.65 Mpps (0.38 &mu;s) line-rate saturation on 1 CPU core |
 
 ---
 
@@ -137,7 +139,11 @@ capstone/
 │   ├── 03_phase2_eight_class_classification.ipynb
 │   ├── 04_phase3_thirtyfour_class_classification.ipynb
 │   ├── 05_feature_selection_latency.ipynb
-│   └── 06_capstone_synthesis_presentation.ipynb
+│   ├── 06_capstone_synthesis_presentation.ipynb
+│   ├── 07_uncapped_high_accuracy_benchmark.ipynb
+│   └── 08_wire_speed_throughput_benchmark.ipynb
+├── demo_app.py                          # Live 3-Tier Multi-Stage Adversarial Ingress Streamlit App
+├── benchmark_throughput.py              # 10 Gbps Wire-Speed Throughput & Latency Benchmark Suite
 ├── src/                                 # Production Python Package
 │   ├── __init__.py
 │   ├── config.py                        # Dataset paths, verified 39-feature schema, label mappings
