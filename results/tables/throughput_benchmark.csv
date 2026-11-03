@@ -1,0 +1,13 @@
+Model,Tier,Task,Features,Median Latency (us),Burst P95 (us),P95 Latency (us),P99 Latency (us),Max Latency (us),Stream Time (s),Single-Core PPS,Single-Core Mpps,Saturates 10G (1500B),Saturates 10G (512B),Cores for 10G (1500B),Cores for 10G (512B)
+T1_XGBoost_Hist,Tier 1,Binary (Benign vs Attack),39,0.38,29.33,29.33,32.14,40.63,0.007552,2648151,2.648,True,True,1,1
+T1_LogisticRegression,Tier 1,Binary (Benign vs Attack),39,0.12,8.77,8.77,9.49,10.23,0.002296,8708981,8.709,True,True,1,1
+T1_LightGBM,Tier 1,Binary (Benign vs Attack),39,1.54,41.52,41.52,44.65,48.1,0.030874,647804,0.648,False,False,2,4
+T1_RandomForest,Tier 1,Binary (Benign vs Attack),39,7.06,222.16,222.16,264.58,292.77,0.141216,141627,0.142,False,False,6,18
+T2_XGBoost_Top20,Tier 2,8-Class Category (Top-20 Features),20,7.53,130.36,130.36,140.42,151.18,0.150552,132844,0.133,False,False,7,19
+T2_LightGBM_Top20,Tier 2,8-Class Category (Top-20 Features),20,117.43,185.13,185.13,206.34,269.96,2.348563,8516,0.009,False,False,98,287
+T2_RandomForest_Top20,Tier 2,8-Class Category (Top-20 Features),20,18.05,241.27,241.27,303.17,401.16,0.360994,55403,0.055,False,False,16,45
+T3_XGBoost_34Class,Tier 3,34-Class Attack Attribution,39,11.01,441.05,441.05,696.65,779.07,0.220091,90872,0.091,False,False,10,27
+T3_LightGBM_34Class,Tier 3,34-Class Attack Attribution,39,91.48,150.1,150.1,159.56,163.28,1.829669,10931,0.011,False,False,77,224
+T3_RandomForest_34Class,Tier 3,34-Class Attack Attribution,39,23.52,138.9,138.9,154.68,163.48,0.470446,42513,0.043,False,False,20,58
+DL_PyTorch_DNN_Binary,DL Baseline,Binary DNN (Literature Paradigm),39,0.4,12.93,12.93,16.91,21.86,0.008022,2493038,2.493,True,True,1,1
+DL_PyTorch_DNN_34Class,DL Baseline,34-Class DNN (Literature Paradigm),39,0.41,14.0,14.0,15.63,15.73,0.008131,2459861,2.46,True,True,1,1
