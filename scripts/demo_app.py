@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Color mappings
 STATUS_COLORS = {
@@ -196,17 +196,21 @@ st.markdown(
 @st.cache_resource
 def load_models():
     """Load pre-trained models and scalers for all 3 tiers."""
-    t1_lr = joblib.load(BASE_DIR / "models_saved" / "binary" / "logistic_regression.joblib")
-    t1_xgb = joblib.load(BASE_DIR / "models_saved" / "binary" / "xgboost.joblib")
-    t1_lgb = joblib.load(BASE_DIR / "models_saved" / "binary" / "lightgbm.joblib")
-    t1_scaler = joblib.load(BASE_DIR / "models_saved" / "binary" / "binary_scaler.joblib")
+    models_dir = BASE_DIR / "models" / "legacy"
+    if not models_dir.exists() and (BASE_DIR / "models_saved").exists():
+        models_dir = BASE_DIR / "models_saved"
+
+    t1_lr = joblib.load(models_dir / "binary" / "logistic_regression.joblib")
+    t1_xgb = joblib.load(models_dir / "binary" / "xgboost.joblib")
+    t1_lgb = joblib.load(models_dir / "binary" / "lightgbm.joblib")
+    t1_scaler = joblib.load(models_dir / "binary" / "binary_scaler.joblib")
     
-    t2_model = joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "xgboost_top20.joblib")
-    t2_scaler = joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "reduced_20_scaler.joblib")
-    top_20_feats = joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "top_20_feature_names.joblib")
+    t2_model = joblib.load(models_dir / "reduced_features" / "xgboost_top20.joblib")
+    t2_scaler = joblib.load(models_dir / "reduced_features" / "reduced_20_scaler.joblib")
+    top_20_feats = joblib.load(models_dir / "reduced_features" / "top_20_feature_names.joblib")
     
-    t3_model = joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "xgboost.joblib")
-    t3_scaler = joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "attack34_scaler.joblib")
+    t3_model = joblib.load(models_dir / "attack_34class" / "xgboost.joblib")
+    t3_scaler = joblib.load(models_dir / "attack_34class" / "attack34_scaler.joblib")
     
     return {
         "t1_lr": t1_lr, "t1_xgb": t1_xgb, "t1_lgb": t1_lgb, "t1_scaler": t1_scaler,
@@ -217,7 +221,9 @@ def load_models():
 @st.cache_data
 def load_sample_dataset():
     """Load stratified sample dataset to draw realistic traffic flows."""
-    sample_file = BASE_DIR / "data" / "sample_stratified.csv"
+    sample_file = BASE_DIR / "data" / "processed" / "sample_stratified.csv"
+    if not sample_file.exists() and (BASE_DIR / "data" / "sample_stratified.csv").exists():
+        sample_file = BASE_DIR / "data" / "sample_stratified.csv"
     df = pd.read_csv(sample_file)
     return df
 

@@ -6,16 +6,28 @@ ENV/
 
 # Large Datasets & Generated Data
 MERGED_CSV/
-data/
+data/raw/
+data/processed/
+data/partitions/
+data/*.csv
 *.csv
 !results/tables/*.csv
+!results_v2/tables/*.csv
 
 # Model Checkpoints & Large Artifacts
+models/*
+!models/README.md
 models_saved/
+models_saved_v2/
 *.pkl
 *.pt
 *.pth
 *.onnx
+*.joblib
+
+# Academic Submissions & Scratch
+snuc/
+scratch/
 
 # Python cache & bytecode
 __pycache__/
@@ -31,9 +43,3 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
-
-snuc/
-models_saved_v2/
-*.joblib
-scratch/
-!results_v2/tables/*.csv

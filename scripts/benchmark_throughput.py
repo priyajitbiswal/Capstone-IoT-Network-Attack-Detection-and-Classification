@@ -32,7 +32,9 @@ import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODELS_DIR = BASE_DIR / "models" / "legacy" if (BASE_DIR / "models" / "legacy").exists() else MODELS_DIR
+DATA_FILE = BASE_DIR / "data" / "processed" / "sample_stratified.csv" if (BASE_DIR / "data" / "processed" / "sample_stratified.csv").exists() else DATA_FILE
 
 
 # ---------------------------------------------------------------------------
@@ -45,59 +47,59 @@ def load_all_models():
 
     # Tier 1: Binary (39 features)
     models["T1_XGBoost_Hist"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "binary" / "xgboost.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "binary" / "binary_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "binary" / "xgboost.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "binary" / "binary_scaler.joblib"),
         "tier": "Tier 1",
         "features": 39,
         "task": "Binary (Benign vs Attack)",
     }
     models["T1_LogisticRegression"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "binary" / "logistic_regression.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "binary" / "binary_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "binary" / "logistic_regression.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "binary" / "binary_scaler.joblib"),
         "tier": "Tier 1",
         "features": 39,
         "task": "Binary (Benign vs Attack)",
     }
     models["T1_LightGBM"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "binary" / "lightgbm.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "binary" / "binary_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "binary" / "lightgbm.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "binary" / "binary_scaler.joblib"),
         "tier": "Tier 1",
         "features": 39,
         "task": "Binary (Benign vs Attack)",
     }
-    rf_b = joblib.load(BASE_DIR / "models_saved" / "binary" / "random_forest.joblib")
+    rf_b = joblib.load(MODELS_DIR / "binary" / "random_forest.joblib")
     rf_b.n_jobs = 1  # optimize single-core evaluation
     models["T1_RandomForest"] = {
         "model": rf_b,
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "binary" / "binary_scaler.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "binary" / "binary_scaler.joblib"),
         "tier": "Tier 1",
         "features": 39,
         "task": "Binary (Benign vs Attack)",
     }
 
     # Tier 2: Reduced 20-Feature (8-class)
-    top_20 = joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "top_20_feature_names.joblib")
+    top_20 = joblib.load(MODELS_DIR / "reduced_features" / "top_20_feature_names.joblib")
     models["T2_XGBoost_Top20"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "xgboost_top20.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "reduced_20_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "reduced_features" / "xgboost_top20.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "reduced_features" / "reduced_20_scaler.joblib"),
         "tier": "Tier 2",
         "features": 20,
         "task": "8-Class Category (Top-20 Features)",
         "feature_names": top_20,
     }
     models["T2_LightGBM_Top20"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "lightgbm_top20.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "reduced_20_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "reduced_features" / "lightgbm_top20.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "reduced_features" / "reduced_20_scaler.joblib"),
         "tier": "Tier 2",
         "features": 20,
         "task": "8-Class Category (Top-20 Features)",
         "feature_names": top_20,
     }
-    rf_t2 = joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "random_forest_top20.joblib")
+    rf_t2 = joblib.load(MODELS_DIR / "reduced_features" / "random_forest_top20.joblib")
     rf_t2.n_jobs = 1
     models["T2_RandomForest_Top20"] = {
         "model": rf_t2,
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "reduced_20_scaler.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "reduced_features" / "reduced_20_scaler.joblib"),
         "tier": "Tier 2",
         "features": 20,
         "task": "8-Class Category (Top-20 Features)",
@@ -106,24 +108,24 @@ def load_all_models():
 
     # Tier 3: Full 34-Class Attribution (39 features)
     models["T3_XGBoost_34Class"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "xgboost.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "attack34_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "attack_34class" / "xgboost.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "attack_34class" / "attack34_scaler.joblib"),
         "tier": "Tier 3",
         "features": 39,
         "task": "34-Class Attack Attribution",
     }
     models["T3_LightGBM_34Class"] = {
-        "model": joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "lightgbm.joblib"),
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "attack34_scaler.joblib"),
+        "model": joblib.load(MODELS_DIR / "attack_34class" / "lightgbm.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "attack_34class" / "attack34_scaler.joblib"),
         "tier": "Tier 3",
         "features": 39,
         "task": "34-Class Attack Attribution",
     }
-    rf_t3 = joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "random_forest.joblib")
+    rf_t3 = joblib.load(MODELS_DIR / "attack_34class" / "random_forest.joblib")
     rf_t3.n_jobs = 1
     models["T3_RandomForest_34Class"] = {
         "model": rf_t3,
-        "scaler": joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "attack34_scaler.joblib"),
+        "scaler": joblib.load(MODELS_DIR / "attack_34class" / "attack34_scaler.joblib"),
         "tier": "Tier 3",
         "features": 39,
         "task": "34-Class Attack Attribution",
@@ -162,13 +164,13 @@ def load_all_models():
 
         bin_dnn = BinaryDNN()
         bin_dnn.load_state_dict(
-            torch.load(BASE_DIR / "models_saved" / "binary" / "pytorch_dnn.pt",
+            torch.load(MODELS_DIR / "binary" / "pytorch_dnn.pt",
                         map_location="cpu", weights_only=False)
         )
         bin_dnn.eval()
         models["DL_PyTorch_DNN_Binary"] = {
             "model": bin_dnn,
-            "scaler": joblib.load(BASE_DIR / "models_saved" / "binary" / "binary_scaler.joblib"),
+            "scaler": joblib.load(MODELS_DIR / "binary" / "binary_scaler.joblib"),
             "tier": "DL Baseline",
             "features": 39,
             "task": "Binary DNN (Literature Paradigm)",
@@ -177,13 +179,13 @@ def load_all_models():
 
         att_dnn = Attack34DNN()
         att_dnn.load_state_dict(
-            torch.load(BASE_DIR / "models_saved" / "attack_34class" / "pytorch_dnn.pt",
+            torch.load(MODELS_DIR / "attack_34class" / "pytorch_dnn.pt",
                         map_location="cpu", weights_only=False)
         )
         att_dnn.eval()
         models["DL_PyTorch_DNN_34Class"] = {
             "model": att_dnn,
-            "scaler": joblib.load(BASE_DIR / "models_saved" / "attack_34class" / "attack34_scaler.joblib"),
+            "scaler": joblib.load(MODELS_DIR / "attack_34class" / "attack34_scaler.joblib"),
             "tier": "DL Baseline",
             "features": 39,
             "task": "34-Class DNN (Literature Paradigm)",
@@ -201,9 +203,9 @@ def load_all_models():
 
 def prepare_data(n_samples):
     """Load and prepare a matrix of feature vectors for benchmarking."""
-    df = pd.read_csv(BASE_DIR / "data" / "sample_stratified.csv")
+    df = pd.read_csv(DATA_FILE)
     feature_cols = [c for c in df.columns if c not in ("Label", "label")]
-    top_20 = joblib.load(BASE_DIR / "models_saved" / "reduced_features" / "top_20_feature_names.joblib")
+    top_20 = joblib.load(MODELS_DIR / "reduced_features" / "top_20_feature_names.joblib")
 
     if n_samples > len(df):
         sampled = df.sample(n_samples, replace=True, random_state=42)

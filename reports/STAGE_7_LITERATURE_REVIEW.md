@@ -3,12 +3,12 @@
 **Project Title**: Empirical Evaluation and Methodological Auditing of Machine Learning Baselines for IoT Network Intrusion Detection on the CICIoT2023 Benchmark  
 **Deliverable**: Comprehensive Literature Review, Methodological Audit, and Research Gap Synthesis  
 **Repository References**: 
-- Research Archive: `research/` (19 PDF documents: 14 distinct peer-reviewed studies, 1 duplicate copy, 1 dataset datasheet, 3 capstone technical analyses)
-- Stage 6 Synthesis: [`results_v2/STAGE_6_RESEARCH_SYNTHESIS.md`](STAGE_6_RESEARCH_SYNTHESIS.md)
-- Stage 4 Evaluation: [`results_v2/STAGE_4_EVALUATION_REPORT.md`](STAGE_4_EVALUATION_REPORT.md)
-- Stage 5 Error Analysis: [`results_v2/STAGE_5_ERROR_ANALYSIS.md`](STAGE_5_ERROR_ANALYSIS.md)
-- Centralized Ledger: [`results_v2/tables/centralized_experiment_ledger.csv`](tables/centralized_experiment_ledger.csv)
-- Master Test Results: [`results_v2/tables/stage4_test_results.csv`](tables/stage4_test_results.csv)
+- Research Archive: `research/` (14 distinct peer-reviewed studies, 1 dataset datasheet)
+- Stage 6 Synthesis: [`reports/STAGE_6_RESEARCH_SYNTHESIS.md`](STAGE_6_RESEARCH_SYNTHESIS.md)
+- Stage 4 Evaluation: [`reports/STAGE_4_EVALUATION_REPORT.md`](STAGE_4_EVALUATION_REPORT.md)
+- Stage 5 Error Analysis: [`reports/STAGE_5_ERROR_ANALYSIS.md`](STAGE_5_ERROR_ANALYSIS.md)
+- Centralized Ledger: [`results_v2/tables/centralized_experiment_ledger.csv`](../results_v2/tables/centralized_experiment_ledger.csv)
+- Master Test Results: [`results_v2/tables/stage4_test_results.csv`](../results_v2/tables/stage4_test_results.csv)
 
 ---
 
@@ -298,7 +298,7 @@ To maintain scientific rigor and avoid unsupported novelty claims, our contribut
 
 ## 7. Connection to Stage 6 Research Findings and Synthesis
 
-This literature review and research gap analysis directly contextualizes the empirical findings synthesized in `results_v2/STAGE_6_RESEARCH_SYNTHESIS.md`:
+This literature review and research gap analysis directly contextualizes the empirical findings synthesized in [`STAGE_6_RESEARCH_SYNTHESIS.md`](STAGE_6_RESEARCH_SYNTHESIS.md):
 
 1. **Contextualizing Published Accuracy**: Published studies reporting high aggregate accuracy on CICIoT2023 often evaluate under class distributions heavily weighted by majority classes or using unweighted objectives. In our experiments, fine-grained accuracy reached **$72.65\%$** under balanced weighting (which prioritizes rare classes) and **$74.45\%$** under unweighted optimization. This illustrates how weighting choices and class priors influence headline metrics, rather than asserting that flood dominance accounts for all published results.
 2. **Task-Specific Model Rankings**: Tree ensembles demonstrated strong performance across tabular network flow tasks: Random Forest achieved the highest binary internal test Macro-F1 (**$0.7690$**), while LightGBM led Category (**$0.6894$**) and Fine-Grained (**$0.6145$**). The 5-epoch PyTorch MLP baseline achieved lower Macro-F1 (**$0.5216$**), corroborating observations in the literature (e.g., Ullah et al., Booij et al.) that shallow neural networks do not necessarily outperform gradient boosted trees on tabular network flow features while requiring higher computational resources.

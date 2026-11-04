@@ -55,7 +55,8 @@ def load_natural_uncapped_data(n_samples=100_000, max_files=10, random_state=42)
     """
     Loads network flows directly from raw MERGED_CSV files WITHOUT ANY CAPPING on flood classes.
     """
-    csv_files = glob.glob(str(BASE_DIR / "MERGED_CSV" / "*.csv"))[:max_files]
+    raw_dir = BASE_DIR / "data" / "raw" if (BASE_DIR / "data" / "raw").exists() else BASE_DIR / "MERGED_CSV"
+    csv_files = glob.glob(str(raw_dir / "*.csv"))[:max_files]
     chunks = []
     per_file = n_samples // len(csv_files)
     

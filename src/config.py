@@ -7,9 +7,19 @@ from pathlib import Path
 
 # Base Paths
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATASET_DIR = PROJECT_ROOT / "MERGED_CSV"
+
+# Raw captures (data/raw or MERGED_CSV)
+DATASET_DIR = PROJECT_ROOT / "data" / "raw"
+if not DATASET_DIR.exists() and (PROJECT_ROOT / "MERGED_CSV").exists():
+    DATASET_DIR = PROJECT_ROOT / "MERGED_CSV"
+
 DATA_DIR = PROJECT_ROOT / "data"
-MODELS_DIR = PROJECT_ROOT / "models_saved"
+
+# Models (models/legacy or models_saved)
+MODELS_DIR = PROJECT_ROOT / "models" / "legacy"
+if not MODELS_DIR.exists() and (PROJECT_ROOT / "models_saved").exists():
+    MODELS_DIR = PROJECT_ROOT / "models_saved"
+
 RESULTS_DIR = PROJECT_ROOT / "results"
 FIGURES_DIR = RESULTS_DIR / "figures"
 TABLES_DIR = RESULTS_DIR / "tables"
@@ -18,8 +28,10 @@ TABLES_DIR = RESULTS_DIR / "tables"
 for p in [DATA_DIR, MODELS_DIR, RESULTS_DIR, FIGURES_DIR, TABLES_DIR]:
     p.mkdir(parents=True, exist_ok=True)
 
-# Sample file path for stratified subset
-SAMPLE_FILE = DATA_DIR / "sample_stratified.csv"
+# Sample file path for stratified subset (check data/processed then data/)
+SAMPLE_FILE = DATA_DIR / "processed" / "sample_stratified.csv"
+if not SAMPLE_FILE.exists() and (DATA_DIR / "sample_stratified.csv").exists():
+    SAMPLE_FILE = DATA_DIR / "sample_stratified.csv"
 
 # Verified 39 input feature columns from the CICIoT2023 MERGED_CSV files
 FEATURE_COLUMNS = [
