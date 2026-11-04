@@ -1,0 +1,60 @@
+{
+  "strategy": "Strategy 2: Ambiguous Feature Vectors Purged",
+  "description": "Separate ablation partition isolating impact of empirical label collisions.",
+  "original_deduplicated_rows": 501098,
+  "ambiguous_feature_hashes_purged": 8740,
+  "ambiguous_rows_purged": 18416,
+  "purged_percentage": 3.68,
+  "separable_rows_total": 482682,
+  "partition_counts": {
+    "train": 337838,
+    "val": 72390,
+    "test": 72454
+  },
+  "classes_per_partition": {
+    "train": 34,
+    "val": 34,
+    "test": 34
+  },
+  "exact_vector_overlaps": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0
+  },
+  "per_class_counts": {
+    "BENIGN": 39919,
+    "DDOS-ICMP_FRAGMENTATION": 19993,
+    "DDOS-UDP_FRAGMENTATION": 19991,
+    "DDOS-ACK_FRAGMENTATION": 19989,
+    "MIRAI-GREIP_FLOOD": 19965,
+    "VULNERABILITYSCAN": 19955,
+    "DOS-HTTP_FLOOD": 19954,
+    "MIRAI-GREETH_FLOOD": 19942,
+    "MIRAI-UDPPLAIN": 19912,
+    "RECON-HOSTDISCOVERY": 19858,
+    "RECON-OSSCAN": 19646,
+    "DNS_SPOOFING": 19611,
+    "RECON-PORTSCAN": 19593,
+    "MITM-ARPSPOOFING": 18580,
+    "DDOS-PSHACK_FLOOD": 17714,
+    "DDOS-RSTFINFLOOD": 17101,
+    "DOS-UDP_FLOOD": 17022,
+    "DDOS-ICMP_FLOOD": 16628,
+    "DDOS-UDP_FLOOD": 16042,
+    "DOS-SYN_FLOOD": 15203,
+    "DOS-TCP_FLOOD": 14527,
+    "DDOS-SYN_FLOOD": 14245,
+    "DDOS-SYNONYMOUSIP_FLOOD": 13974,
+    "DDOS-TCP_FLOOD": 13817,
+    "DDOS-HTTP_FLOOD": 9120,
+    "DDOS-SLOWLORIS": 7534,
+    "DICTIONARYBRUTEFORCE": 4175,
+    "BROWSERHIJACKING": 1861,
+    "SQLINJECTION": 1717,
+    "COMMANDINJECTION": 1665,
+    "XSS": 1237,
+    "BACKDOOR_MALWARE": 1055,
+    "RECON-PINGSWEEP": 721,
+    "UPLOADING_ATTACK": 416
+  }
+}

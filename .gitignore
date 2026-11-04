@@ -8,11 +8,15 @@ ENV/
 MERGED_CSV/
 data/raw/
 data/processed/
-data/partitions/
+data/sample_stratified.csv
 data/*.csv
+data/partitions/*.csv
+data/partitions/*/*.csv
 *.csv
 !results/tables/*.csv
 !results_v2/tables/*.csv
+!data/partitions/*.json
+!data/partitions/*/*.json
 
 # Model Checkpoints & Large Artifacts
 models/*

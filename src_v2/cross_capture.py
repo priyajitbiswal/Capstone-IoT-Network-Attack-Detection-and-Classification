@@ -20,6 +20,7 @@ from src_v2.config import (
 
 
 CROSS_CAPTURE_FILE = PARTITIONS_DIR / "cross_capture_test.csv"
+CROSS_CAPTURE_CLEAN_FILE = PARTITIONS_DIR / "cross_capture_test_clean.csv"
 CROSS_CAPTURE_METADATA_FILE = PARTITIONS_DIR / "cross_capture_metadata.json"
 
 
@@ -102,5 +103,43 @@ def extract_cross_capture_sample(
     return df_cross, metadata
 
 
+def clean_cross_capture(
+    raw_cross_path: Path = CROSS_CAPTURE_FILE,
+    clean_output_path: Path = CROSS_CAPTURE_CLEAN_FILE,
+    metadata_path: Path = CROSS_CAPTURE_METADATA_FILE,
+) -> pd.DataFrame:
+    """
+    Purges any flows from cross_capture_test.csv that share 39-feature coordinates
+    with the primary training, validation, or test partitions.
+    Guarantees strictly zero feature overlap and produces cross_capture_test_clean.csv (57,280 rows).
+    """
+    from src_v2.config import ORIGINAL_SAMPLE_FILE, PARTITION_ASSIGNMENTS_FILE
+
+    print(f"Loading raw cross-capture sample from {raw_cross_path}...")
+    df_cross = pd.read_csv(raw_cross_path)
+
+    # Load internal partitions
+    df_assign = pd.read_csv(PARTITION_ASSIGNMENTS_FILE)
+    df_raw = pd.read_csv(ORIGINAL_SAMPLE_FILE)
+    df_clean = df_raw.iloc[df_assign["orig_idx"]].copy()
+    df_clean["partition"] = df_assign["partition"].values
+
+    train_hashes = set(pd.util.hash_pandas_object(df_clean[df_clean["partition"] == "train"][FEATURE_COLUMNS], index=False))
+    val_hashes = set(pd.util.hash_pandas_object(df_clean[df_clean["partition"] == "val"][FEATURE_COLUMNS], index=False))
+    test_hashes = set(pd.util.hash_pandas_object(df_clean[df_clean["partition"] == "test"][FEATURE_COLUMNS], index=False))
+
+    cross_hashes = pd.util.hash_pandas_object(df_cross[FEATURE_COLUMNS], index=False)
+    overlap_mask = cross_hashes.isin(train_hashes | val_hashes | test_hashes)
+
+    df_clean_cross = df_cross[~overlap_mask].copy().reset_index(drop=True)
+    df_clean_cross.to_csv(clean_output_path, index=False)
+
+    print(f"Purged {overlap_mask.sum():,} overlapping records from cross-capture sample.")
+    print(f"Saved clean, leak-free holdout to {clean_output_path}: {len(df_clean_cross):,} rows ({df_clean_cross[TARGET_COLUMN].nunique()} classes).")
+
+    return df_clean_cross
+
+
 if __name__ == "__main__":
     extract_cross_capture_sample()
+    clean_cross_capture()

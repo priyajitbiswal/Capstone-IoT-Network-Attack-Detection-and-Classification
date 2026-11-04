@@ -1,43 +1,55 @@
-# Capstone Research Paper Package
+# Academic Research Manuscript Package (`paper/`)
 
-This directory contains the academic research paper for the Capstone Project:
-**"Hierarchical Multi-Tier Network Intrusion Detection and Edge Latency Optimization on the CICIoT2023 Benchmark"**
+This directory contains the academic research manuscript, typesetting sources, publication figures, and compiled PDF deliverable for the capstone project:
 
-## Files Included
+> **"Empirical Evaluation of Data Leakage, Class Imbalance, and Temporal Fragility in IoT Network Intrusion Detection on CICIoT2023"**  
+> *Authors:* Priyajit Biswal, Rohit K Manoj, Rishab Rajeev  
+> *Affiliation:* Department of Computer Science & Engineering, Shiv Nadar University Chennai, India  
+> *Faculty In Charge:* Dr. Vegesna S M Srinivasavarma  
 
-1. **`research_paper.pdf`**:
-   The compiled, publication-quality research paper PDF formatted in IEEE two-column conference layout. Includes abstract, mathematical formulations, master benchmark tables, minority attack defense deep-dives, and embedded high-resolution figures.
+---
 
-2. **`main.tex`**:
-   The complete, standard LaTeX source document formatted with the `IEEEtran` conference document class. Ready for direct submission or compilation in:
-   - [Overleaf](https://www.overleaf.com) (simply upload this `paper/` directory as a ZIP)
-   - Local TeX distributions (TeX Live, MiKTeX, MacTeX) via `pdflatex main.tex`
+## 1. Package Contents
 
-3. **`references.bib`**:
-   Complete BibTeX citation database containing IEEE-formatted references for the CICIoT2023 dataset, XGBoost, LightGBM, Random Forest, PyTorch, and foundational NIDS surveys.
+| File / Directory | Format | Scope & Purpose |
+|---|---|---|
+| **[`research_paper.pdf`](research_paper.pdf)** | PDF (11 Pages) | The compiled publication-quality research paper PDF (3.90 MB) formatted in academic two-column layout. Includes abstract, mathematical formulations, 9 master tables, 6 figures, and IEEE-style references. |
+| **[`main.tex`](main.tex)** | LaTeX (IEEEtran) | Complete, standard LaTeX source document formatted with the `IEEEtran` document class. Syntax-verified with 100% environment balance and 19 resolved citations. Ready for direct upload to Overleaf or local TeXLive compilation. |
+| **[`paper.typ`](paper.typ)** | Typst | Modern Typst source document equivalent in content, math, tables, figures, and references to `main.tex`. Enables rapid, reproducible local compilation. |
+| **[`references.bib`](references.bib)** | BibTeX | Comprehensive BibTeX database containing 23 verified entries, including all 14 peer-reviewed IoT NIDS studies audited in Stage 7 and foundational algorithmic citations (XGBoost, LightGBM, Random Forest, PyTorch, Scikit-Learn). |
+| **[`figures/`](figures/)** | PNG (300 DPI) | High-resolution publication figures generated from repository experimental ledgers: |
+| &emsp; `fig1_partitioning_protocol.png` | PNG | Schematic of the Zero-Leakage Atomic Hash-Grouped Partitioning Protocol. |
+| &emsp; `fig2_accuracy_vs_macro_f1.png` | PNG | In-distribution test generalization scatter (Macro-F1 vs. Accuracy) across 21 models. |
+| &emsp; `fig3_minority_recall_collapse.png` | PNG | The Accuracy Paradox: minority attack recall disparity under unweighted training. |
+| &emsp; `fig4_threat_tier_cross_capture.png` | PNG | Temporal cross-capture generalization across threat tiers for fine-grained LightGBM. |
+| &emsp; `fig5_latency_pareto_frontier.png` | PNG | Host-side latency vs. diagnostic Macro-F1 Pareto curve with reconciled P50 values. |
+| &emsp; `fig6_error_topology_matrix.png` | PNG | 34-class fine-grained confusion matrix highlighting intra-flood and benign handshake overlap. |
 
-4. **`paper.typ`**:
-   The source document formatted using Typst, enabling sub-second local compilation to PDF without requiring a multi-gigabyte TeX Live installation.
+---
 
-5. **`figures/`**:
-   Contains all high-resolution figures embedded into the paper:
-   - `capstone_master_synthesis.png`: 4-panel master synthesis (Accuracy progression, Macro F1 resilience, Latency vs F1 Pareto frontier, and line-rate network throughput).
-   - `feature_importance_ranking.png`: Consensus tree feature importance and cumulative information retained curve.
-   - `feature_reduction_comparison.png`: Accuracy retention vs inference latency speedup.
-   - `attack34_cm_xgboost.png`: 34x34 fine-grained confusion matrix.
+## 2. Compilation Instructions
 
-## How to Re-Compile
-
-### Option A: Via Local Python Environment (Typst)
-```bash
-python -c "import typst; typst.compile('paper/paper.typ', output='paper/research_paper.pdf')"
+### Option A: Via Python Typst Engine (Recommended / Local)
+To compile `paper.typ` into `research_paper.pdf` locally without requiring a full TeXLive installation:
+```powershell
+.\.venv\Scripts\python.exe -c "import typst; typst.compile('paper/paper.typ', output='paper/research_paper.pdf')"
 ```
 
 ### Option B: Via Standard LaTeX / Overleaf
-```bash
-pdflatex main.tex
-bibtex main
-pdflatex main.tex
-pdflatex main.tex
+To compile `main.tex` into PDF using a local TeXLive or MiKTeX installation:
+```powershell
+pdflatex paper/main.tex
+bibtex paper/main
+pdflatex paper/main.tex
+pdflatex paper/main.tex
 ```
-Or upload the entire `paper/` folder directly to Overleaf.
+*Alternatively, the entire `paper/` folder can be uploaded directly as a ZIP archive to [Overleaf](https://www.overleaf.com).*
+
+---
+
+## 3. Regenerating Publication Figures
+
+All six figures embedded in the paper can be deterministically regenerated from [`results_v2/tables/`](../results_v2/tables/) at 300 DPI:
+```powershell
+.\.venv\Scripts\python.exe scripts/generate_paper_figures.py
+```

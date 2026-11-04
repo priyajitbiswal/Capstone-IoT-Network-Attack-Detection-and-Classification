@@ -1,0 +1,254 @@
+{
+  "source_dataset": "C:\\Users\\priya\\Downloads\\capstone\\data\\sample_stratified.csv",
+  "random_seed": 42,
+  "train_ratio_target": 0.7,
+  "val_ratio_target": 0.15,
+  "test_ratio_target": 0.15,
+  "duplicate_investigation": {
+    "total_records": 529562,
+    "exact_duplicates": {
+      "redundant_rows": 28464,
+      "redundant_pct": 5.375,
+      "total_rows_in_exact_clusters": 47430
+    },
+    "feature_vector_duplicates": {
+      "redundant_vectors": 38140,
+      "redundant_pct": 7.202,
+      "total_rows_in_feature_clusters": 59780
+    },
+    "conflicting_label_collisions": {
+      "unique_conflicting_hashes": 8740,
+      "total_conflicting_rows": 28608,
+      "conflicting_pct": 5.402
+    }
+  },
+  "exact_duplicates_removed": 28464,
+  "clean_rows_total": 501098,
+  "unique_feature_vectors": 491422,
+  "actual_partition_counts": {
+    "train": 350821,
+    "val": 75172,
+    "test": 75105
+  },
+  "actual_partition_percentages": {
+    "train": 70.01,
+    "val": 15.0,
+    "test": 14.99
+  },
+  "classes_represented": {
+    "train": 34,
+    "val": 34,
+    "test": 34
+  },
+  "feature_leakage_overlap_counts": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0
+  },
+  "per_class_distribution": {
+    "BACKDOOR_MALWARE": {
+      "total": 1060,
+      "train": 766,
+      "val": 155,
+      "test": 139
+    },
+    "BENIGN": {
+      "total": 39960,
+      "train": 27855,
+      "val": 6086,
+      "test": 6019
+    },
+    "BROWSERHIJACKING": {
+      "total": 1889,
+      "train": 1324,
+      "val": 271,
+      "test": 294
+    },
+    "COMMANDINJECTION": {
+      "total": 1666,
+      "train": 1186,
+      "val": 225,
+      "test": 255
+    },
+    "DDOS-ACK_FRAGMENTATION": {
+      "total": 19989,
+      "train": 13968,
+      "val": 3053,
+      "test": 2968
+    },
+    "DDOS-HTTP_FLOOD": {
+      "total": 9121,
+      "train": 6395,
+      "val": 1424,
+      "test": 1302
+    },
+    "DDOS-ICMP_FLOOD": {
+      "total": 16628,
+      "train": 11639,
+      "val": 2485,
+      "test": 2504
+    },
+    "DDOS-ICMP_FRAGMENTATION": {
+      "total": 19993,
+      "train": 14029,
+      "val": 2947,
+      "test": 3017
+    },
+    "DDOS-PSHACK_FLOOD": {
+      "total": 17714,
+      "train": 12435,
+      "val": 2598,
+      "test": 2681
+    },
+    "DDOS-RSTFINFLOOD": {
+      "total": 17101,
+      "train": 11804,
+      "val": 2642,
+      "test": 2655
+    },
+    "DDOS-SLOWLORIS": {
+      "total": 7534,
+      "train": 5273,
+      "val": 1102,
+      "test": 1159
+    },
+    "DDOS-SYNONYMOUSIP_FLOOD": {
+      "total": 17253,
+      "train": 12184,
+      "val": 2610,
+      "test": 2459
+    },
+    "DDOS-SYN_FLOOD": {
+      "total": 17690,
+      "train": 12374,
+      "val": 2686,
+      "test": 2630
+    },
+    "DDOS-TCP_FLOOD": {
+      "total": 16539,
+      "train": 11585,
+      "val": 2503,
+      "test": 2451
+    },
+    "DDOS-UDP_FLOOD": {
+      "total": 17375,
+      "train": 12148,
+      "val": 2593,
+      "test": 2634
+    },
+    "DDOS-UDP_FRAGMENTATION": {
+      "total": 19991,
+      "train": 13956,
+      "val": 3031,
+      "test": 3004
+    },
+    "DICTIONARYBRUTEFORCE": {
+      "total": 4181,
+      "train": 2935,
+      "val": 617,
+      "test": 629
+    },
+    "DNS_SPOOFING": {
+      "total": 19675,
+      "train": 13733,
+      "val": 2905,
+      "test": 3037
+    },
+    "DOS-HTTP_FLOOD": {
+      "total": 19955,
+      "train": 14040,
+      "val": 2973,
+      "test": 2942
+    },
+    "DOS-SYN_FLOOD": {
+      "total": 18072,
+      "train": 12579,
+      "val": 2738,
+      "test": 2755
+    },
+    "DOS-TCP_FLOOD": {
+      "total": 17249,
+      "train": 12025,
+      "val": 2597,
+      "test": 2627
+    },
+    "DOS-UDP_FLOOD": {
+      "total": 18355,
+      "train": 12854,
+      "val": 2778,
+      "test": 2723
+    },
+    "MIRAI-GREETH_FLOOD": {
+      "total": 19942,
+      "train": 14072,
+      "val": 2912,
+      "test": 2958
+    },
+    "MIRAI-GREIP_FLOOD": {
+      "total": 19965,
+      "train": 13887,
+      "val": 2992,
+      "test": 3086
+    },
+    "MIRAI-UDPPLAIN": {
+      "total": 19912,
+      "train": 14004,
+      "val": 2959,
+      "test": 2949
+    },
+    "MITM-ARPSPOOFING": {
+      "total": 18721,
+      "train": 13206,
+      "val": 2752,
+      "test": 2763
+    },
+    "RECON-HOSTDISCOVERY": {
+      "total": 19930,
+      "train": 14010,
+      "val": 2989,
+      "test": 2931
+    },
+    "RECON-OSSCAN": {
+      "total": 19815,
+      "train": 13895,
+      "val": 2952,
+      "test": 2968
+    },
+    "RECON-PINGSWEEP": {
+      "total": 722,
+      "train": 486,
+      "val": 111,
+      "test": 125
+    },
+    "RECON-PORTSCAN": {
+      "total": 19749,
+      "train": 13790,
+      "val": 3009,
+      "test": 2950
+    },
+    "SQLINJECTION": {
+      "total": 1718,
+      "train": 1212,
+      "val": 252,
+      "test": 254
+    },
+    "UPLOADING_ATTACK": {
+      "total": 416,
+      "train": 312,
+      "val": 44,
+      "test": 60
+    },
+    "VULNERABILITYSCAN": {
+      "total": 19979,
+      "train": 13973,
+      "val": 3012,
+      "test": 2994
+    },
+    "XSS": {
+      "total": 1239,
+      "train": 887,
+      "val": 169,
+      "test": 183
+    }
+  }
+}

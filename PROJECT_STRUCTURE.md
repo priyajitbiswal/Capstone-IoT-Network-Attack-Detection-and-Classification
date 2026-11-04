@@ -1,6 +1,6 @@
 # Repository Architecture & Directory Structure Guide
 
-This document provides a comprehensive structural guide to the CICIoT2023 Intrusion Detection System research repository.
+This document provides a comprehensive structural guide to the CICIoT2023 Intrusion Detection System research repository, updated through **Stage 8D**.
 
 ---
 
@@ -10,10 +10,11 @@ This document provides a comprehensive structural guide to the CICIoT2023 Intrus
 capstone/
 ├── .gitignore                         # Comprehensive Git exclusion rules protecting data & models
 ├── README.md                          # Executive project documentation & pipeline quickstart
+├── REPRODUCIBILITY.md                 # Complete end-to-end reproduction playbook
 ├── PROJECT_STRUCTURE.md               # (This file) Repository architecture & directory guide
 ├── requirements.txt                   # Pinned runtime and experimental dependencies
 │
-├── src_v2/                            # [ACTIVE] Verified Stage 2–7 Leak-Free Research Pipeline
+├── src_v2/                            # [ACTIVE] Verified Stage 2–8 Leak-Free Research Pipeline
 │   ├── config.py                      # Canonical paths, 39 features, threat tiers, class maps
 │   ├── data_partitioning.py           # Stage 2 atomic hash-grouped dataset partitioning
 │   ├── preprocessing.py               # LeakFreePreprocessor (fitted strictly on training splits)
@@ -46,8 +47,8 @@ capstone/
 │   ├── legacy/                        # Generation 1 baseline model checkpoints (gitignored)
 │   └── README.md                      # Checkpoint manifest and loading specifications
 │
-├── reports/                           # Consolidated Master Research Reports (Stages 1–7)
-│   ├── README.md                      # Master index linking and summarizing all 7 research stages
+├── reports/                           # Consolidated Master Research Reports (Stages 1–8D)
+│   ├── README.md                      # Master index linking and summarizing all research stages
 │   ├── STAGE_1_AUDIT_REPORT.md        # Stage 1: Forensic Dataset Audit & Collision Quantification
 │   ├── STAGE_2_INVESTIGATION_REPORT.md# Stage 2: Feature-Hash Partitioning & Collision Purging
 │   ├── STAGE_3_COMPLETE_REPORT.md     # Stage 3: Baseline Training, Canary, Audit & Validation Benchmarks
@@ -55,6 +56,14 @@ capstone/
 │   ├── STAGE_5_ERROR_ANALYSIS.md      # Stage 5: Fine-Grained Error Analysis & Worst-10 Profiles
 │   ├── STAGE_6_RESEARCH_SYNTHESIS.md  # Stage 6: Research Findings, Contributions & Synthesis
 │   ├── STAGE_7_LITERATURE_REVIEW.md   # Stage 7: Systematic Literature Review (14 Studies)
+│   ├── STAGE_8A_RESEARCH_CONSOLIDATION.md # Stage 8A: Research Problem & 7 Contributions
+│   ├── STAGE_8A1_CONSISTENCY_AUDIT.md # Stage 8A.1: Independent Consistency Audit
+│   ├── STAGE_8A2_AUDIT_VERIFICATION.md# Stage 8A.2: Mathematical Reconciliation & Ground Truths
+│   ├── STAGE_8B_MANUSCRIPT_PLAN.md    # Stage 8B: Authoritative Manuscript Architecture Blueprint
+│   ├── STAGE_8C_DRAFTING_NOTES.md     # Stage 8C: Manuscript Drafting Inventory & Working Notes
+│   ├── STAGE_8D_FINAL_REVIEW.md       # Stage 8D: Final Manuscript Audit & Packaging Report
+│   ├── STAGE_8D_REPOSITORY_SYNCHRONIZATION.md # Stage 8D: Repository-Wide Synchronization Report
+│   ├── STAGE_9_FINAL_PUBLICATION_VERIFICATION.md # Stage 9: Final Publication Verification & Approval Report
 │   ├── PROJECT_ORIENTATION_REPORT.md  # Pre-execution environment & codebase audit
 │   └── PROJECT_STRUCTURE_AUDIT.md     # Pre-reorganization full repository audit
 │
@@ -73,12 +82,12 @@ capstone/
 │   ├── Dataset.pdf                    # Official CICIoT2023 dataset datasheet (Univ. of New Brunswick)
 │   └── RESEARCH_PAPERS_CRITICAL_ANALYSIS.md # Detailed critical survey and comparative matrix
 │
-├── paper/                             # Academic Conference Paper Package
-│   ├── main.tex                       # IEEE Transactions / Conference LaTeX manuscript
-│   ├── paper.typ                      # Typst modern typesetting manuscript
-│   ├── references.bib                 # Comprehensive BibTeX citation database
-│   ├── research_paper.pdf             # Compiled camera-ready PDF deliverable
-│   ├── figures/                       # Figures embedded within the academic manuscripts
+├── paper/                             # Academic Research Manuscript Package
+│   ├── main.tex                       # Standard IEEEtran LaTeX source document
+│   ├── paper.typ                      # Modern Typst source document
+│   ├── references.bib                 # Comprehensive BibTeX citation database (23 verified entries)
+│   ├── research_paper.pdf             # 11-page compiled publication PDF deliverable (3.90 MB)
+│   ├── figures/                       # 300 DPI publication figures (fig1 to fig6)
 │   └── README.md                      # Paper compilation and submission notes
 │
 ├── snuc/                              # Shiv Nadar University Chennai Capstone Deliverables
@@ -103,9 +112,10 @@ capstone/
 │   ├── uncapped_pure34_benchmark.py   # Raw traffic evaluation
 │   └── weight_calibration.py          # Class weight balancing sweeps
 │
-├── scripts/                           # Utility Tools & SOC Dashboard
+├── scripts/                           # Utility Tools & Figure Generators
+│   ├── generate_paper_figures.py      # Reproducible 300 DPI publication figure generator
 │   ├── demo_app.py                    # Streamlit Security Operations Center (SOC) Console
-│   ├── benchmark_throughput.py        # Single-packet latency & throughput benchmarking tool
+│   ├── benchmark_throughput.py        # Host-side CPU latency & throughput benchmarking tool
 │   └── README.md                      # Script execution guide
 │
 ├── docs/                              # Project Engineering Notes & Roadmaps
@@ -122,35 +132,33 @@ capstone/
 
 | Directory | Status | Primary Role & Contents |
 |---|:---:|---|
-| **`src_v2/`** | Active | Core engine for all Stage 2–7 research. Implements leak-free partitioning, strict training-only preprocessing, model instantiation, training runs, and read-only test evaluation. |
+| **`src_v2/`** | Active | Core engine for all Stage 2–8 research. Implements leak-free partitioning, strict training-only preprocessing, model instantiation, training runs, and read-only test evaluation. |
 | **`src/`** | Legacy | Historical Generation 1 pipeline code used for early baselines and exploratory notebooks. Preserved for exact reproducibility of prior results. |
 | **`data/`** | Active | Hierarchical dataset repository: `raw/` holds original CICIoT2023 CSVs; `processed/` holds the 529k stratified sample; `partitions/` holds atomic hash-grouped splits. |
 | **`models/`** | Active | Central model store: `active/` holds the 21 audited Stage 3 checkpoints and 2 serialized preprocessors; `legacy/` preserves Generation 1 weights. |
-| **`reports/`** | Active | Consolidated repository for all 7 research stage markdown reports, pre-execution orientation, and structural audits. |
+| **`reports/`** | Active | Consolidated repository for all 14 research stage markdown reports, audits, and blueprints (Stages 1 through 8D). |
 | **`results_v2/`** | Active | Empirical outputs from the active pipeline: per-class JSON metrics, centralized experiment ledger, and master Stage 4 test results. |
 | **`results/`** | Legacy | Generation 1 figures and tables from initial exploratory sweeps. |
 | **`research/`** | Active | Curated academic library containing 14 peer-reviewed research papers and the CICIoT2023 dataset specification. |
-| **`paper/`** | Active | Camera-ready academic conference paper package containing LaTeX, Typst, BibTeX, figures, and compiled PDF. |
+| **`paper/`** | Active | Camera-ready academic research paper package containing LaTeX, Typst, BibTeX, publication figures, and compiled PDF (`research_paper.pdf`). |
 | **`snuc/`** | University | Capstone project submission deliverables for Shiv Nadar University Chennai (Presentations, Project Reports, LaTeX templates). |
 | **`notebooks/`** | Exploratory | Sequential Jupyter notebooks (01 to 08) chronicling the exploratory development phases. |
 | **`learning/`** | Education | Educational notebooks and learning notes introducing IoT networking and dataset structure. |
 | **`experiments/`**| Research | Standalone ablation scripts testing feature pruning, cascade architectures, and class weighting sweeps. |
-| **`scripts/`** | Tools | Standalone execution utilities: Streamlit SOC dashboard (`demo_app.py`) and wire-speed throughput benchmarking (`benchmark_throughput.py`). |
+| **`scripts/`** | Tools | Standalone utilities: publication figure generator (`generate_paper_figures.py`), Streamlit SOC dashboard (`demo_app.py`), and CPU throughput benchmarking (`benchmark_throughput.py`). |
 | **`docs/`** | Reference | Engineering notebooks (`INSIGHTS.md`) and project roadmaps (`PROGRESS.md`). |
 
 ---
 
 ## 3. Data Flow Architecture
 
-The following diagram illustrates how data flows through the active research pipeline:
-
 ```mermaid
 flowchart TD
     subgraph Data Tier
         RAW["data/raw/ (Merged01-63.csv)"] --> SAMPLE["data/processed/sample_stratified.csv"]
-        SAMPLE --> PART_S1["data/partitions/ (Strategy 1 Primary)"]
-        SAMPLE --> PART_S2["data/partitions/ablation_strategy2/ (Strategy 2 Purged)"]
-        RAW --> CC_TEST["data/partitions/cross_capture_test_clean.csv (Merged26-40)"]
+        SAMPLE --> PART_S1["data/partitions/ (Strategy 1 Primary, N=501k)"]
+        SAMPLE --> PART_S2["data/partitions/ablation_strategy2/ (Strategy 2 Purged, N=482k)"]
+        RAW --> CC_TEST["data/partitions/cross_capture_test_clean.csv (N=57,280)"]
     end
 
     subgraph Active Research Pipeline (src_v2)
@@ -164,13 +172,17 @@ flowchart TD
         CC_TEST --> EVAL
     end
 
-    subgraph Evaluation & Research Reports
+    subgraph Evaluation & Research Ledgers
         EVAL --> RES_TABLES["results_v2/tables/ (Ledger & Stage 4 CSV)"]
         EVAL --> RES_METRICS["results_v2/metrics/ (Per-Class & Stage 4 JSONs)"]
-        RES_TABLES --> REP4["reports/STAGE_4_EVALUATION_REPORT.md"]
-        RES_METRICS --> REP5["reports/STAGE_5_ERROR_ANALYSIS.md"]
-        REP4 & REP5 --> REP6["reports/STAGE_6_RESEARCH_SYNTHESIS.md"]
-        RESEARCH["research/ (14 Peer-Reviewed PDFs)"] --> REP7["reports/STAGE_7_LITERATURE_REVIEW.md"]
+    end
+
+    subgraph Manuscript & Publishing (Stages 8A-8D)
+        RES_TABLES --> FIG_GEN["scripts/generate_paper_figures.py"]
+        FIG_GEN --> FIGS["paper/figures/ (fig1 - fig6)"]
+        RES_TABLES & RES_METRICS --> MANUSCRIPT["paper/main.tex & paper/paper.typ"]
+        FIGS --> MANUSCRIPT
+        MANUSCRIPT --> PDF["paper/research_paper.pdf (11-Page Compiled Paper)"]
     end
 ```
 
@@ -178,7 +190,7 @@ flowchart TD
 
 ## 4. Git Hygiene & Artifact Management Policy
 
-- **Tracked in Git**: All Python source code (`src_v2/`, `src/`, `experiments/`, `scripts/`), research reports (`reports/`), documentation (`docs/`, `PROJECT_STRUCTURE.md`, `README.md`), research literature (`research/`), conference paper sources (`paper/`), exploratory notebooks (`notebooks/`, `learning/`), and structured summary result tables (`results/tables/*.csv`, `results_v2/tables/*.csv`).
+- **Tracked in Git**: All Python source code (`src_v2/`, `src/`, `experiments/`, `scripts/`), research reports (`reports/`), documentation (`docs/`, `PROJECT_STRUCTURE.md`, `README.md`), research literature (`research/`), academic paper sources (`paper/`), exploratory notebooks (`notebooks/`, `learning/`), and structured summary result tables (`results/tables/*.csv`, `results_v2/tables/*.csv`).
 - **Excluded via `.gitignore`**:
   - Raw and processed datasets (`data/raw/`, `data/processed/`, `data/partitions/`, `*.csv`).
   - Binary model checkpoints and serialized preprocessors (`models/`, `*.joblib`, `*.pt`, `*.pkl`).
