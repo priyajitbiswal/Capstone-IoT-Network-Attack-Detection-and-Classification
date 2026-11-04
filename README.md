@@ -36,8 +36,7 @@ All formal research stage reports and structural audits are consolidated in the 
 |:---:|---|---|
 | **Stage 1** | [`reports/STAGE_1_AUDIT_REPORT.md`](reports/STAGE_1_AUDIT_REPORT.md) | Forensic dataset audit; identified 8,740 conflicting feature-label collisions. |
 | **Stage 2** | [`reports/STAGE_2_INVESTIGATION_REPORT.md`](reports/STAGE_2_INVESTIGATION_REPORT.md) | Zero-leakage feature-hash grouped partitioning & temporal cross-capture design. |
-| **Stage 3** | [`reports/STAGE_3_METHODOLOGY_REVIEW.md`](reports/STAGE_3_METHODOLOGY_REVIEW.md) | Preprocessing parity audit, class-weight calibration, and DNN budget verification. |
-| **Stage 3** | [`reports/STAGE_3_CANARY_REPORT.md`](reports/STAGE_3_CANARY_REPORT.md) | Canary execution and runtime verification of initial baseline models. |
+| **Stage 3** | [`reports/STAGE_3_COMPLETE_REPORT.md`](reports/STAGE_3_COMPLETE_REPORT.md) | Baseline model training, infrastructure canary, methodological audit, and validation benchmarking. |
 | **Stage 4** | [`reports/STAGE_4_EVALUATION_REPORT.md`](reports/STAGE_4_EVALUATION_REPORT.md) | Read-only dual-test evaluation across all 21 Stage 3 model checkpoints. |
 | **Stage 5** | [`reports/STAGE_5_ERROR_ANALYSIS.md`](reports/STAGE_5_ERROR_ANALYSIS.md) | Fine-grained error analysis, worst-10 attack profiles, and weighting ablations. |
 | **Stage 6** | [`reports/STAGE_6_RESEARCH_SYNTHESIS.md`](reports/STAGE_6_RESEARCH_SYNTHESIS.md) | Comprehensive contribution synthesis, calibrated claims, and limitations. |

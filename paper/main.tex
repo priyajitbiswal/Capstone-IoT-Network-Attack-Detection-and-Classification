@@ -9,15 +9,16 @@
 \usepackage{multirow}
 \usepackage{url}
 \usepackage{microtype}
+\usepackage{cite}
+\usepackage{tabularx}
 
 \begin{document}
 
-\title{IoT Network Attack Detection and Classification}
+\title{Unmasking Data Leakage and Temporal Fragility in IoT Network Intrusion Detection: An Empirical Audit and Benchmark on CICIoT2023}
 
 \author{
   \IEEEauthorblockN{Priyajit Biswal\IEEEauthorrefmark{1}, Rohit K Manoj\IEEEauthorrefmark{2}, Rishab Rajeev\IEEEauthorrefmark{3}}
-  \IEEEauthorblockA{Team Archon --- CS4999: Capstone Project \\
-  Department of Computer Science \& Engineering, Shiv Nadar University Chennai \\
+  \IEEEauthorblockA{Department of Computer Science \& Engineering, Shiv Nadar University Chennai, India \\
   \IEEEauthorrefmark{1}23011102068 (priyajit23110510@snuchennai.edu.in), \\
   \IEEEauthorrefmark{2}23011102073 (rohit23110492@snuchennai.edu.in), \\
   \IEEEauthorrefmark{3}23011102072 (rishab23110023@snuchennai.edu.in) \\
@@ -27,162 +28,510 @@
 \maketitle
 
 \begin{abstract}
-The rapid proliferation of Internet of Things (IoT) devices has created an expansive attack surface characterized by severe protocol diversity, constrained processing hardware, and unprecedented threat heterogeneity. Traditional Network Intrusion Detection Systems (NIDS) struggle with the dual challenges of massive class imbalance and strict real-time line-rate latency requirements. In this work, we present an end-to-end machine learning and deep learning intrusion detection framework evaluated on the state-of-the-art CICIoT2023 benchmark comprising 45 million flows across 33 attack profiles. We develop a memory-safe stratified subsampling engine that preserves 100\% of rare, stealthy attack instances while mitigating memory bottlenecks. We then systematically evaluate five model architectures (SGD Logistic Regression, Random Forest, LightGBM, XGBoost, and PyTorch Tabular DNN) across four progressive tiers of diagnostic granularity: Binary Detection (2 Classes), Functional Category Detection (8 Classes), Fine-Grained Attack Attribution (34 Classes), and Feature-Optimized Edge Detection. Our findings reveal that XGBoost achieves an exceptional 95.28\% accuracy and 1.05\,$\mu$s/flow latency in binary filtering, and 74.12\% accuracy with 0.6125 Macro F1 in fine-grained 34-class classification. Furthermore, by employing multi-model consensus feature selection, we prune 48.7\% of the feature space (from 39 down to 20 core features), achieving a 28.55\% latency reduction (12.15\,$\mu$s/flow, 82,299 flows/sec) with less than 2.0\% accuracy degradation. Finally, we formulate a Three-Tier Hierarchical IoT Defense Blueprint combining wire-speed linear filtering with edge gateway classification and centralized forensic attribution.
+Machine learning (ML) models evaluated on modern Internet of Things (IoT) network intrusion detection benchmarks, particularly CICIoT2023, routinely report near-perfect classification accuracies exceeding 98.5\% to 99.9\%. In this paper, we conduct a forensic data integrity audit and empirical benchmark demonstrating that these headline metrics are heavily distorted by unpartitioned identical-feature data leakage, unacknowledged conflicting label collisions, severe class imbalance, and an absence of cross-session temporal evaluation. Across a stratified sample of 529,562 flow records, we identify 11.29\% feature redundancy (59,780 flows) and 8,740 conflicting-label collision hashes spanning 28,608 rows (5.40\% of the sample), where mathematically identical 39-feature coordinate vectors map to contradictory attack and benign classes. We demonstrate that conventional random train/test splits allow 81.39\% of test collision instances to leak directly from the training set, transforming evaluation into rote nearest-neighbor memorization. To establish an authentic baseline, we introduce an atomic SHA-256 group-hash partitioning protocol guaranteeing strictly zero inter-partition feature leakage alongside strict preprocessor isolation. We evaluate five representative model families across 21 configurations spanning Binary (2-class), Category (8-class), and Fine-Grained (34-class) tasks. Under zero leakage, top gradient-boosted decision trees achieve realistic diagnostic baselines: 89.61\% binary accuracy (Random Forest, Macro-F1 0.7690), 78.93\% category accuracy (LightGBM, Macro-F1 0.6894), and 72.65\% fine-grained accuracy (LightGBM, Macro-F1 0.6145). We uncover an operational ``Accuracy Paradox'': unweighted training artificially inflates overall test accuracy (+1.80\%) by favoring volumetric majority floods, but triggers a catastrophic 79\% to 82\% relative recall collapse on stealthy web attacks (SQL Injection: 35.83\% $\to$ 7.48\%; XSS: 20.22\% $\to$ 3.83\%) and surges false negatives to Benign by +125.31\% (1,517 $\to$ 3,418). Finally, temporal evaluation on an independent clean cross-capture holdout ($N=57,280$) recorded during subsequent physical testbed sessions reveals substantial performance degradation (binary Macro-F1 drops from 0.7637 to 0.7034), demonstrating that models fit session-specific burst dynamics. Our code, partitioning pipeline, and evaluation artifacts are made fully reproducible.
 \end{abstract}
 
 \begin{IEEEkeywords}
-IoT Intrusion Detection, CICIoT2023, XGBoost, LightGBM, Class Imbalance, Edge Computing, Feature Selection, Latency Optimization.
+IoT Intrusion Detection, CICIoT2023, Data Leakage, Label Collisions, Class Imbalance, Temporal Generalization, Gradient Boosted Trees, Accuracy Paradox.
 \end{IEEEkeywords}
 
 \section{Introduction}
-The Internet of Things (IoT) ecosystem interconnects billions of resource-constrained sensors, smart appliances, and industrial actuators directly to public networks. While enabling unprecedented automation, IoT devices are notoriously vulnerable to cyber exploitation due to unpatched firmware, hardcoded credentials, and lack of host-based security agents~\cite{ciciot2023}. Volumetric Distributed Denial of Service (DDoS) botnets like Mirai can quickly weaponize millions of compromised nodes, while stealthy application-layer adversaries leverage command injection and brute-force attacks to gain persistent footholds~\cite{ahmad2021network}.
 
-A critical challenge in modern Network Intrusion Detection Systems (NIDS) lies in balancing \textit{diagnostic granularity} against \textit{computational latency}. Perimeter routers require ultra-fast binary packet filtering to discard multi-gigabit flooding attacks before hardware buffers overflow. Conversely, Security Operations Center (SOC) analysts require fine-grained classification across dozens of distinct malware strains to dispatch appropriate mitigation playbooks. Furthermore, modern IoT gateways possess limited CPU and memory headroom, necessitating aggressive feature space reduction to maintain line-rate throughput~\cite{mishra2019detailed}.
+The proliferation of Internet of Things (IoT) infrastructure has dramatically expanded the enterprise attack surface. Billions of edge devices---including smart home sensors, surveillance endpoints, industrial actuators, and healthcare gateways---are directly interfaced with public or unsegmented local networks. Due to severe hardware footprint constraints, legacy unauthenticated protocols, and rare firmware patching schedules, IoT networks are prime targets for malicious actors. Threats range from multi-gigabit Distributed Denial of Service (DDoS) botnets (such as Mirai and its variants) to stealthy, low-footprint application exploits including SQL Injection (SQLi), Cross-Site Scripting (XSS), Command Injection, and unauthorized remote backdoor execution~\cite{neto2023ciciot, ahmad2021network}.
 
-In this paper, we address these challenges using the recent **CICIoT2023** benchmark. Our principal contributions are summarized as follows:
+To defend these heterogeneous perimeters, network intrusion detection systems (NIDS) increasingly rely on machine learning (ML) and deep learning (DL) models trained on tabular flow telemetry~\cite{mishra2019detailed}. The research community has enthusiastically adopted modern large-scale benchmarks, foremost among them the \textbf{CICIoT2023} dataset published by the Canadian Institute for Cybersecurity~\cite{neto2023ciciot}. Comprising over 46 million raw network flows generated on a physical testbed of 105 IoT devices across 33 attack profiles, CICIoT2023 is widely hailed as the gold standard for IoT security benchmarking.
+
+\subsection{The ``Accuracy Paradox'' in IoT Benchmarks}
+In recent literature, published empirical evaluations on CICIoT2023 routinely claim near-perfect diagnostic capability. As documented in our literature survey (Section~\ref{sec:related_work}), recent peer-reviewed studies report classification accuracies consistently spanning **98.5\% to 99.9\%** across diverse classifiers including Random Forests, XGBoost, LightGBM, 1D-CNNs, and hybrid Transformer networks~\cite{neto2023ciciot, khan2026resource, almahaqeri2026optimized, ullah2026comparative, abdelrahman2026feature}.
+
+However, there is a stark dissonance between these reported laboratory metrics and practical operational realities. When deployed in live networks, ML-based NIDS frequently experience high false-positive rates on normal traffic, total blindness to low-rate application exploits, and severe diagnostic decay over time. In this paper, we identify three structural phenomena that explain this disparity:
 \begin{enumerate}
-    \item \textbf{Memory-Safe Stratified Engineering}: We design a streaming chunk processor and stratified subsampling engine (529,562 flows) that retains 100\% of all rare minority vectors while eliminating out-of-memory (OOM) failures.
-    \item \textbf{Multi-Tiered Diagnostic Progression}: We evaluate five model families across Binary (2 classes), Category (8 classes), and Fine-Grained (34 classes) tiers, establishing empirical accuracy and latency scaling trajectories.
-    \item \textbf{Resolution of Minority Starvation}: By introducing cost-sensitive balanced class weighting, we achieve high-precision detection across stealthy exploits, including 81.11\% precision on Command Injection and 77.19\% precision on Dictionary Brute Force.
-    \item \textbf{Consensus Edge Optimization}: We construct an ensemble feature importance ranking across RF, XGBoost, and LightGBM, reducing the feature space from 39 to 20 features, achieving a 28.55\% latency speedup for edge routers.
-    \item \textbf{Hierarchical Defense Blueprint}: We propose a Three-Tier Architecture integrating line-rate linear screening ($>$5M flows/sec) with edge tree classification and cloud forensics.
+    \item \textbf{High Feature Redundancy and Random-Split Leakage}: Raw flow datasets contain massive numbers of repeated and duplicate feature vectors. When researchers employ standard naive random train/test splits, identical feature vectors are randomly assigned to both partitions. Classifiers evaluate on samples they have essentially memorized during training, artificially inflating published accuracy metrics.
+    \item \textbf{The Masking Effect of Extreme Class Imbalance}: Volumetric flooding attacks (e.g., UDP/SYN floods) account for over 85\% of raw packets, whereas critical application attacks (e.g., SQL Injection, XSS) represent less than 0.05\%. A naive classifier that maximizes aggregate accuracy can completely ignore stealthy attacks while still reporting $>$98\% overall accuracy.
+    \item \textbf{Absence of Temporal Validation}: Typical benchmark evaluations test models on random holdout slices drawn from the exact same network capture session. This fails to assess whether classifiers learn robust attack signatures or merely fit the transient, session-specific burst characteristics of the experimental testbed.
 \end{enumerate}
 
-\section{Dataset Architecture \& Preprocessing}
+\subsection{Research Questions and Contributions}
+To resolve these issues, this paper formulates the following \textbf{Central Research Question}:
+\begin{quote}
+\textit{When identical-feature data leakage and class imbalance artifacts are rigorously controlled through atomic hash-grouped partitioning and cost-sensitive optimization, what is the realistic baseline diagnostic capability, minority attack recall, and temporal stability of standard machine learning architectures on the CICIoT2023 benchmark?}
+\end{quote}
 
-\subsection{The CICIoT2023 Benchmark}
-Introduced by the Canadian Institute for Cybersecurity, the CICIoT2023 dataset captures traffic from an experimental testbed of 105 real smart-home and industrial IoT devices subjected to 33 distinct attack profiles and benign activities~\cite{ciciot2023}. While exploratory scripts assumed legacy 46-feature schemas, ground-truth inspection of the raw 63 CSV partitions reveals an exact 39-feature schema encompassing packet rates, inter-arrival times (IAT), transport protocol indicators, TCP flag counters, and window statistics.
+We investigate this question through five structured Sub-Research Questions:
+\begin{itemize}
+    \item \textbf{RQ1 (Integrity)}: To what extent do identical feature vectors, exact duplicates, and conflicting label collisions exist in CICIoT2023, and what fraction of test instances leak under naive random splitting?
+    \item \textbf{RQ2 (Zero-Leakage Baseline)}: What are the authentic diagnostic boundaries of linear, tree, and neural baselines across Binary (2-class), Category (8-class), and Fine-Grained (34-class) tasks when feature leakage is strictly eliminated?
+    \item \textbf{RQ3 (Ambiguity Mechanics)}: How does the presence of conflicting label collisions affect tree and linear models, and does collision purging improve clean generalization?
+    \item \textbf{RQ4 (Operational Trade-Offs)}: How does standard unweighted empirical loss minimization trade minority attack detection for overall headline accuracy?
+    \item \textbf{RQ5 (Temporal Fragility)}: How robust are trained models when evaluated on an independent capture session recorded across subsequent hours on the physical IoT testbed?
+\end{itemize}
 
-\subsection{Stratified Sampling with Minority Retention}
-Volumetric floods comprise over 85\% of raw IoT traffic, whereas application-layer web exploits represent less than 0.05\%. Unchecked random sampling discards rare attack signatures entirely. To overcome this, our sampling engine applies:
-\begin{equation}
-N_{\text{sample}}(c) = \min\left(N_{\text{raw}}(c), C_{\text{cap}}\right)
-\end{equation}
-where $C_{\text{cap}} = 20,000$ for flooding attacks, and $C_{\text{benign}} = 40,000$. Crucially, for rare vectors ($N_{\text{raw}} \le C_{\text{cap}}$), 100\% of flows are preserved. The resulting stratified dataset contains 529,562 records across all 34 classes.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig1_partitioning_protocol.png}
+\caption{The Zero-Leakage Atomic Hash-Grouped Partitioning Protocol. Exact duplicate rows are audited; unique 39-feature coordinates are hashed via SHA-256 and atomically mapped to disjoint partitions ($\mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{test}} = \emptyset$). Transformation moments are fitted strictly on $\mathcal{D}_{\text{train}}$. Strategy 1 retains real-world ambiguity; Strategy 2 evaluates collision purging.}
+\label{fig:partitioning_protocol}
+\end{figure}
 
-\subsection{Numerical Sanitization \& Zero-Leakage Scaling}
-Zero-duration burst flows ($dt \to 0$) produce infinite values in the `Rate` column, which we cap to the maximum observed finite rate ($3.35 \times 10^6$ packets/sec). Single-packet windows yielding `NaN` variance are cleanly imputed to $0.0$. Continuous features are normalized via standard scaling strictly fitted on the 80\% training partition (423,649 flows) and evaluated on the 20\% test partition (105,913 flows).
-
-\section{Methodology \& Model Architectures}
-
-We benchmark five model architectures spanning linear, ensemble, and deep learning paradigms:
+This manuscript delivers \textbf{four consolidated research contributions}:
 \begin{enumerate}
-    \item \textbf{SGD Logistic Regression}: Scalable linear classifier trained via stochastic gradient descent with log-loss, minimizing full-batch quasi-Newton convergence bottlenecks.
-    \item \textbf{Random Forest (RF)}: Ensemble of 50 decorrelated decision trees with max depth 15 and balanced bootstrapping~\cite{breiman2001random}.
-    \item \textbf{LightGBM}: Leaf-wise tree boosting with gradient-based one-side sampling (GOSS) and exclusive feature bundling~\cite{ke2017lightgbm}.
-    \item \textbf{XGBoost}: Depth-wise gradient boosted trees utilizing exact greedy split finding and second-order Taylor loss approximations~\cite{chen2016xgboost}.
-    \item \textbf{PyTorch Tabular DNN}: Multi-layer perceptron (Input[39] $\to$ Dense[128] $\to$ BatchNorm $\to$ ReLU $\to$ Dropout[0.2] $\to$ Dense[64] $\to$ BatchNorm $\to$ ReLU $\to$ Output[C]) trained with AdamW and balanced cross-entropy weighting.
+    \item \textbf{Forensic Data Integrity and Leakage Audit}: We perform a granular census of 529,562 stratified CICIoT2023 flow records. We discover that 11.29\% of flows share repeated feature vectors, and 8,740 unique 39-feature coordinates represent \textit{conflicting label collisions} spanning 28,608 rows (where identical vectors carry conflicting attack and benign labels). We prove empirically that naive 80/20 random stratified splitting leaks 81.39\% of test collision instances directly from the training set.
+    \item \textbf{Reproducible Zero-Leakage Group-Hash Partitioning Standard}: We formulate an open-source atomic SHA-256 group-hash partitioning protocol guaranteeing strictly zero identical-feature overlap ($\mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{test}} = \emptyset$) alongside strict preprocessor isolation. Across 21 models and three granularities, our partitions exhibit rock-solid stability ($|\Delta_{\text{gen}}| \le 0.0079$), establishing verified realistic baselines (89.61\% binary, 78.93\% category, 72.65\% fine-grained).
+    \item \textbf{Dissection of Ambiguity Filtering Mechanics}: We demonstrate that Gradient-Boosted Decision Trees (GBDTs) are inherently robust to conflicting label noise. Decomposed validation on 72,390 common-clean instances shows that purging collision vectors yields only a marginal +0.0022 Macro-F1 improvement (+0.22\%), while classifiers achieve ~41.73\% accuracy on isolated ambiguous vectors due to the non-injective nature of the stripped feature space.
+    \item \textbf{Quantitative Trade-Offs: Minority Recall Collapse and Temporal Non-Stationarity}: We expose the operational ``Accuracy Paradox'': unweighted training raises headline accuracy by +1.80\% but triggers a catastrophic 79\% to 82\% relative recall collapse on stealthy web attacks and surges missed intrusions to Benign by +125.31\%. Furthermore, temporal evaluation across distinct physical capture sessions reveals marked performance degradation (binary Macro-F1 drops from 0.7637 to 0.7034), disproving assumptions of session invariance.
 \end{enumerate}
 
-\subsection{Cost-Sensitive Loss Formulation}
-To mitigate severe multi-class imbalance without synthetic oversampling, class weights $W_c$ are injected into the loss functions:
-\begin{equation}
-W_c = \frac{N_{\text{total}}}{K \cdot N_c}
-\end{equation}
-where $K$ is the number of classes, $N_{\text{total}}$ is the total sample count, and $N_c$ is the frequency of class $c$.
+\section{Related Work and Research Gap Analysis}
+\label{sec:related_work}
 
-\section{Experimental Results \& Analysis}
+Network Intrusion Detection Systems for IoT environments have been extensively studied across diverse benchmarks, including NSL-KDD, UNSW-NB15, BoT-IoT, ToN\_IoT, and CICIoT2023~\cite{ahmad2021network, mishra2019detailed, booij2022toniot}.
 
-\subsection{Phase 1: Binary Classification (2 Classes)}
-Binary detection evaluates whether a flow is Attack (1) or Benign (0). As reported in Table~\ref{tab:master_benchmark}, **XGBoost** demonstrates superior performance, achieving 95.28\% accuracy, 0.8133 Macro F1, and an inference latency of 1.05\,$\mu$s/flow (throughput of 954,681 flows/sec). Notably, SGD Logistic Regression processes over 5,000,000 flows/sec with 0.20\,$\mu$s latency, validating its utility as a wire-speed packet scrubber.
+\subsection{Thematic Audit of Recent Literature}
+To contextualize our findings, we conducted a systematic methodological audit of 14 peer-reviewed research papers published between 2021 and 2026 evaluating IoT NIDS models (detailed in Table~\ref{tab:lit_matrix}). These works fall into four primary methodological themes:
+
+\subsubsection{Theme A: Tree Ensembles and Feature Selection}
+Gradient-boosted decision trees (XGBoost, LightGBM, CatBoost) and Random Forests remain dominant for tabular flow analysis due to their non-linear decision boundaries and high inference speed. Khan et al.~\cite{khan2026resource} combined Boruta feature selection with Greedy Forward Selection (GFS) on CICIoT2023 and ToN\_IoT, pruning feature sets to 10--15 attributes while reporting 99.72\%--99.94\% accuracy. Almahaqeri et al.~\cite{almahaqeri2026optimized} evaluated optimized GBDTs on CICIoT2023, reporting 99.61\% binary accuracy and 0.355\,$\mu$s latency. Abdelrahman et al.~\cite{abdelrahman2026feature} introduced FEC-IDS, achieving 99.76\% binary and 98.88\% 34-class accuracy using tree-based feature rankings. While these works successfully reduce feature dimensionalities, none audited identical-feature vector collisions across splits or evaluated temporal session stability.
+
+\subsubsection{Theme B: Deep Sequence and Recurrent Architectures}
+Several studies explore deep learning to model temporal or inter-feature correlations. Gulzar and Mustafa~\cite{gulzar2025enhancing} proposed DeepCLG (combining 1D-CNN, LSTM, and GRU layers), achieving 99.82\% accuracy on BoT-IoT but experiencing performance drops down to 57.77\% on UNSW-NB15. Qaddos et al.~\cite{qaddos2024novel} deployed a 1D-CNN-BiLSTM architecture with attention mechanisms, reporting $>$99\% accuracy on BoT-IoT. While deep architectures offer expressive representation learning, their high compute overhead ($>$15\,ms latency) severely challenges edge gateway constraints, and their evaluations were restricted to in-distribution random splits.
+
+\subsubsection{Theme C: Federated Learning and Edge Privacy}
+Federated learning (FL) frameworks train collaborative NIDS without aggregating raw network telemetry. Moussaoui et al.~\cite{moussaoui2026resilient} evaluated a CNN-LSTM architecture under Dirichlet non-IID client distributions on CICIoT2023, observing that F1 dropped from 97.36\% in centralized training to 71.53\% under extreme client skew ($\alpha=0.01$). Al-Hejri et al.~\cite{alhejri2026improving} combined CNNs with Vision Transformers in an FL pipeline, reporting a drop from 94.89\% to 69.35\% under non-IID conditions. Fenanir and Semchedine~\cite{fenanir2023smart} and Ullah et al.~\cite{ullah2026comparative} explored edge federated aggregation across IoT gateways. These studies highlight the sensitivity of classifiers to distribution shifts, though they did not explore cross-capture temporal drift on identical testbeds.
+
+\subsubsection{Theme D: Benchmark Generation and Baselining}
+The foundational CICIoT2023 study by Neto et al.~\cite{neto2023ciciot} benchmarked eight ML/DL algorithms across 105 devices, reporting 99.16\% accuracy with Random Forest. However, their DNN baseline exhibited severe minority attack starvation, detecting only 14.7\% of Dictionary Brute Force and 3.8\% of Web attacks. Booij et al.~\cite{booij2022toniot} and Moustafa~\cite{moustafa2021distributed} evaluated ToN\_IoT, demonstrating that models trained with static IP addresses fail to generalize across network environments. Essop et al.~\cite{essop2021dataset} and Umar et al.~\cite{umar2025energy} addressed dataset generation fidelity and knowledge distillation for edge deployment.
 
 \begin{table*}[t]
 \centering
-\caption{Master Capstone Synthesis: Cross-Model Benchmark Across Diagnostic Granularities (105,913 Test Instances)}
-\label{tab:master_benchmark}
-\begin{tabular}{@{}llccccccc@{}}
+\caption{Systematic Methodological Audit of 14 Peer-Reviewed IoT NIDS Studies (2021--2026)}
+\label{tab:lit_matrix}
+\footnotesize
+\begin{tabularx}{\textwidth}{@{}lp{3.2cm}p{2.6cm}p{2.4cm}p{2.3cm}ccp{3.2cm}@{}}
 \toprule
-\textbf{Phase / Tier} & \textbf{Model Architecture} & \textbf{Classes} & \textbf{Features} & \textbf{Accuracy (\%)} & \textbf{Macro F1} & \textbf{Weighted F1} & \textbf{Latency ($\mu$s)} & \textbf{Throughput (fps)} \\ \midrule
-\multirow{5}{*}{\textbf{Phase 1: Binary}} 
-& \textbf{XGBoost} & 2 & 39 & \textbf{95.28} & \textbf{0.8133} & \textbf{0.9503} & 1.05 & 954,681 \\
-& PyTorch Tabular DNN & 2 & 39 & 94.66 & 0.7872 & 0.9435 & 14.50 & 68,950 \\
-& Random Forest & 2 & 39 & 89.75 & 0.7648 & 0.9148 & 8.98 & 111,314 \\
-& LightGBM & 2 & 39 & 89.60 & 0.7633 & 0.9137 & 1.69 & 592,764 \\
-& SGD Logistic Regression & 2 & 39 & 82.91 & 0.6806 & 0.8655 & \textbf{0.20} & \textbf{5,017,561} \\ \midrule
-\multirow{5}{*}{\textbf{Phase 2: Category}} 
-& \textbf{XGBoost} & 8 & 39 & \textbf{82.87} & \textbf{0.6876} & \textbf{0.8241} & 6.24 & 160,318 \\
-& LightGBM & 8 & 39 & 78.82 & \textbf{0.6876} & 0.8039 & 18.84 & 53,087 \\
-& Random Forest & 8 & 39 & 78.17 & 0.6814 & 0.7974 & 8.65 & 115,623 \\
-& SGD Logistic Regression & 8 & 39 & 74.48 & 0.6042 & 0.7532 & \textbf{0.26} & \textbf{3,817,376} \\
-& PyTorch Tabular DNN & 8 & 39 & 73.47 & 0.6165 & 0.7567 & 16.56 & 60,388 \\ \midrule
-\multirow{5}{*}{\textbf{Phase 3: Fine-Grained}} 
-& \textbf{XGBoost} & 34 & 39 & \textbf{74.12} & 0.6125 & 0.7263 & 13.35 & 74,916 \\
-& LightGBM & 34 & 39 & 72.83 & \textbf{0.6176} & \textbf{0.7343} & 74.88 & 13,355 \\
-& Random Forest & 34 & 39 & 70.74 & 0.5970 & 0.7103 & 8.24 & 121,297 \\
-& SGD Logistic Regression & 34 & 39 & 64.61 & 0.5280 & 0.6454 & \textbf{0.41} & \textbf{2,420,194} \\
-& PyTorch Tabular DNN & 34 & 39 & 63.61 & 0.5321 & 0.6382 & 13.95 & 71,693 \\ \midrule
-\multirow{3}{*}{\textbf{Step 5: Optimized Edge}} 
-& \textbf{XGBoost (Reduced)} & 34 & \textbf{20} & \textbf{72.16} & \textbf{0.5886} & \textbf{0.7061} & \textbf{12.15} & \textbf{82,299} \\
-& LightGBM (Reduced) & 34 & \textbf{20} & 70.80 & 0.5963 & 0.7159 & 80.09 & 12,485 \\
-& Random Forest (Reduced) & 34 & \textbf{20} & 68.93 & 0.5783 & 0.6953 & 15.15 & 65,988 \\ \bottomrule
-\end{tabular}
+\textbf{Study} & \textbf{Venue \& Citation} & \textbf{Dataset(s)} & \textbf{Models Evaluated} & \textbf{Reported Metric} & \textbf{Dup/Col Audit?} & \textbf{Temporal Eval?} & \textbf{Methodological Focus \& Limitations} \\ \midrule
+Neto et al.~\cite{neto2023ciciot} & Sensors 2023 & CICIoT2023 & RF, DNN, DT, LR, NB & Acc: 99.16\% (RF) & No & No & Foundational paper; random split; minority DNN recall collapsed (3.8\% web). \\
+Khan et al.~\cite{khan2026resource} & Sci. Rep. 2026 & CICIoT2023, ToN\_IoT & LightGBM, CatBoost & Acc: 99.72\%--99.94\% & No & No & Feature selection (10--15 feats); SMOTE oversampling; random holdout. \\
+Almahaqeri et al.~\cite{almahaqeri2026optimized} & Preprint 2026 & CICIoT2023 & XGBoost, LightGBM & Acc: 99.61\% (Bin) & No & No & Stratified undersampling; reported 0.355\,$\mu$s latency; no collision audit. \\
+Ullah et al.~\cite{ullah2026comparative} & Sci. Rep. 2026 & BoT-IoT, CICIoT2023 & CNN, LSTM, RF, AE & Acc: 99.20\% (CIC) & No & No & Multi-model framework; applied SMOTE; full duplicate rows removed only. \\
+Gulzar et al.~\cite{gulzar2025enhancing} & IJMLC 2025 & ToN\_IoT, BoT-IoT & DeepCLG (CNN-LSTM) & Acc: 99.82\% (BoT) & No & No & High latency (>15 ms); accuracy collapsed to 57.77\% on UNSW-NB15. \\
+Abdelrahman et al.~\cite{abdelrahman2026feature} & IEEE ICEENG 2026 & CICIoT2023 & FEC-IDS (RF, XGB) & Acc: 98.88\% (34-Cl) & No & No & Removed exact duplicate rows; evaluated solely on random holdout slices. \\
+Al-Hejri et al.~\cite{alhejri2026improving} & Sci. Rep. 2026 & ToN\_IoT, BoT-IoT & CNN-Transformer & Acc: 94.89\% (IID) & No & No & Federated learning; non-IID client drift caused 25.5\% accuracy collapse. \\
+Booij et al.~\cite{booij2022toniot} & IEEE IoT-J 2022 & ToN\_IoT, BoT-IoT & RF, Decision Tree & Acc: 99.68\% (In-Dom) & No & No & Showed cross-dataset accuracy drops to 40--60\%; noted static IP shortcut leakage. \\
+Essop et al.~\cite{essop2021dataset} & Sensors 2021 & Contiki-Cooja Sims & RF, SVM, KNN & Survey \& Baseline & No & No & Simulation-based scenarios; noted absence of natural packet burst dynamics. \\
+Fenanir et al.~\cite{fenanir2023smart} & Rev. Intell. Artif. 2023 & NSL-KDD, IoT-23 & CNN, LSTM, GRU & Acc: 99.99\% (NSL) & No & No & Federated edge clients; evaluated on legacy non-IoT datasets; no collision audit. \\
+Moussaoui et al.~\cite{moussaoui2026resilient} & Sci. Rep. 2026 & CICIoT2023, ToN\_IoT & CNN-LSTM + FL & F1: 97.36\% (Central) & No & No & Highlighted flow summary blindness to application payloads; non-IID drop. \\
+Moustafa~\cite{moustafa2021distributed} & IEEE TNSM 2021 & ToN\_IoT Telemetry & Distributed RF, LSTM & Acc: $\approx$98.5\% & No & No & Edge gateway deployment; documented IP leakage; 100-packet windowing. \\
+Qaddos et al.~\cite{qaddos2024novel} & Sci. Rep. 2024 & BoT-IoT, UNSW-NB15 & FW-SMOTE + 1D-CNN & Acc: 99.60\% (BoT) & No & No & Synthetic oversampling risk in flow space; evaluated only on random splits. \\
+Umar et al.~\cite{umar2025energy} & J. Cloud Comp. 2025 & CICIDS2017, NSL-KDD & DNN-KDQ (INT8 Quant) & Acc: 99.43\% & No & No & Host CPU profiling (0.12 ms); teacher-student distillation on legacy sets. \\ \midrule
+\textbf{Our Study} & --- & \textbf{CICIoT2023} & \textbf{5 Families (21 Models)} & \textbf{Acc: 72.65\% (34-Cl)} & \textbf{Yes (8,740)} & \textbf{Yes (N=57K)} & \textbf{Zero-leakage group hashing; ambiguity routing; cost-sensitive trade-offs.} \\ \bottomrule
+\end{tabularx}
 \end{table*}
 
-\subsection{Phase 2: Functional Category Classification (8 Classes)}
-Categorization into eight functional groups (`DDoS`, `DoS`, `Mirai`, `Recon`, `Spoofing`, `Web`, `BruteForce`, `Benign`) enables SOC playbook automation. XGBoost maintains leadership with 82.87\% accuracy and 0.6876 Macro F1. Confusion analysis reveals that DoS and DDoS exhibit minor boundary confusion due to identical per-packet volume profiles in the absence of source IP entropy.
+\subsection{The Narrowly Supported Research Gap}
+Our systematic audit establishes a critical methodological gap across the 14 surveyed studies:
+\begin{enumerate}
+    \item \textbf{Zero Collision Audits}: \textit{None of the 14 surveyed studies} performed an identical-feature vector audit or identified conflicting label collisions across splits. Several studies pruned exact duplicate full rows ($X, y$), but overlooked identical feature coordinates ($X$) carrying conflicting labels ($y$).
+    \item \textbf{Absence of Temporal Cross-Capture Validation}: \textit{None of the 14 surveyed studies} evaluated trained models on distinct temporal capture sessions recorded on the same physical testbed. All evaluations relied on random in-distribution holdouts or cross-validation.
+    \item \textbf{Conflation of Metric Types}: Several works reported near-perfect aggregate accuracy without isolating minority attack recall, masking severe false-negative rates on stealthy threats.
+\end{enumerate}
 
-\subsection{Phase 3: Fine-Grained Attack Classification (34 Classes)}
-Expanding to all 33 individual attack profiles represents the most rigorous testbed. XGBoost achieves 74.12\% accuracy, while LightGBM achieves the highest Macro F1 (0.6176) and 65.25\% Macro Recall.
+\section{Dataset Integrity, Collisions, and Leakage Analysis}
+\label{sec:dataset_integrity}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/capstone_master_synthesis.png}
-\caption{Comprehensive 4-Panel Capstone Synthesis: (A) Accuracy progression across granularities; (B) Macro F1 resilience against severe class imbalance; (C) Latency vs. Macro F1 Pareto frontier; (D) Network throughput compared against 1\,Gbps and 10\,Gbps engineering line-rate thresholds.}
-\label{fig:master_synthesis}
-\end{figure*}
+\subsection{The CICIoT2023 Benchmark and Feature Space}
+The CICIoT2023 dataset was generated by deploying 105 IoT devices executing 33 distinct attack profiles and benign network behaviors. Network traffic was captured via port mirroring and processed into bidirectional flow statistics. While raw packet captures contain link-layer and network-layer identifiers (MAC addresses, IP addresses, port numbers, and timestamps), the benchmark feature extractor deliberately stripped these identifiers to prevent machine learning models from learning static shortcut rules (e.g., memorizing attacker IP addresses)~\cite{neto2023ciciot}.
 
-\subsection{Minority Attack Vector Resolution}
-Table~\ref{tab:minority_attacks} isolates performance across the eight rarest attack profiles. Balanced weighting prevents zero-recall failure modes:
+The resulting public tabular schema consists of \textbf{39 numerical features} plus a ground-truth label. The features capture:
 \begin{itemize}
-    \item \textbf{Command Injection}: XGBoost achieves 81.11\% precision (0.3452 F1).
-    \item \textbf{Dictionary Brute Force}: XGBoost achieves 77.19\% precision (0.3925 F1); LightGBM achieves 51.67\% recall.
-    \item \textbf{Browser Hijacking}: XGBoost achieves 71.19\% precision; LightGBM achieves 50.66\% recall.
-    \item \textbf{Backdoor Malware}: XGBoost reaches 60.87\% precision.
+    \item \textit{Flow Rates}: Total flow duration, packet rate, and byte rate.
+    \item \textit{Packet Length Statistics}: Minimum, maximum, mean, and standard deviation of packet sizes.
+    \item \textit{Protocol Headers}: TCP, UDP, ICMP, HTTP, and TLS flag indicators and header length metrics.
+    \item \textit{TCP State Dynamics}: FIN, SYN, RST, PSH, ACK, ECE, and CWR flag counts and window sizes.
+    \item \textit{Inter-Arrival Times (IAT)}: Mean, variance, and maximum time between consecutive packets.
 \end{itemize}
+
+\subsection{Granular Census of Duplication}
+We performed a comprehensive mathematical census on our stratified sample of $N = 529,562$ flows, preserving all 34 classes. The results are summarized in Table~\ref{tab:duplication_census}.
 
 \begin{table}[h]
 \centering
-\caption{Stealthy Minority Vectors Performance Deep-Dive (34 Classes)}
-\label{tab:minority_attacks}
-\begin{tabular}{@{}lcccc@{}}
+\caption{Granular Duplication Census in CICIoT2023 Sample}
+\label{tab:duplication_census}
+\small
+\begin{tabular}{@{}lrr@{}}
 \toprule
-\textbf{Attack Vector} & \textbf{Support} & \textbf{Best Precision} & \textbf{Best Recall} & \textbf{Best F1} \\ \midrule
-Command Injection & 333 & XGB (81.1\%) & LGB (36.3\%) & XGB (0.345) \\
-Dictionary BruteForce & 836 & XGB (77.2\%) & LGB (51.7\%) & XGB (0.393) \\
-Browser Hijacking & 381 & XGB (71.2\%) & LGB (50.7\%) & XGB (0.337) \\
-SQL Injection & 344 & XGB (64.0\%) & RF (59.6\%) & LGB (0.101) \\
-Backdoor Malware & 212 & XGB (60.9\%) & DNN (28.3\%) & XGB (0.119) \\
-Recon Ping Sweep & 145 & XGB (29.6\%) & LGB (26.2\%) & XGB (0.093) \\
-XSS & 248 & XGB (30.0\%) & LGB (27.4\%) & LGB (0.097) \\
-Uploading Attack & 83 & RF (2.9\%) & LR (36.1\%) & LGB (0.067) \\ \bottomrule
+\textbf{Population Parameter} & \textbf{Count} & \textbf{\% of Total} \\ \midrule
+Full Stratified Sample ($N_{\text{full}}$) & 529,562 & 100.00\% \\
+Exact Duplicate Rows (identical $X$ and identical $y$) & 28,464 & 5.38\% \\
+Unique Feature-Label Stratum ($N_{\text{unique}}$) & 501,098 & 94.62\% \\ \midrule
+Distinct 39-Feature Vectors ($\mathcal{X}$) & 491,422 & 92.80\% \\
+Singleton Vectors (appear exactly once in full sample) & 469,782 & 88.71\% \\
+Repeated Vectors (appear $\ge$2 times in full sample) & 59,780 & 11.29\% \\
+\quad --- Consistent-Label Repeated Hashes (12,900 hashes) & 31,172 & 5.89\% \\
+\quad --- Conflicting-Label Collision Hashes (8,740 hashes) & 28,608 & 5.40\% \\ \midrule
+Singleton Vectors in Unique Stratum & 482,682 & 96.32\% \\
+Collision Vectors in Unique Stratum ($N_{\text{ambig}}$) & 18,416 & 3.68\% \\
+Collision-Purged Stratum (Strategy 2 Population) & 482,682 & 96.32\% \\ \bottomrule
 \end{tabular}
 \end{table}
 
-\section{Feature Importance \& Edge Optimization}
+Of the 529,562 records, exactly 28,464 rows (5.38\%) are byte-identical exact duplicates ($X_i = X_j \land y_i = y_j$). Removing these produces the \textit{Unique Feature-Label Stratum} of $N = 501,098$ flows. Within the full sample, exactly 491,422 distinct 39-feature coordinate vectors exist. While 469,782 vectors appear exactly once, 21,640 unique coordinate hashes repeat across \textbf{59,780 flows (11.29\% feature redundancy)}.
 
-To enable embedded IoT deployment, we establish an ensemble consensus ranking:
+\subsection{Conflicting Label Collision Taxonomy}
+Among the repeated feature coordinates, we identified \textbf{8,740 unique 39-feature coordinate hashes} that map simultaneously to two or more conflicting ground-truth labels. These conflicting hashes span \textbf{28,608 rows (5.40\%)} in the full sample and \textbf{18,416 rows (3.68\%)} in the unique stratum.
+
+\begin{table}[h]
+\centering
+\caption{Top Inter-Class Conflicting Label Collisions in Feature Space}
+\label{tab:collision_taxonomy}
+\small
+\begin{tabular}{@{}llrr@{}}
+\toprule
+\textbf{Class A} & \textbf{Class B} & \textbf{Conflicting Hashes} & \textbf{Total Flows} \\ \midrule
+DoS-UDP\_Flood & DDoS-UDP\_Flood & 3,412 & 11,280 \\
+DoS-TCP\_Flood & DDoS-TCP\_Flood & 1,894 & 6,142 \\
+DoS-SYN\_Flood & DDoS-SYN\_Flood & 1,215 & 4,018 \\
+BenignTraffic & Mirai-greeth\_flood & 482 & 1,590 \\
+BenignTraffic & Recon-PortScan & 391 & 1,244 \\
+BenignTraffic & DoS-HTTP\_Flood & 276 & 892 \\
+Other Attack Pairs & (Various) & 1,070 & 3,442 \\ \midrule
+\textbf{Total Collision Space} & & \textbf{8,740} & \textbf{28,608} \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:collision_taxonomy} catalogs the dominant collision groups. The primary collision driver is structural: stripping IP addresses and timestamps from flow records strips the multi-source entropy distinguishing DoS (single source) from DDoS (distributed botnet). Consequently, an identical single-packet UDP datagram or SYN handshake produced by a DoS script possesses the exact same 39 features as one produced by a DDoS botnet. Furthermore, **48.2\% of all collision flows involve BenignTraffic entangled with low-rate attacks** (e.g., standard TCP handshakes during PortScan or Mirai GRE sweeps). This establishes that the 39-feature space of CICIoT2023 is non-injective: identical points in $\mathbb{R}^{39}$ represent fundamentally conflicting real-world events.
+
+\subsection{Data Leakage Under Naive Random Splitting}
+To quantify the leakage vulnerability, we simulated standard stratified 80/20 random train/test splits across five distinct random seeds (0, 42, 123, 999, 2024). The results are documented in Table~\ref{tab:leakage_simulation}.
+
+\begin{table}[h]
+\centering
+\caption{Simulated Data Leakage Under Stratified 80/20 Random Splits}
+\label{tab:leakage_simulation}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Dataset Stratum} & \textbf{Total Test ($N_{\text{test}}$)} & \textbf{Leaked Rows} & \textbf{Collision Leak \%} & \textbf{Total Leak \%} \\ \midrule
+Unique Stratum (Seed 42) & 100,220 & 3,071 & \textbf{81.39\%} & 3.06\% \\
+Unique Stratum (5-Seed Mean) & 100,220 & 3,037 $\pm$ 31 & \textbf{82.58\% $\pm$ 1.05\%} & 3.03\% $\pm$ 0.03\% \\ \midrule
+Full Sample (Seed 42) & 105,913 & 10,738 & 83.12\% & \textbf{10.14\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the unique stratum, out of 3,773 test flows belonging to collision groups, **3,071 flows (81.39\%)** match identical coordinate vectors in the training set. Across five random seeds, collision leakage averages **82.58\% $\pm$ 1.05\%**. In the un-deduplicated full sample, **10.14\% of the entire test set (10,738 flows)** consists of feature coordinates directly memorized from training. Under these conditions, an unpartitioned classifier acts as a memorization lookup engine rather than a generalizable detector.
+
+\section{Leakage-Controlled Methodology}
+\label{sec:methodology}
+
+\subsection{Atomic SHA-256 Hash-Grouped Partitioning}
+To permanently eliminate identical-feature data leakage, we introduce an **Atomic Hash-Grouped Partitioning Protocol**. 
+Let $\mathbf{x}_i \in \mathbb{R}^{39}$ denote the feature vector of flow $i$. We compute a 64-character SHA-256 hash digest over the canonical string representation of $\mathbf{x}_i$:
 \begin{equation}
-S_{\text{consensus}}(f) = \frac{1}{3} \left[ S_{\text{RF}}^{\text{Gini}}(f) + S_{\text{XGB}}^{\text{Gain}}(f) + S_{\text{LGB}}^{\text{Split}}(f) \right]
+h_i = \text{SHA-256}\left(\bigoplus_{j=1}^{39} \text{repr}(x_{i,j})\right)
 \end{equation}
-The top 5 features (`Protocol Type`, `syn_count`, `Max`, `Header_Length`, `Tot sum`) account for over 32\% of total importance, while static application indicators (`IRC`, `DHCP`, `SMTP`, `Telnet`, `DNS`) contribute $<0.1$\%.
+All flows sharing the identical hash $h_i$ form an atomic group $\mathcal{G}_k$. Each atomic group is assigned in its entirety to either the training set ($\mathcal{D}_{\text{train}}$), validation set ($\mathcal{D}_{\text{val}}$), or test set ($\mathcal{D}_{\text{test}}$) using a stratified hash assignment algorithm that preserves class proportions while strictly guaranteeing:
+\begin{equation}
+\mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{val}} = \emptyset, \quad \mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{test}} = \emptyset, \quad \mathcal{X}_{\text{val}} \cap \mathcal{X}_{\text{test}} = \emptyset
+\end{equation}
 
-Pruning from 39 down to 20 core features yields:
+\subsection{Partition Formulations: Strategy 1 vs. Strategy 2}
+We formulate two controlled partitioning regimes:
 \begin{itemize}
-    \item \textbf{RAM Savings}: Vector storage drops from 156 bytes to 80 bytes per flow (\textbf{48.7\% reduction}).
-    \item \textbf{Latency Speedup}: XGBoost inference drops from 17.01\,$\mu$s to 12.15\,$\mu$s (\textbf{+28.55\% speedup}).
-    \item \textbf{Minimal Accuracy Drop}: Accuracy decreases by only 1.96\% (from 74.12\% to 72.16\%).
+    \item \textbf{Strategy 1 (Primary / Collision-Contaminated)}: Retains all 501,098 unique stratum flows, partitioning them into Train ($N = 350,821$; 70\%), Validation ($N = 75,172$; 15\%), and Internal Test ($N = 75,105$; 15\%). This reflects real-world deployment where conflicting label noise exists naturally in network traffic.
+    \item \textbf{Strategy 2 (Ablation / Collision-Purged)}: Completely purges all 8,740 conflicting collision hashes, leaving 482,682 flows partitioned into Train ($N = 337,838$), Validation ($N = 72,390$), and Internal Test ($N = 72,454$).
 \end{itemize}
 
-\section{Proposed Hierarchical IoT Architecture}
-Based on these benchmarks, we propose a Three-Tier Defense Blueprint:
+Crucially, the validation set of Strategy 2 ($N = 72,390$) represents the exact **Common-Clean Validation Population** embedded within Strategy 1. The remaining 2,782 validation flows in Strategy 1 constitute the **Ambiguous Collision Validation Population**, allowing precise decomposed error routing.
+
+\subsection{Temporal Cross-Capture Clean Holdout}
+To evaluate temporal generalizability, we extracted an independent holdout set of \textbf{$N = 57,280$ flows} from subsequent capture archives (`Merged26.csv` through `Merged40.csv`). These files were recorded during later operational hours on the same physical IoT testbed. We verified that the cross-capture holdout shares **zero identical-feature overlap ($0.00\%$)** with the training partition.
+
+\subsection{Preprocessor Isolation and Model Configurations}
+To prevent distributional leakage, all preprocessing transformations---including finite rate clipping limits and `StandardScaler` moments ($\boldsymbol{\mu}, \boldsymbol{\sigma}^2$)---were fitted strictly on $\mathcal{D}_{\text{train}}$ and serialized. Model evaluation verified exact parity ($\Delta = 0.00000$) on test splits.
+
+We benchmarked five representative model families across three diagnostic granularities (21 configurations total):
 \begin{enumerate}
-    \item \textbf{Tier 1 (Perimeter Wire-Filter)}: SGD Linear classifier operating at $>$5,000,000 flows/sec with 0.20\,$\mu$s latency, immediately passing verified benign packets.
-    \item \textbf{Tier 2 (IoT Gateway Defense)}: Reduced 20-feature XGBoost model running on local ARM routers, classifying 82,299 flows/sec with 72.16\% fine-grained accuracy.
-    \item \textbf{Tier 3 (Cloud SOC Forensics)}: Centralized SIEM executing full 34-class attribution for automated patch deployment.
+    \item \textbf{SGD Logistic Regression}: Linear classifier trained via mini-batch stochastic gradient descent with log-loss and $L_2$ regularization.
+    \item \textbf{PyTorch Tabular MLP}: Multi-layer perceptron (Input[39] $\to$ Dense[128] $\to$ BatchNorm $\to$ ReLU $\to$ Dropout[0.2] $\to$ Dense[64] $\to$ BatchNorm $\to$ ReLU $\to$ Output[$K$]) trained with AdamW under a standard 5-epoch CPU budget.
+    \item \textbf{Random Forest (RF)}: Ensemble of 50 decorrelated decision trees with max depth 15 and balanced bootstrapping~\cite{breiman2001random}.
+    \item \textbf{LightGBM}: Leaf-wise gradient boosted trees with GOSS sampling and max depth 12~\cite{ke2017lightgbm}.
+    \item \textbf{XGBoost}: Depth-wise gradient boosted trees with exact split finding and histogram binning~\cite{chen2016xgboost}.
 \end{enumerate}
 
-\section{Conclusion}
-This research presented an empirical evaluation of machine learning architectures on the CICIoT2023 benchmark across binary, category, fine-grained, and feature-reduced tiers. Tree boosting models (XGBoost and LightGBM) consistently outperformed deep neural networks on tabular flow statistics. By implementing cost-sensitive balanced weighting and consensus feature pruning, we demonstrated that an optimized 20-feature XGBoost classifier can deliver line-rate 82,299 flows/sec intrusion detection on edge IoT gateways with exceptional minority attack detection capability.
+To counter extreme class imbalance, models were optimized using cost-sensitive inverse-frequency class weighting:
+\begin{equation}
+W_c = \frac{N_{\text{train}}}{K \cdot N_c}
+\end{equation}
+where $K$ is the number of classes and $N_c$ is the support of class $c$.
+
+\section{Experimental Benchmark Evaluation}
+\label{sec:benchmark}
+
+\subsection{Multi-Granularity Benchmark Results}
+Table~\ref{tab:master_benchmark_results} reports the complete, leak-free in-distribution performance across all 21 models evaluated on the Internal Test Set ($N = 75,105$).
+
+\begin{table*}[t]
+\centering
+\caption{Master Benchmark Evaluation Across 21 Models and Three Granularities (Internal Test $N=75,105$)}
+\label{tab:master_benchmark_results}
+\small
+\begin{tabular}{@{}llccccccc@{}}
+\toprule
+\textbf{Diagnostic Task} & \textbf{Model Architecture} & \textbf{Partition Strategy} & \textbf{Val Macro-F1} & \textbf{Test Accuracy} & \textbf{Test Macro-F1} & \textbf{Test MCC} & \textbf{Test ROC-AUC} & \textbf{Test Macro-AP} \\ \midrule
+\multirow{6}{*}{\textbf{Binary (2-Class)}} 
+& SGD Logistic Regression & Strategy 1 & 0.6765 & 81.73\% & 0.6761 & 0.6012 & 0.8988 & 0.9412 \\
+& PyTorch Tabular MLP & Strategy 1 & 0.7130 & 85.11\% & 0.7125 & 0.6021 & 0.9345 & 0.9620 \\
+& \textbf{Random Forest} & Strategy 1 & \textbf{0.7694} & \textbf{89.61\%} & \textbf{0.7690} & \textbf{0.6057} & 0.9512 & 0.9741 \\
+& LightGBM & Strategy 1 & 0.7641 & 89.15\% & 0.7637 & 0.6007 & \textbf{0.9582} & \textbf{0.9785} \\
+& XGBoost & Strategy 1 & 0.7595 & 88.89\% & 0.7592 & 0.5982 & 0.9560 & 0.9768 \\
+& LightGBM (Ablation S2) & Strategy 2 & 0.7652 & 89.28\% & 0.7648 & 0.6025 & 0.9585 & 0.9788 \\ \midrule
+\multirow{6}{*}{\textbf{Category (8-Class)}} 
+& SGD Logistic Regression & Strategy 1 & 0.6039 & 74.04\% & 0.6036 & 0.6890 & 0.9420 & 0.7120 \\
+& PyTorch Tabular MLP & Strategy 1 & 0.6135 & 73.41\% & 0.6130 & 0.6812 & 0.9510 & 0.7240 \\
+& Random Forest & Strategy 1 & 0.6811 & 78.22\% & 0.6805 & 0.7385 & 0.9680 & 0.7650 \\
+& \textbf{LightGBM} & Strategy 1 & \textbf{0.6899} & \textbf{78.93\%} & \textbf{0.6894} & \textbf{0.7468} & \textbf{0.9725} & \textbf{0.7812} \\
+& XGBoost & Strategy 1 & 0.6625 & 76.08\% & 0.6619 & 0.7180 & 0.9654 & 0.7540 \\
+& LightGBM (Ablation S2) & Strategy 2 & 0.6912 & 79.10\% & 0.6908 & 0.7482 & 0.9730 & 0.7825 \\ \midrule
+\multirow{9}{*}{\textbf{Fine-Grained (34-Class)}} 
+& SGD Logistic Regression & Strategy 1 & 0.5275 & 64.29\% & 0.5272 & 0.6280 & 0.9412 & 0.5610 \\
+& PyTorch Tabular MLP & Strategy 1 & 0.5220 & 62.42\% & 0.5216 & 0.6095 & 0.9480 & 0.5540 \\
+& Random Forest & Strategy 1 & 0.5970 & 70.58\% & 0.5966 & 0.6950 & 0.9710 & 0.6320 \\
+& \textbf{LightGBM} & Strategy 1 & \textbf{0.6142} & \textbf{72.65\%} & \textbf{0.6145} & \textbf{0.7170} & \textbf{0.9811} & \textbf{0.6619} \\
+& XGBoost & Strategy 1 & 0.5995 & 71.04\% & 0.6001 & 0.7012 & 0.9785 & 0.6480 \\
+& LightGBM (Ablation S2) & Strategy 2 & 0.6160 & 72.82\% & 0.6162 & 0.7190 & 0.9815 & 0.6635 \\
+& XGBoost (Ablation S2) & Strategy 2 & 0.6015 & 71.18\% & 0.6018 & 0.7030 & 0.9790 & 0.6495 \\
+& LightGBM (Unweighted) & Strategy 1 & 0.6239 & 74.45\% & 0.6220 & 0.7346 & 0.9712 & 0.6431 \\
+& XGBoost (Unweighted) & Strategy 1 & 0.6110 & 72.95\% & 0.6105 & 0.7205 & 0.9680 & 0.6310 \\ \bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig2_accuracy_vs_macro_f1.png}
+\caption{In-Distribution Generalization: Macro-F1 vs. Accuracy across 21 evaluated model configurations and granularities.}
+\label{fig:accuracy_vs_macro_f1}
+\end{figure}
+
+The empirical results unmask realistic baseline performance on CICIoT2023:
+\begin{itemize}
+    \item \textbf{Binary Attack Detection}: Random Forest achieves the highest diagnostic performance (Accuracy: **89.61\%**, Macro-F1: **0.7690**, MCC: **0.6057**), followed closely by LightGBM (Accuracy: **89.15\%**, Macro-F1: **0.7637**).
+    \item \textbf{Category Classification (8 Classes)}: LightGBM leads across all metrics (Accuracy: **78.93\%**, Macro-F1: **0.6894**, MCC: **0.7468**).
+    \item \textbf{Fine-Grained Classification (34 Classes)}: LightGBM delivers the best overall trade-off (Accuracy: **72.65\%**, Macro-F1: **0.6145**, MCC: **0.7170**, Macro-AP: **0.6619**, ROC-AUC: **0.9811**).
+\end{itemize}
+
+\subsection{In-Distribution Generalization Stability}
+A vital finding is the exceptional stability of the hash-grouped partitions. Across all 21 models, the generalization delta between validation and internal test performance satisfies:
+\begin{equation}
+|\Delta_{\text{gen}}| = |\text{Metric}_{\text{val}} - \text{Metric}_{\text{test}}| \le \mathbf{0.0079}
+\end{equation}
+This confirms that the lower baseline accuracies are not caused by partition variance or distribution mismatch between train and test, but reflect the true difficulty of separating non-injective tabular flow signatures without leakage shortcuts.
+
+\subsection{Dissecting Ambiguity Filtering Mechanics}
+To evaluate the impact of label collisions, Table~\ref{tab:ambiguity_routing} details the decomposed routing analysis on the Common-Clean validation set ($N = 72,390$) and the Isolated Ambiguous collision set ($N = 2,782$).
+
+\begin{table}[h]
+\centering
+\caption{Ambiguity-Aware Decomposed Validation Routing Analysis (LightGBM 34-Class)}
+\label{tab:ambiguity_routing}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Validation Slice} & \textbf{Size ($N$)} & \textbf{Strategy 1 F1} & \textbf{Strategy 2 F1} & \textbf{Delta ($\Delta$)} \\ \midrule
+Common-Clean Population & 72,390 & 0.6196 & 0.6218 & \textbf{+0.0022} \\
+Isolated Ambiguous Population & 2,782 & 0.2386 & N/A & N/A \\ \midrule
+Cross-Capture Clean Holdout & 57,280 & 0.6498 & 0.6511 & \textbf{+0.0013} \\ \bottomrule
+\end{tabular}
+\end{table}
+
+This decomposition provides two critical insights:
+\begin{enumerate}
+    \item \textbf{Marginal Clean Benefit}: Training without conflicting label collisions (Strategy 2) improves clean validation Macro-F1 by only **+0.0022 (+0.22\%)**, and cross-capture Macro-F1 by only **+0.0013 (+0.13\%)**. Gradient-boosted decision trees effectively isolate conflicting label noise within minority leaf nodes, proving highly resilient to label ambiguity during split finding.
+    \item \textbf{Observed Collision Accuracy}: On the isolated ambiguous collision subset ($N = 2,782$), the classifier achieves an observed accuracy of **41.73\%**. Because identical feature coordinates map to multiple valid ground-truth labels, a single-label classifier cannot deterministically resolve the target class from the 39 features alone.
+\end{enumerate}
+
+\section{Security Trade-Offs, Temporal Robustness, and Systems Profiling}
+\label{sec:tradeoffs}
+
+\subsection{The Accuracy Paradox: Minority Recall Collapse}
+Standard empirical loss optimization minimizes average sample loss, inadvertently prioritizing majority classes. In Table~\ref{tab:cost_sensitive_ablation}, we present the authoritative ablation comparing cost-sensitive balanced weighting against unweighted training for LightGBM on the 34-class task.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig3_minority_recall_collapse.png}
+\caption{The Accuracy Paradox: Minority Attack Recall Collapse under Unweighted Loss Optimization (LightGBM 34-Class, Internal Test Set).}
+\label{fig:minority_recall_collapse}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+\caption{Authoritative Cost-Sensitive vs. Unweighted Ablation Comparison (LightGBM 34-Class Task)}
+\label{tab:cost_sensitive_ablation}
+\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+& \multicolumn{3}{c}{\textbf{Validation Set ($N = 75,172$)}} & \multicolumn{3}{c}{\textbf{Internal Test Set ($N = 75,105$)}} \\ \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+\textbf{Metric / Attack Class} & \textbf{Balanced} & \textbf{Unweighted} & \textbf{Relative Change} & \textbf{Balanced} & \textbf{Unweighted} & \textbf{Relative Change} \\ \midrule
+Overall Accuracy & 72.45\% & 74.33\% & +1.88\% & 72.65\% & 74.45\% & +1.80\% \\
+Macro-F1 Score & 0.6142 & 0.6239 & +0.0097 & 0.6145 & 0.6220 & +0.0075 \\
+Matthews Correlation (MCC) & 0.7149 & 0.7333 & +0.0184 & 0.7170 & 0.7346 & +0.0176 \\
+Macro Average Precision (AP) & 0.6638 & 0.6424 & -0.0214 & 0.6619 & 0.6431 & -0.0188 \\
+ROC-AUC (OvR) & 0.9812 & 0.9718 & -0.0094 & 0.9811 & 0.9712 & -0.0099 \\ \midrule
+Benign Traffic Recall & 65.84\% & 84.64\% & +18.80\% & 65.71\% & 83.70\% & +17.99\% \\
+Benign Traffic Precision & 72.09\% & 60.41\% & -11.68\% & 72.28\% & 59.58\% & -12.70\% \\
+\textbf{False Negatives to Benign} & --- & --- & --- & \textbf{1,517 flows} & \textbf{3,418 flows} & \textbf{+125.31\%} \\ \midrule
+\textbf{SQL Injection Recall} & 34.13\% & 5.56\% & \textbf{-83.72\%} & 35.83\% & 7.48\% & \textbf{-79.12\%} \\
+\textbf{Recon-PingSweep Recall} & 24.32\% & 5.41\% & \textbf{-77.78\%} & 26.40\% & 4.80\% & \textbf{-81.82\%} \\
+\textbf{XSS Recall} & 27.22\% & 7.10\% & \textbf{-73.91\%} & 20.22\% & 3.83\% & \textbf{-81.08\%} \\
+Backdoor Malware Recall & 31.61\% & 11.61\% & -63.27\% & 25.18\% & 12.23\% & -51.43\% \\
+Browser Hijacking Recall & 53.51\% & 31.00\% & -42.07\% & 53.06\% & 31.29\% & -41.03\% \\
+Tier 4 (Web) Macro-Recall & 36.67\% & 18.53\% & -49.47\% & 34.63\% & 16.81\% & -51.46\% \\ \bottomrule
+\end{tabular}
+\end{table*}
+
+As illustrated in Figure~\ref{fig:minority_recall_collapse}, switching from balanced to unweighted training produces an apparent improvement in aggregate test metrics: accuracy increases by **+1.80\%** (72.65\% $\to$ 74.45\%) and MCC improves by **+0.0176**. However, this headline gain masks a catastrophic collapse in minority attack detection:
+\begin{itemize}
+    \item \textbf{SQL Injection}: Recall collapses by **-79.12\%** relative drop (from 35.83\% down to 7.48\%).
+    \item \textbf{Recon-PingSweep}: Recall collapses by **-81.82\%** relative drop (from 26.40\% down to 4.80\%).
+    \item \textbf{Cross-Site Scripting (XSS)}: Recall collapses by **-81.08\%** relative drop (from 20.22\% down to 3.83\%).
+    \item \textbf{Surge in Missed Intrusions}: False negatives where malicious traffic is misclassified as Benign surge by **+125.31\%** (from 1,517 missed flows up to 3,418 missed flows).
+\end{itemize}
+This empirically demonstrates the danger of evaluating IoT security models purely on aggregate accuracy: unweighted models achieve high headline numbers precisely by abandoning stealthy intrusions.
+
+\subsection{Temporal Cross-Capture Generalizability}
+Table~\ref{tab:cross_capture_results} evaluates temporal stability by testing models trained on earlier capture sessions against the independent cross-capture holdout ($N = 57,280$) from later sessions.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig4_threat_tier_cross_capture.png}
+\caption{Temporal Cross-Capture Degradation across Threat Tiers for Fine-Grained LightGBM.}
+\label{fig:threat_tier_cross_capture}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+\caption{Temporal Cross-Capture Generalization Degradation (Internal Test $N=75,105$ vs. Cross-Capture $N=57,280$)}
+\label{tab:cross_capture_results}
+\small
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+\textbf{Diagnostic Task} & \textbf{Model Architecture} & \textbf{Internal Accuracy} & \textbf{Cross Accuracy} & \textbf{Internal Macro-F1} & \textbf{Cross Macro-F1} & \textbf{Internal MCC} & \textbf{Cross MCC} \\ \midrule
+\textbf{Binary} & \textbf{LightGBM} & \textbf{89.15\%} & \textbf{83.48\%} (-5.67\%) & \textbf{0.7637} & \textbf{0.7034} (-0.0603) & \textbf{0.6007} & \textbf{0.4912} (-0.1095) \\
+Binary & Random Forest & 89.61\% & 83.10\% (-6.51\%) & 0.7690 & 0.7018 (-0.0672) & 0.6057 & 0.4850 (-0.1207) \\
+Binary & XGBoost & 88.89\% & 83.55\% (-5.34\%) & 0.7592 & 0.7015 (-0.0577) & 0.5982 & 0.4890 (-0.1092) \\
+Binary & SGD Logistic Reg. & 81.73\% & 73.85\% (-7.88\%) & 0.6761 & 0.6120 (-0.0641) & 0.6012 & 0.4510 (-0.1502) \\ \midrule
+\textbf{Category} & \textbf{LightGBM} & \textbf{78.93\%} & \textbf{75.12\%} (-3.81\%) & \textbf{0.6894} & \textbf{0.6845} (-0.0049) & \textbf{0.7468} & \textbf{0.7180} (-0.0288) \\ \midrule
+\textbf{Fine-Grained} & \textbf{LightGBM} & \textbf{72.65\%} & \textbf{69.64\%} (-3.01\%) & \textbf{0.6145} & \textbf{0.6498} (+0.0353) & \textbf{0.7170} & \textbf{0.6861} (-0.0309) \\
+Fine-Grained & XGBoost & 71.04\% & 68.12\% (-2.92\%) & 0.6001 & 0.6385 (+0.0384) & 0.7012 & 0.6720 (-0.0292) \\ \bottomrule
+\end{tabular}
+\end{table*}
+
+On the binary detection task, cross-capture evaluation exposes marked degradation:
+\begin{itemize}
+    \item Binary LightGBM accuracy drops by **-5.67\%** (from 89.15\% to 83.48\%), Macro-F1 degrades by **-0.0603** (0.7637 to 0.7034), and MCC drops by **-0.1095** (0.6007 to 0.4912).
+    \item Benign F1 drops from 0.5899 to 0.5061, while overall test error increases from 27.35\% to 30.36\%.
+\end{itemize}
+
+\subsubsection{Multiclass Prevalence Shift Deconstruction}
+Notably, for the 34-class task, LightGBM Macro-F1 appears to increase from 0.6145 to 0.6498 (+0.0353), even as Accuracy drops (-3.01\%) and MCC degrades (-0.0310). Deconstructing this metric reveals an artifact of **class prevalence shift**:
+The cross-capture holdout contains a 3.2$\times$ to 5.2$\times$ higher proportion of rare web attack instances (e.g., BrowserHijacking support rose from 294 to 1,320 flows). Because True Positives scaled with support while False Positives remained low, per-class Precision surged (19.67\% $\to$ 51.18\% for BrowserHijacking), mechanically boosting individual F1 scores and elevating the unweighted arithmetic mean. As shown in Figure~\ref{fig:threat_tier_cross_capture}, when broken down by threat tier, high-volume floods (Tier 1, F1 $\approx$ 0.81) and Mirai botnets (Tier 2, F1 $>$ 0.99) remain stable, whereas Reconnaissance (Tier 3, F1 $\approx$ 0.46) and Benign traffic experience notable session drift.
+
+\subsection{Error Topology and Confusion Matrix Analysis}
+Figure~\ref{fig:confusion_matrix} visualizes the fine-grained 34-class error topology. Off-diagonal error clusters reveal two structural confusion patterns:
+\begin{enumerate}
+    \item \textbf{Intra-Protocol Flood Collisions}: Severe mutual misclassification occurs between DoS and DDoS variants of identical protocols (e.g., `DoS-UDP_Flood` vs. `DDoS-UDP_Flood`). Because source IP addresses are stripped, single-source and distributed floods generate indistinguishable packet header statistics.
+    \item \textbf{Benign Handshake Entanglement}: Low-rate reconnaissance sweeps (`Recon-PortScan`, `Recon-PingSweep`) and HTTP floods exhibit substantial misclassification into `BenignTraffic`. Single-packet probes and standard TCP handshakes share identical feature coordinates with legitimate connection establishment flows.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig6_error_topology_matrix.png}
+\caption{Fine-Grained 34-Class Confusion Matrix (XGBoost baseline), highlighting error clusters in volumetric flood pairs and benign handshake overlap.}
+\label{fig:confusion_matrix}
+\end{figure}
+
+\subsection{Host-Side Computational Profiling}
+Table~\ref{tab:computational_profiling} and Figure~\ref{fig:latency_pareto} benchmark host-side CPU inference latency, throughput, and memory consumption on an Intel Core i5-1135G7 CPU.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig5_latency_pareto_frontier.png}
+\caption{Host-Side Inference Latency vs. Diagnostic Macro-F1 Pareto Frontier across 15 primary baseline configurations.}
+\label{fig:latency_pareto}
+\end{figure}
+
+\begin{table*}[t]
+\centering
+\caption{Host-Side Computational Profiling and Inference Headroom on Intel Core i5-1135G7 CPU}
+\label{tab:computational_profiling}
+\small
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+\textbf{Diagnostic Task} & \textbf{Model Architecture} & \textbf{P50 Latency ($\mu$s)} & \textbf{P95 Latency ($\mu$s)} & \textbf{Batch Throughput (flows/s)} & \textbf{Peak RSS (MB)} & \textbf{On-Disk Size} \\ \midrule
+\multirow{5}{*}{\textbf{Binary}} 
+& SGD Logistic Regression & \textbf{143} & \textbf{189} & \textbf{2,940,000} & 312.4 & <0.05 MB \\
+& PyTorch Tabular MLP & 247 & 382 & 121,000 & 650.9 & <0.10 MB \\
+& \textbf{LightGBM} & 1,409 & 1,840 & 941,000 & 494.7 & 11.3 MB \\
+& XGBoost & 1,575 & 2,110 & 820,000 & 482.1 & 8.3 MB \\
+& Random Forest & 22,467 & 28,150 & 44,500 & 498.9 & 91.2 MB \\ \midrule
+\multirow{5}{*}{\textbf{Category}} 
+& SGD Logistic Regression & 198 & 265 & 2,150,000 & 314.1 & <0.05 MB \\
+& PyTorch Tabular MLP & 489 & 695 & 68,000 & 650.9 & <0.10 MB \\
+& LightGBM & 2,180 & 2,890 & 610,000 & 494.7 & 11.3 MB \\
+& XGBoost & 2,410 & 3,210 & 540,000 & 482.1 & 8.3 MB \\
+& Random Forest & 45,120 & 56,400 & 22,100 & 542.1 & 91.2 MB \\ \midrule
+\multirow{5}{*}{\textbf{Fine-Grained}} 
+& SGD Logistic Regression & 362 & 480 & 1,420,000 & 318.5 & <0.05 MB \\
+& PyTorch Tabular MLP & 942 & 1,310 & 21,500 & 650.9 & <0.10 MB \\
+& \textbf{LightGBM} & \textbf{3,504} & \textbf{4,610} & \textbf{11,200} & 494.7 & 11.3 MB \\
+& XGBoost & 3,732 & 4,950 & 9,800 & 482.1 & 8.3 MB \\
+& Random Forest & 70,883 & 89,200 & 1,410 & 572.6 & 91.2 MB \\ \bottomrule
+\end{tabular}
+\end{table*}
+
+The profiling highlights distinct architectural niches:
+\begin{itemize}
+    \item \textbf{Wire-Speed Linear Screening}: SGD Logistic Regression evaluates in 143\,$\mu$s P50 latency with throughput exceeding 2.9 million flows/sec, operating as an ultra-fast first-stage volumetric scrubber.
+    \item \textbf{GBDT Efficiency}: LightGBM evaluates in 1.4--3.5\,ms with modest memory footprint (494.7 MB RSS), dominating the Pareto frontier.
+    \item \textbf{Random Forest Latency Penalty}: Random Forest incurs severe latency overhead (22.5 to 70.9\,ms per flow) and requires 91.2 MB on disk, rendering it unsuited for real-time edge processing despite strong binary F1.
+\end{itemize}
+
+\section{Discussion and Practical Implications}
+\label{sec:discussion}
+
+\subsection{Re-Evaluating Published Performance on CICIoT2023}
+Our empirical findings provide an evidence-based explanation for the discrepancy between published $>$99\% accuracies and practical NIDS operational failures. Prior evaluations suffered from the compounding effects of:
+\begin{enumerate}
+    \item \textit{Rote Memorization}: Under unpartitioned random splits, classifiers exploit the 81.39\% collision leakage to memorize coordinate-to-label mappings.
+    \item \textit{Metric Distortion}: High-volume flooding traffic masks near-zero detection rates on stealthy exploits when evaluations rely on overall accuracy.
+    \item \textit{Temporal Session Overfitting}: Testing on slices of the training session overlooks concept drift and burst non-stationarity.
+\end{enumerate}
+
+\subsection{Operational Recommendations for IoT NIDS Deployment}
+Based on our findings, we formulate four actionable recommendations for designing and evaluating IoT intrusion detection systems:
+\begin{enumerate}
+    \item \textbf{Mandate Hash-Grouped Partitioning}: Evaluators must verify that $\mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{test}} = \emptyset$. Standard random splits on tabular flow data must be treated as methodologically invalid due to severe leakage risks.
+    \item \textbf{Prioritize Cost-Sensitive Loss Objectives}: Systems designers must reject pure aggregate accuracy in favor of balanced macro metrics and minority recall bounds to ensure protection against low-rate exploits.
+    \item \textbf{Institute Multi-Tier Detection Cascades}: Network architects should deploy lightweight linear scrubbers (e.g., SGD) at edge ingress to filter obvious volumetric floods at wire speed ($>$2.9M flows/sec), routing ambiguous flows to GBDT classifiers for fine-grained analysis.
+    \item \textbf{Integrate Selective Deep Packet Inspection}: Tabular flow statistics are fundamentally blind to application-layer attack payloads. Flow classifiers should be coupled with targeted deep packet inspection (DPI) for HTTP and TLS streams.
+\end{enumerate}
+
+\section{Threats to Validity and Limitations}
+\label{sec:threats}
+
+We explicitly delineate the scientific boundaries of this investigation:
+\begin{itemize}
+    \item \textbf{Dataset Scope}: All empirical benchmarks were conducted on the CICIoT2023 dataset. While CICIoT2023 represents a diverse 105-device physical testbed, cross-dataset transferability to ToN\_IoT or BoT-IoT was not benchmarked.
+    \item \textbf{Payload Inaccessibility}: The dataset strips packet payloads and raw byte streams. Misclassifications on SQL Injection and XSS reflect the inherent limitation of distinguishing web attacks using statistical flow counters alone.
+    \item \textbf{Neural Training Budget}: The PyTorch MLP baseline was trained under a 5-epoch CPU budget. Extended GPU training with advanced architectures (e.g., TabNet) may yield higher neural accuracy.
+    \item \textbf{Host Hardware Profiling}: Latency and throughput were measured on an Intel Core i5 host CPU. Performance on constrained microcontrollers (ARM Cortex-M) remains subject to physical edge hardware constraints.
+    \item \textbf{Literature Review Scope}: Methodological comparisons are bounded strictly to the 14 surveyed peer-reviewed studies.
+\end{itemize}
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+This paper conducted a rigorous data integrity audit and empirical benchmark of machine learning models on the CICIoT2023 benchmark. We demonstrated that headline accuracies exceeding 99\% reported in prior literature are vulnerable to unpartitioned identical-feature data leakage (81.39\% collision leakage) and class imbalance distortion. By introducing an atomic SHA-256 group-hash partitioning standard, we established authentic zero-leakage diagnostic baselines (89.61\% binary, 78.93\% category, and 72.65\% fine-grained accuracy). We uncovered an operational ``Accuracy Paradox'', showing that unweighted training trades a 79\% to 82\% collapse in minority attack recall for a minor +1.80\% gain in headline accuracy. Furthermore, temporal cross-capture evaluation revealed substantial session fragility. Future work will investigate physical microcontroller hardware deployment (ARM Cortex-M / Raspberry Pi), multi-modal tabular-payload fusion architectures, and cross-dataset transferability across heterogeneous IoT environments.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

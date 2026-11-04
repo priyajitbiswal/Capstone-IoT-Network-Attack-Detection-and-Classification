@@ -50,8 +50,7 @@ capstone/
 │   ├── README.md                      # Master index linking and summarizing all 7 research stages
 │   ├── STAGE_1_AUDIT_REPORT.md        # Stage 1: Forensic Dataset Audit & Collision Quantification
 │   ├── STAGE_2_INVESTIGATION_REPORT.md# Stage 2: Feature-Hash Partitioning & Collision Purging
-│   ├── STAGE_3_METHODOLOGY_REVIEW.md  # Stage 3: Preprocessing Parity & Class-Weighting Audit
-│   ├── STAGE_3_CANARY_REPORT.md       # Stage 3: Canary Execution and Verification
+│   ├── STAGE_3_COMPLETE_REPORT.md     # Stage 3: Baseline Training, Canary, Audit & Validation Benchmarks
 │   ├── STAGE_4_EVALUATION_REPORT.md   # Stage 4: Master Test Evaluation (Dual-Partition)
 │   ├── STAGE_5_ERROR_ANALYSIS.md      # Stage 5: Fine-Grained Error Analysis & Worst-10 Profiles
 │   ├── STAGE_6_RESEARCH_SYNTHESIS.md  # Stage 6: Research Findings, Contributions & Synthesis
