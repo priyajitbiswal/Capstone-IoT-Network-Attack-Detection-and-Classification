@@ -33,3 +33,7 @@ Thumbs.db
 .idea/
 
 snuc/
+models_saved_v2/
+*.joblib
+scratch/
+!results_v2/tables/*.csv

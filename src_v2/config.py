@@ -172,6 +172,28 @@ THIRTY_FOUR_CLASSES = sorted(list(LABEL_MAPPING_BINARY.keys()))
 THIRTY_FOUR_TO_IDX = {cls_name: i for i, cls_name in enumerate(THIRTY_FOUR_CLASSES)}
 IDX_TO_THIRTY_FOUR = {i: cls_name for i, cls_name in enumerate(THIRTY_FOUR_CLASSES)}
 
+# Functional Threat Tiers (Mutually exclusive grouping of all 33 attacks; Benign handled separately)
+FUNCTIONAL_THREAT_TIERS = {
+    "Tier 1: Volumetric Floods": [
+        "DDOS-ACK_FRAGMENTATION", "DDOS-HTTP_FLOOD", "DDOS-ICMP_FLOOD",
+        "DDOS-ICMP_FRAGMENTATION", "DDOS-PSHACK_FLOOD", "DDOS-RSTFINFLOOD",
+        "DDOS-SLOWLORIS", "DDOS-SYNONYMOUSIP_FLOOD", "DDOS-SYN_FLOOD",
+        "DDOS-TCP_FLOOD", "DDOS-UDP_FLOOD", "DDOS-UDP_FRAGMENTATION",
+        "DOS-HTTP_FLOOD", "DOS-SYN_FLOOD", "DOS-TCP_FLOOD", "DOS-UDP_FLOOD",
+    ],
+    "Tier 2: IoT Botnets": [
+        "MIRAI-GREETH_FLOOD", "MIRAI-GREIP_FLOOD", "MIRAI-UDPPLAIN",
+    ],
+    "Tier 3: Recon & Spoofing": [
+        "RECON-HOSTDISCOVERY", "RECON-OSSCAN", "RECON-PINGSWEEP",
+        "RECON-PORTSCAN", "VULNERABILITYSCAN", "DNS_SPOOFING", "MITM-ARPSPOOFING",
+    ],
+    "Tier 4: Web & Exploit Attacks": [
+        "BACKDOOR_MALWARE", "BROWSERHIJACKING", "COMMANDINJECTION",
+        "DICTIONARYBRUTEFORCE", "SQLINJECTION", "UPLOADING_ATTACK", "XSS",
+    ],
+}
+
 # Reproducible random seed
 RANDOM_SEED = 42
 

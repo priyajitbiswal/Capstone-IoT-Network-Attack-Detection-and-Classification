@@ -14,10 +14,13 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
     f1_score,
+    matthews_corrcoef,
     precision_score,
     recall_score,
     roc_auc_score,
+    average_precision_score,
 )
+from sklearn.preprocessing import label_binarize
 
 
 def evaluate_predictions_v2(
@@ -37,18 +40,21 @@ def evaluate_predictions_v2(
         "weighted_f1": float(f1_score(y_true, y_pred, average="weighted", zero_division=0)),
         "macro_precision": float(precision_score(y_true, y_pred, average="macro", zero_division=0)),
         "macro_recall": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
+        "mcc": float(matthews_corrcoef(y_true, y_pred)),
         "confusion_matrix": confusion_matrix(y_true, y_pred),
     }
 
     # Macro One-vs-Rest (OVR) ROC-AUC calculation
     metrics["roc_auc_ovr"] = None
     metrics["roc_auc_error"] = None
+    metrics["macro_ap_ovr"] = None
 
     if y_prob is not None:
         try:
             if num_classes == 2:
                 prob_pos = y_prob[:, 1] if y_prob.ndim == 2 else y_prob
                 metrics["roc_auc_ovr"] = float(roc_auc_score(y_true, prob_pos))
+                metrics["macro_ap_ovr"] = float(average_precision_score(y_true, prob_pos))
             else:
                 # Multiclass Macro OVR
                 # Note: labels parameter ensures all classes are accounted for
@@ -56,21 +62,51 @@ def evaluate_predictions_v2(
                 metrics["roc_auc_ovr"] = float(
                     roc_auc_score(y_true, y_prob, multi_class="ovr", average="macro", labels=labels)
                 )
+                y_true_bin = label_binarize(y_true, classes=labels)
+                metrics["macro_ap_ovr"] = float(average_precision_score(y_true_bin, y_prob, average="macro"))
         except Exception as e:
             metrics["roc_auc_ovr"] = None
+            metrics["macro_ap_ovr"] = None
             metrics["roc_auc_error"] = str(e)
     else:
         metrics["roc_auc_error"] = "Model does not produce probability distributions (predict_proba unavailable)."
 
-    # Full Per-Class Report
+    # Full Per-Class Report (with labels explicitly specified to handle subpopulation slices)
     report = classification_report(
         y_true,
         y_pred,
+        labels=list(range(num_classes)) if class_names else None,
         target_names=class_names,
         output_dict=True,
         zero_division=0,
     )
     metrics["per_class_report"] = report
+
+    # Threat Tiers Summary (if 34 classes)
+    metrics["threat_tier_summary"] = {}
+    if class_names and len(class_names) == 34:
+        from src_v2.config import FUNCTIONAL_THREAT_TIERS
+        tier_summaries = {}
+        for tier_name, tier_classes in FUNCTIONAL_THREAT_TIERS.items():
+            tier_recalls = [report[cls]["recall"] for cls in tier_classes if cls in report]
+            tier_precisions = [report[cls]["precision"] for cls in tier_classes if cls in report]
+            tier_f1s = [report[cls]["f1-score"] for cls in tier_classes if cls in report]
+            tier_supports = sum([report[cls]["support"] for cls in tier_classes if cls in report])
+            tier_summaries[tier_name] = {
+                "macro_recall": round(float(np.mean(tier_recalls)), 5) if tier_recalls else 0.0,
+                "macro_precision": round(float(np.mean(tier_precisions)), 5) if tier_precisions else 0.0,
+                "macro_f1": round(float(np.mean(tier_f1s)), 5) if tier_f1s else 0.0,
+                "total_support": int(tier_supports),
+            }
+        # Benign is handled separately
+        if "BENIGN" in report:
+            tier_summaries["Non-Attack: Benign"] = {
+                "recall": round(float(report["BENIGN"]["recall"]), 5),
+                "precision": round(float(report["BENIGN"]["precision"]), 5),
+                "f1": round(float(report["BENIGN"]["f1-score"]), 5),
+                "total_support": int(report["BENIGN"]["support"]),
+            }
+        metrics["threat_tier_summary"] = tier_summaries
 
     return metrics
 
@@ -97,29 +133,33 @@ def benchmark_single_flow_latency(
     test_subset = X_sample[:n_samples] if len(X_sample) >= n_samples else X_sample
     actual_count = len(test_subset)
 
-    # 1. Warm-up runs (instruction cache priming)
-    warmup_n = min(n_warmup, actual_count)
-    for i in range(warmup_n):
-        x_single = test_subset[i:i+1]
-        if scaler is not None:
-            x_single = scaler.transform(x_single)
-        _ = model.predict(x_single)
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
 
-    # 2. Sequential measurements across repetitions
-    run_latencies_us = []
-
-    for _ in range(n_runs):
-        sample_latencies = []
-        for i in range(actual_count):
+        # 1. Warm-up runs (instruction cache priming)
+        warmup_n = min(n_warmup, actual_count)
+        for i in range(warmup_n):
             x_single = test_subset[i:i+1]
-            t0 = time.perf_counter()
             if scaler is not None:
                 x_single = scaler.transform(x_single)
             _ = model.predict(x_single)
-            t1 = time.perf_counter()
-            sample_latencies.append((t1 - t0) * 1e6)
 
-        run_latencies_us.extend(sample_latencies)
+        # 2. Sequential measurements across repetitions
+        run_latencies_us = []
+
+        for _ in range(n_runs):
+            sample_latencies = []
+            for i in range(actual_count):
+                x_single = test_subset[i:i+1]
+                t0 = time.perf_counter()
+                if scaler is not None:
+                    x_single = scaler.transform(x_single)
+                _ = model.predict(x_single)
+                t1 = time.perf_counter()
+                sample_latencies.append((t1 - t0) * 1e6)
+
+            run_latencies_us.extend(sample_latencies)
 
     arr = np.array(run_latencies_us)
 

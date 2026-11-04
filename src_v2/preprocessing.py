@@ -141,16 +141,18 @@ def load_partitioned_datasets(
     sample_file: Path = ORIGINAL_SAMPLE_FILE,
     assignments_file: Path = PARTITION_ASSIGNMENTS_FILE,
     save_preprocessor_path: Optional[Path] = None,
+    load_test: bool = False,
 ) -> Tuple[
-    Tuple[np.ndarray, np.ndarray],  # (X_train, y_train)
-    Tuple[np.ndarray, np.ndarray],  # (X_val, y_val)
-    Tuple[np.ndarray, np.ndarray],  # (X_test, y_test)
-    List[str],                      # class_names
-    LeakFreePreprocessor,          # fitted preprocessor
+    Tuple[np.ndarray, np.ndarray],           # (X_train, y_train)
+    Tuple[np.ndarray, np.ndarray],           # (X_val, y_val)
+    Tuple[Optional[np.ndarray], Optional[np.ndarray]],  # (X_test, y_test)
+    List[str],                               # class_names
+    LeakFreePreprocessor,                   # fitted preprocessor
 ]:
     """
     Loads partitioned dataset according to verified partition assignments.
-    Fits all preprocessing strictly on train, and transforms val and test.
+    Fits all preprocessing strictly on train, and transforms val.
+    Test partition is strictly sealed and untouched unless load_test=True.
     
     Returns:
         (X_train, y_train), (X_val, y_val), (X_test, y_test), class_names, preprocessor
@@ -171,35 +173,50 @@ def load_partitioned_datasets(
 
     train_df = df_merged[df_merged["partition"] == "train"].copy().reset_index(drop=True)
     val_df = df_merged[df_merged["partition"] == "val"].copy().reset_index(drop=True)
-    test_df = df_merged[df_merged["partition"] == "test"].copy().reset_index(drop=True)
 
-    print(f"Loaded partitions: Train={len(train_df):,}, Val={len(val_df):,}, Test={len(test_df):,}")
+    if load_test:
+        test_df = df_merged[df_merged["partition"] == "test"].copy().reset_index(drop=True)
+        print(f"Loaded partitions: Train={len(train_df):,}, Val={len(val_df):,}, Test={len(test_df):,}")
+    else:
+        test_df = None
+        print(f"Loaded partitions: Train={len(train_df):,}, Val={len(val_df):,}, Test=[SEALED / UNTOUCHED]")
 
     # 1. Fit Preprocessor strictly on train
     preprocessor = LeakFreePreprocessor(FEATURE_COLUMNS)
     preprocessor.fit(train_df)
 
-    # 2. Clean features across all partitions
+    # 2. Clean features strictly on training and validation
     X_train_raw = preprocessor.clean_transform(train_df)
     X_val_raw = preprocessor.clean_transform(val_df)
-    X_test_raw = preprocessor.clean_transform(test_df)
+    X_test_raw = preprocessor.clean_transform(test_df) if load_test else None
 
     # 3. Scale features if requested (fitting strictly on train)
     if scale_features:
         X_train = preprocessor.fit_transform_scaler(X_train_raw)
         X_val = preprocessor.transform_scaler(X_val_raw)
-        X_test = preprocessor.transform_scaler(X_test_raw)
+        X_test = preprocessor.transform_scaler(X_test_raw) if load_test else None
     else:
         X_train, X_val, X_test = X_train_raw, X_val_raw, X_test_raw
 
     # 4. Encode labels
     y_train, class_names = encode_target_labels(train_df[TARGET_COLUMN], target_type=target_type)
     y_val, _ = encode_target_labels(val_df[TARGET_COLUMN], target_type=target_type)
-    y_test, _ = encode_target_labels(test_df[TARGET_COLUMN], target_type=target_type)
+    y_test = encode_target_labels(test_df[TARGET_COLUMN], target_type=target_type)[0] if load_test else None
+
+    # 5. Extract validation clean subpopulation mask (D_val_clean, N=72,390)
+    from src_v2.config import PARTITIONS_DIR
+    ablation_assign_file = PARTITIONS_DIR / "ablation_strategy2" / "partition_assignments.csv"
+    if ablation_assign_file.exists():
+        df_ablation = pd.read_csv(ablation_assign_file)
+        clean_val_orig_idx = set(df_ablation[df_ablation["partition"] == "val"]["orig_idx"])
+        val_df_orig = df_assign[df_assign["partition"] == "val"]["orig_idx"].values
+        val_clean_mask = np.isin(val_df_orig, list(clean_val_orig_idx))
+    else:
+        val_clean_mask = np.ones(len(val_df), dtype=bool)
 
     if save_preprocessor_path:
         save_preprocessor_path.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(preprocessor, save_preprocessor_path)
 
-    return (X_train, y_train), (X_val, y_val), (X_test, y_test), class_names, preprocessor
+    return (X_train, y_train), (X_val, y_val), (X_test, y_test), class_names, preprocessor, val_clean_mask
 

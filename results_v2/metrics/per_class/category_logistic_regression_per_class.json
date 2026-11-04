@@ -1,0 +1,192 @@
+{
+  "full_validation": {
+    "Benign": {
+      "precision": 0.5243540872511647,
+      "recall": 0.6102530397633914,
+      "f1-score": 0.5640519401625028,
+      "support": 6086.0
+    },
+    "DDoS": {
+      "precision": 0.8921135169859804,
+      "recall": 0.79557862101503,
+      "f1-score": 0.8410852022730106,
+      "support": 29674.0
+    },
+    "DoS": {
+      "precision": 0.5762794589318087,
+      "recall": 0.7455349088941007,
+      "f1-score": 0.6500707881075979,
+      "support": 11086.0
+    },
+    "Mirai": {
+      "precision": 0.9965932318873495,
+      "recall": 0.9901839106397382,
+      "f1-score": 0.9933782330635577,
+      "support": 8863.0
+    },
+    "Recon": {
+      "precision": 0.8263991552270328,
+      "recall": 0.6482233082083989,
+      "f1-score": 0.7265469061876247,
+      "support": 12073.0
+    },
+    "Spoofing": {
+      "precision": 0.5311802095859818,
+      "recall": 0.5465794590772495,
+      "f1-score": 0.5387698205262241,
+      "support": 5657.0
+    },
+    "Web": {
+      "precision": 0.13456147376852223,
+      "recall": 0.3010752688172043,
+      "f1-score": 0.18599501799058954,
+      "support": 1116.0
+    },
+    "BruteForce": {
+      "precision": 0.28840579710144926,
+      "recall": 0.3225283630470016,
+      "f1-score": 0.3045141545524101,
+      "support": 617.0
+    },
+    "accuracy": 0.7425105092321609,
+    "macro avg": {
+      "precision": 0.5962358663424112,
+      "recall": 0.6199946099327643,
+      "f1-score": 0.6005515078579398,
+      "support": 75172.0
+    },
+    "weighted avg": {
+      "precision": 0.7741626643192853,
+      "recall": 0.7425105092321609,
+      "f1-score": 0.7531668145484732,
+      "support": 75172.0
+    }
+  },
+  "threat_tier_summary": {},
+  "clean_validation": {
+    "Benign": {
+      "precision": 0.5246503743466592,
+      "recall": 0.6105540029590663,
+      "f1-score": 0.5643519222002735,
+      "support": 6083.0
+    },
+    "DDoS": {
+      "precision": 0.903763677902922,
+      "recall": 0.8042803638309256,
+      "f1-score": 0.8511248678846445,
+      "support": 28035.0
+    },
+    "DoS": {
+      "precision": 0.5829793689320388,
+      "recall": 0.7645478961504029,
+      "f1-score": 0.6615311787235874,
+      "support": 10053.0
+    },
+    "Mirai": {
+      "precision": 0.9965932318873495,
+      "recall": 0.9901839106397382,
+      "f1-score": 0.9933782330635577,
+      "support": 8863.0
+    },
+    "Recon": {
+      "precision": 0.8254591782567151,
+      "recall": 0.6479166666666667,
+      "f1-score": 0.7259909426210374,
+      "support": 12000.0
+    },
+    "Spoofing": {
+      "precision": 0.5313909122441901,
+      "recall": 0.5445175048871512,
+      "f1-score": 0.5378741332397086,
+      "support": 5627.0
+    },
+    "Web": {
+      "precision": 0.13456147376852223,
+      "recall": 0.302158273381295,
+      "f1-score": 0.1862011637572735,
+      "support": 1112.0
+    },
+    "BruteForce": {
+      "precision": 0.28840579710144926,
+      "recall": 0.3225283630470016,
+      "f1-score": 0.3045141545524101,
+      "support": 617.0
+    },
+    "accuracy": 0.7473131648017682,
+    "macro avg": {
+      "precision": 0.5984755018049808,
+      "recall": 0.6233358726952809,
+      "f1-score": 0.6031208245053116,
+      "support": 72390.0
+    },
+    "weighted avg": {
+      "precision": 0.7797373378252707,
+      "recall": 0.7473131648017682,
+      "f1-score": 0.7581485373655203,
+      "support": 72390.0
+    }
+  },
+  "ambiguous_validation": {
+    "Benign": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 3.0
+    },
+    "DDoS": {
+      "precision": 0.7001321003963011,
+      "recall": 0.6467358145210494,
+      "f1-score": 0.6723755153821757,
+      "support": 1639.0
+    },
+    "DoS": {
+      "precision": 0.5,
+      "recall": 0.5605033881897387,
+      "f1-score": 0.5285257873117298,
+      "support": 1033.0
+    },
+    "Mirai": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "Recon": {
+      "precision": 1.0,
+      "recall": 0.6986301369863014,
+      "f1-score": 0.8225806451612904,
+      "support": 73.0
+    },
+    "Spoofing": {
+      "precision": 0.509090909090909,
+      "recall": 0.9333333333333333,
+      "f1-score": 0.6588235294117647,
+      "support": 30.0
+    },
+    "Web": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 4.0
+    },
+    "BruteForce": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 0.0
+    },
+    "accuracy": 0.6175413371675054,
+    "macro avg": {
+      "precision": 0.33865287618590123,
+      "recall": 0.35490033412880284,
+      "f1-score": 0.33528818465837007,
+      "support": 2782.0
+    },
+    "weighted avg": {
+      "precision": 0.629866728908075,
+      "recall": 0.6175413371675054,
+      "f1-score": 0.6210653130781919,
+      "support": 2782.0
+    }
+  }
+}

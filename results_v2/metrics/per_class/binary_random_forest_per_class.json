@@ -1,0 +1,84 @@
+{
+  "full_validation": {
+    "Benign": {
+      "precision": 0.4409774436090226,
+      "recall": 0.9636871508379888,
+      "f1-score": 0.6050758279170535,
+      "support": 6086.0
+    },
+    "Attack": {
+      "precision": 0.9964281096457202,
+      "recall": 0.8923805112468518,
+      "f1-score": 0.9415385085294522,
+      "support": 69086.0
+    },
+    "accuracy": 0.8981535678178045,
+    "macro avg": {
+      "precision": 0.7187027766273714,
+      "recall": 0.9280338310424203,
+      "f1-score": 0.7733071682232528,
+      "support": 75172.0
+    },
+    "weighted avg": {
+      "precision": 0.9514582704303295,
+      "recall": 0.8981535678178045,
+      "f1-score": 0.914298154751356,
+      "support": 75172.0
+    }
+  },
+  "threat_tier_summary": {},
+  "clean_validation": {
+    "Benign": {
+      "precision": 0.4417570825798674,
+      "recall": 0.9638336347197106,
+      "f1-score": 0.605838284680961,
+      "support": 6083.0
+    },
+    "Attack": {
+      "precision": 0.9962786291823134,
+      "recall": 0.8882621744310556,
+      "f1-score": 0.9391748056607534,
+      "support": 66307.0
+    },
+    "accuracy": 0.8946125155408206,
+    "macro avg": {
+      "precision": 0.7190178558810904,
+      "recall": 0.9260479045753831,
+      "f1-score": 0.7725065451708573,
+      "support": 72390.0
+    },
+    "weighted avg": {
+      "precision": 0.9496816604299624,
+      "recall": 0.8946125155408206,
+      "f1-score": 0.9111642232996527,
+      "support": 72390.0
+    }
+  },
+  "ambiguous_validation": {
+    "Benign": {
+      "precision": 0.07142857142857142,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.12903225806451613,
+      "support": 3.0
+    },
+    "Attack": {
+      "precision": 0.9996368917937546,
+      "recall": 0.990644116588701,
+      "f1-score": 0.9951201879631303,
+      "support": 2779.0
+    },
+    "accuracy": 0.990294751976995,
+    "macro avg": {
+      "precision": 0.535532731611163,
+      "recall": 0.8286553916276838,
+      "f1-score": 0.5620762230138232,
+      "support": 2782.0
+    },
+    "weighted avg": {
+      "precision": 0.998635948241959,
+      "recall": 0.990294751976995,
+      "f1-score": 0.994186232610975,
+      "support": 2782.0
+    }
+  }
+}
