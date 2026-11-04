@@ -19,7 +19,7 @@ The codebase represents a mature, two-generation research progression:
    - **Stage 1 (Data Audit)**: Audited 529,562 flows, quantifying exact duplicate records, identical-feature vectors, and 8,740 conflicting label collision hashes.
    - **Stage 2 (Partitioning)**: Implemented atomic feature-hash grouped partitioning enforcing zero vector overlap across splits (Strategy 1 Primary, Strategy 2 Purged, and Cross-Capture Clean).
    - **Stage 3 (Model Suite)**: Trained and audited 21 baseline model checkpoints across 5 phases with stateful `LeakFreePreprocessor` serialization.
-   - **Stage 4 (Evaluation)**: Evaluated all 21 models strictly read-only across Internal Test ($N=75,105$) and same-testbed Temporal Cross-Capture Test ($N=57,280$).
+   - **Stage 4 (Evaluation)**: Evaluated all 21 models strictly read-only across Internal Test (`N = 75,105`) and same-testbed Temporal Cross-Capture Test (`N = 57,280`).
    - **Stage 5 (Error Analysis)**: Comprehensive confusion, false-negative, and ablation error analysis.
    - **Stage 6 (Research Synthesis)**: Rigorous synthesis resolving scientific claims, trade-offs, and calibrated findings.
    - **Stage 7 (Literature Review)**: Deep-dive review of 14 peer-reviewed research papers and capstone technical documentation.
@@ -565,7 +565,7 @@ verify_partitions.cpython-313.pyc                                        9,329 b
 
 ### 5.2 Source Code and Pipelines (`src/`, `src_v2/`)
 - **`src_v2/data_partitioning.py`**: Stage 2 engine creating atomic feature-hash groupings and mutually disjoint partitions.
-- **`src_v2/preprocessing.py`**: Implements `LeakFreePreprocessor`, guaranteeing that finite-max capping and $z$-score scaling parameters are learned strictly on training partitions.
+- **`src_v2/preprocessing.py`**: Implements `LeakFreePreprocessor`, guaranteeing that finite-max capping and z-score scaling parameters are learned strictly on training partitions.
 - **`src_v2/models.py`**: Model architecture factory providing SGD, Random Forest, LightGBM, XGBoost, and PyTorch Tabular DNN with cost-sensitive class weighting.
 - **`src_v2/run_stage3.py`**: Training orchestrator that fits, audits RAM/duration, validates, and serializes all 21 Stage 3 model checkpoints.
 - **`src_v2/run_stage4_eval.py`**: Final read-only test evaluation runner across internal test and cross-capture test partitions.

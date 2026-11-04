@@ -33,7 +33,7 @@ An interactive Streamlit-based dashboard simulating real-time packet inspection,
 ---
 
 ### 3. Host-Side Throughput & Latency Benchmark: `benchmark_throughput.py`
-Measures single-packet latency ($\mu\text{s}$) and batch packet processing throughput (Packets Per Second) for edge models on host CPU hardware (Intel Core i5-1135G7).
+Measures single-packet latency (µs) and batch packet processing throughput (Packets Per Second) for edge models on host CPU hardware (Intel Core i5-1135G7).
 
 **Run Command**:
 ```powershell

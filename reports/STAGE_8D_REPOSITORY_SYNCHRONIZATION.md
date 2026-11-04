@@ -77,7 +77,7 @@ The following 38 core repository files were comprehensively audited and verified
 | [`paper/README.md`](../paper/README.md) | Synchronized | Updated title, documented the final 11-page compiled PDF, detailed the six 300 DPI publication figures, and added Python `typst` local compilation instructions. |
 | [`reports/README.md`](../reports/README.md) | Synchronized | Expanded the Master Trajectory table to include Stages 8C and 8D, linking all 14 chronological reports and audits. |
 | [`PROJECT_STRUCTURE.md`](../PROJECT_STRUCTURE.md) | Synchronized | Extended directory tree, functional role matrix, and Mermaid data flow architecture through Stages 8A–8D, documenting `generate_paper_figures.py` and the final PDF deliverable. |
-| [`data/README.md`](../data/README.md) | Corrected & Reconciled | Corrected the Strategy 2 purged flow count from the legacy pre-audit artifact of 54,828 rows to the certified count of 18,416 flows ($501,098 - 18,416 = 482,682$ flows). |
+| [`data/README.md`](../data/README.md) | Corrected & Reconciled | Corrected the Strategy 2 purged flow count from the legacy pre-audit artifact of 54,828 rows to the certified count of 18,416 flows (501,098 - 18,416 = 482,682 flows). |
 | [`scripts/README.md`](../scripts/README.md) | Updated | Added complete documentation and execution commands for [`scripts/generate_paper_figures.py`](../scripts/generate_paper_figures.py), and clarified host CPU hardware context for throughput benchmarks. |
 | [`results_v2/README.md`](../results_v2/README.md) | Updated | Updated note to reflect reports consolidation across Stages 1 through 8D. |
 | [`scripts/generate_paper_figures.py`](../scripts/generate_paper_figures.py) | Corrected & Audited | Reconciled all P50 latencies, throughputs, and F1 coordinates in Figure 5 against raw ledgers, and applied calibrated neutral labeling to Figures 1, 2, and 3. |
@@ -90,11 +90,11 @@ The following 38 core repository files were comprehensively audited and verified
 ## 4. Important Inconsistencies Corrected
 
 1. **Computational Profiling Telemetry Reconciled**:
-   - In preliminary drafts, task rows were shifted (e.g., Category Logistic Regression latency of 143.2 $\mu$s was mistakenly placed in Binary Logistic Regression; Binary LightGBM was listed as 1,409.8 $\mu$s instead of 1,983.3 $\mu$s; Random Forest latencies were transposed).
+   - In preliminary drafts, task rows were shifted (e.g., Category Logistic Regression latency of 143.2 µs was mistakenly placed in Binary Logistic Regression; Binary LightGBM was listed as 1,409.8 µs instead of 1,983.3 µs; Random Forest latencies were transposed).
    - *Correction*: All 15 primary configurations across SGD, PyTorch MLP, LightGBM, XGBoost, and Random Forest were cell-by-cell reconciled against [`results_v2/tables/centralized_experiment_ledger.csv`](../results_v2/tables/centralized_experiment_ledger.csv) and binary model files in [`models/active/`](../models/active/).
 2. **Strategy 2 Purged Population Arithmetic Corrected**:
    - `data/README.md` and early Stage 1/2 notes listed Strategy 2 as purging 54,828 rows.
-   - *Correction*: Verified that 54,828 was a pre-audit count. The 8,740 conflicting collision hashes account for exactly 18,416 rows in the unique stratum ($N=501,098$). Purging them leaves exactly 482,682 flows ($501,098 - 18,416 = 482,682$, partitioned into Train: 337,838; Val: 72,390; Test: 72,454).
+   - *Correction*: Verified that 54,828 was a pre-audit count. The 8,740 conflicting collision hashes account for exactly 18,416 rows in the unique stratum (N = 501,098). Purging them leaves exactly 482,682 flows (501,098 - 18,416 = 482,682, partitioned into Train: 337,838; Val: 72,390; Test: 72,454).
 3. **Cross-Capture Binary MCC Values Corrected**:
    - In preliminary drafts, cross-capture MCC values were approximated (e.g., LightGBM MCC listed as 0.4912 instead of 0.5189; Random Forest listed as 0.4850 instead of 0.5245).
    - *Correction*: Reconciled to the exact figures recorded in [`results_v2/tables/stage4_test_results.csv`](../results_v2/tables/stage4_test_results.csv).
@@ -142,7 +142,7 @@ Executed [`scripts/generate_paper_figures.py`](../scripts/generate_paper_figures
 
 ### C. Manuscript Compilation Audit
 Executed Python `typst.compile`:
-- Target: [`paper/paper.typ`](../paper/paper.typ) $\to$ [`paper/research_paper.pdf`](../paper/research_paper.pdf)
+- Target: [`paper/paper.typ`](../paper/paper.typ) → [`paper/research_paper.pdf`](../paper/research_paper.pdf)
 - Exit Code: **0 (Success)**
 - Page Count: **11 pages**
 - File Size: **3.90 MB**

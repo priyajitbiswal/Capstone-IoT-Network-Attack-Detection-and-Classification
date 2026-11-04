@@ -70,7 +70,7 @@ python -m src.create_sample
 ```
 - **Execution Time**: ~2–4 minutes depending on disk I/O.
 - **Expected Output**: `data/processed/sample_stratified.csv`
-- **Verified Record Count**: Exactly **529,562 rows** $\times$ **40 columns** (39 numerical features + 1 ground-truth `Label`).
+- **Verified Record Count**: Exactly **529,562 rows** × **40 columns** (39 numerical features + 1 ground-truth `Label`).
 - **Cryptographic Verification**:
   ```bash
   # Verify SHA-256 checksum of generated sample
@@ -87,7 +87,7 @@ python -m src.create_sample
 Execute the pipeline in the strict sequential order documented below:
 
 ### Step 1: Zero-Leakage Atomic Hash-Grouped Partitioning (Strategy 1)
-Partitions the deduplicated unique stratum ($N = 501,098$) into strictly disjoint Train (70%), Validation (15%), and Internal Test (15%) splits using SHA-256 feature-coordinate hashing with random seed 42:
+Partitions the deduplicated unique stratum (N = 501,098) into strictly disjoint Train (70%), Validation (15%), and Internal Test (15%) splits using SHA-256 feature-coordinate hashing with random seed 42:
 ```bash
 python -m src_v2.data_partitioning
 ```
@@ -98,7 +98,7 @@ python -m src_v2.data_partitioning
 - **Execution Time**: ~30 seconds.
 
 ### Step 2: Collision-Purged Partitioning (Strategy 2 Ablation)
-Purges all 8,740 conflicting-label collision coordinate hashes (18,416 rows) to construct the separable ablation stratum ($N = 482,682$):
+Purges all 8,740 conflicting-label collision coordinate hashes (18,416 rows) to construct the separable ablation stratum (N = 482,682):
 ```bash
 python -m src_v2.ablation_strategy2
 ```
@@ -147,7 +147,7 @@ python -m src_v2.run_stage3
   - XGBoost (`hist` tree method, balanced weighting)
   - PyTorch Deep MLP (3-layer feedforward architecture with batch normalization and dropout)
 - **Experimental Conditions**:
-  - Strategy 1 (Cost-sensitive class balanced weights, 3 granularities $\times$ 5 models = 15 models)
+  - Strategy 1 (Cost-sensitive class balanced weights, 3 granularities × 5 models = 15 models)
   - Strategy 2 Ablation (Collision-purged clean training, 4 models)
   - Unweighted Loss Ablation (Empirical risk minimization, 2 models)
 - **Output Checkpoints**: Saved to `models/active/` alongside fitted `RobustScaler` preprocessors.
@@ -213,9 +213,9 @@ To verify that local execution reproduced the exact published benchmark findings
 | **Fine-Grained (34-class)** | XGBoost | 72.48% | 0.6120 | 0.7314 | 0.4410 |
 
 ### Minority Attack Recall Under Class Weighting (Fine-Grained)
-- **SQL Injection Recall**: 35.83% (Cost-Sensitive Weighted) vs. 7.48% (Unweighted Loss) $\to$ **79.12% relative recall collapse**.
-- **XSS Attack Recall**: 20.22% (Cost-Sensitive Weighted) vs. 3.83% (Unweighted Loss) $\to$ **81.06% relative recall collapse**.
-- **Headline Accuracy**: 72.65% (Weighted) vs. 74.45% (Unweighted) $\to$ **+1.80% headline accuracy increase at the expense of minority detection**.
+- **SQL Injection Recall**: 35.83% (Cost-Sensitive Weighted) vs. 7.48% (Unweighted Loss) → **79.12% relative recall collapse**.
+- **XSS Attack Recall**: 20.22% (Cost-Sensitive Weighted) vs. 3.83% (Unweighted Loss) → **81.06% relative recall collapse**.
+- **Headline Accuracy**: 72.65% (Weighted) vs. 74.45% (Unweighted) → **+1.80% headline accuracy increase at the expense of minority detection**.
 
 ---
 

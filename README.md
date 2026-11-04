@@ -21,7 +21,7 @@ Recent literature on IoT Network Intrusion Detection Systems (NIDS) evaluating t
 
 This research project conducts an empirical data integrity audit and zero-leakage benchmark demonstrating that reported headline metrics can be distorted by unpartitioned identical-feature data leakage, conflicting label collisions, severe class imbalance, and an absence of cross-session temporal validation. 
 
-By introducing an open-source **Atomic SHA-256 Group-Hash Partitioning Protocol** that enforces strictly zero identical-feature overlap ($\mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{test}} = \emptyset$) alongside strict preprocessor isolation, we establish verified, leak-free diagnostic baselines across five model families and three diagnostic granularities.
+By introducing an open-source **Atomic SHA-256 Group-Hash Partitioning Protocol** that enforces strictly zero identical-feature overlap (**Train feature hashes ∩ Test feature hashes = ∅**) alongside strict preprocessor isolation, we establish verified, leak-free diagnostic baselines across five model families and three diagnostic granularities.
 
 ```
 +----------------------------------------------------------------------------------------------------+
@@ -76,7 +76,7 @@ By introducing an open-source **Atomic SHA-256 Group-Hash Partitioning Protocol*
 ## 3. Four Consolidated Research Contributions
 
 1. **Forensic Data Integrity & Leakage Audit**: Granular census of 529,562 stratified CICIoT2023 flow records: identified 11.29% feature redundancy (59,780 flows) and 8,740 conflicting-label collision hashes spanning 28,608 rows (5.40% of full sample). Proved empirically that simulated 80/20 random stratified splitting allows 81.39% of test collision instances (and 10.14% of un-deduplicated test flows) to match identical training coordinates.
-2. **Reproducible Zero-Leakage Group-Hash Partitioning Standard**: Open-source atomic SHA-256 group-hash partitioning protocol guaranteeing strictly zero identical-feature overlap ($\mathcal{X}_{\text{train}} \cap \mathcal{X}_{\text{test}} = \emptyset$) alongside strict preprocessor isolation. Demonstrated consistent generalization ($|\Delta_{\text{gen}}| \le 0.0079$) across all 21 models.
+2. **Reproducible Zero-Leakage Group-Hash Partitioning Standard**: Open-source atomic SHA-256 group-hash partitioning protocol guaranteeing strictly zero identical-feature overlap (**Train feature hashes ∩ Test feature hashes = ∅**) alongside strict preprocessor isolation. Demonstrated consistent generalization (|Δ_gen| ≤ 0.0079) across all 21 models.
 3. **Empirical Analysis of Ambiguity Filtering Mechanics**: Evaluated classifier sensitivity to conflicting label noise. Decomposed validation on 72,390 common-clean instances demonstrates that purging collision vectors yields a marginal +0.0022 Macro-F1 improvement (+0.22%), while classifiers achieve ~41.73% accuracy on isolated ambiguous vectors due to the non-injective nature of the stripped feature space.
 4. **Quantitative Trade-Offs: Minority Recall Collapse & Temporal Non-Stationarity**: Quantified the operational trade-offs of class weighting: unweighted training raises headline accuracy by +1.80% but triggers a 79% to 82% relative recall reduction on minority web attacks (SQLi, XSS, PingSweep) and surges false negatives to Benign by +125.31%. Furthermore, temporal evaluation across distinct physical capture sessions reveals measurable degradation (binary Macro-F1 drops from 0.7637 to 0.7034).
 
@@ -91,7 +91,7 @@ All formal stage reports, consistency audits, verification documents, and bluepr
 | **Stage 1** | [`reports/STAGE_1_AUDIT_REPORT.md`](reports/STAGE_1_AUDIT_REPORT.md) | Forensic dataset audit; identified 8,740 conflicting feature-label collision hashes. |
 | **Stage 2** | [`reports/STAGE_2_INVESTIGATION_REPORT.md`](reports/STAGE_2_INVESTIGATION_REPORT.md) | Zero-leakage atomic hash partitioning protocol & temporal cross-capture design. |
 | **Stage 3** | [`reports/STAGE_3_COMPLETE_REPORT.md`](reports/STAGE_3_COMPLETE_REPORT.md) | Training of 21 model checkpoints, preprocessor isolation, and decomposed validation. |
-| **Stage 4** | [`reports/STAGE_4_EVALUATION_REPORT.md`](reports/STAGE_4_EVALUATION_REPORT.md) | Read-only dual-test evaluation across Internal Test ($N=75,105$) and Cross-Capture ($N=57,280$). |
+| **Stage 4** | [`reports/STAGE_4_EVALUATION_REPORT.md`](reports/STAGE_4_EVALUATION_REPORT.md) | Read-only dual-test evaluation across Internal Test (N = 75,105) and Cross-Capture (N = 57,280). |
 | **Stage 5** | [`reports/STAGE_5_ERROR_ANALYSIS.md`](reports/STAGE_5_ERROR_ANALYSIS.md) | Fine-grained error analysis, confusion topology, and class weighting ablations. |
 | **Stage 6** | [`reports/STAGE_6_RESEARCH_SYNTHESIS.md`](reports/STAGE_6_RESEARCH_SYNTHESIS.md) | Calibrated scientific claims synthesis, trade-offs, and boundary definitions. |
 | **Stage 7** | [`reports/STAGE_7_LITERATURE_REVIEW.md`](reports/STAGE_7_LITERATURE_REVIEW.md) | Systematic review of 14 peer-reviewed IoT NIDS studies (2021–2026). |
@@ -106,7 +106,7 @@ All formal stage reports, consistency audits, verification documents, and bluepr
 
 ## 5. Master Benchmark Results Across 21 Models
 
-All metrics are evaluated on the strictly isolated, zero-leakage **Internal Test Set ($N = 75,105$)**:
+All metrics are evaluated on the strictly isolated, zero-leakage **Internal Test Set (N = 75,105)**:
 
 | Diagnostic Task | Model Architecture | Partition Strategy | Val Macro-F1 | Test Accuracy | Test Macro-F1 | Test MCC | Test ROC-AUC | Test Macro-AP |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -138,7 +138,7 @@ All metrics are evaluated on the strictly isolated, zero-leakage **Internal Test
 
 Measured on host CPU hardware (**Intel Core i5-1135G7 @ 2.40GHz**, single-thread inference):
 
-| Task Granularity | Model Architecture | P50 Latency ($\mu$s) | P95 Latency ($\mu$s) | Batch Throughput (flows/s) | Peak RSS (MB) | On-Disk Model Size |
+| Task Granularity | Model Architecture | P50 Latency (µs) | P95 Latency (µs) | Batch Throughput (flows/s) | Peak RSS (MB) | On-Disk Model Size |
 |---|---|:---:|:---:|:---:|:---:|:---:|
 | **Binary (2-Class)** | SGD Logistic Regression | **362.1** | 518.2 | **8,325,000** | 481.7 | <0.01 MB (1.3 KB) |
 | Binary | PyTorch Tabular MLP | 247.1 | 557.3 | 163,500 | 650.9 | 0.06 MB (63.3 KB) |
@@ -209,7 +209,7 @@ pip install -r requirements.txt
 ```
 
 ### 3. Re-run Stage 4 Read-Only Test Evaluation
-Evaluates all 21 pre-trained Stage 3 checkpoints on the Internal Test set ($N=75,105$) and Cross-Capture Test set ($N=57,280$) in strictly read-only mode:
+Evaluates all 21 pre-trained Stage 3 checkpoints on the Internal Test set (N = 75,105) and Cross-Capture Test set (N = 57,280) in strictly read-only mode:
 ```powershell
 .\.venv\Scripts\python.exe -m src_v2.run_stage4_eval
 ```

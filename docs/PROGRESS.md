@@ -176,8 +176,8 @@ graph TD
 
 ### Step 7: Senior Research Optimizations & Literature Reconciliation
 - [x] **Task 7.1**: Loss & Class Weighting Calibration (`experiments/weight_calibration.py`):
-  - Proved naive inverse balanced weights ($1,000\times$ penalty) distort split boundaries.
-  - Implemented square-root dampened weights ($w_c \propto \sqrt{N / (K \cdot N_c)}$), yielding **+1.27% accuracy** (74.33%) and **+1.92% precision**.
+  - Proved naive inverse balanced weights (1,000× penalty) distort split boundaries.
+  - Implemented square-root dampened weights (`w_c ∝ √(N / (K · N_c))`), yielding **+1.27% accuracy** (74.33%) and **+1.92% precision**.
 - [x] **Task 7.2**: Hyperparameter Optimization & Capacity Analysis (`experiments/hyperparameter_tuning.py`):
   - Benchmarked tree depth (31 to 127 leaves) and sub-sampling based on the *Optimized Gradient Boosting Framework* paper.
   - Demonstrated that moderate depth (`max_depth=6-8`, `num_leaves=31-45`) achieves optimal generalization, while XGBoost Hist delivers **19.5 &mu;s latency** (2.3&times; faster than LightGBM).

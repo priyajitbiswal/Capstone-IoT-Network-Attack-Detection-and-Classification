@@ -48,9 +48,9 @@ python -m src.create_sample
 ## Partitioning Integrity & Zero Leakage
 
 To eliminate identical-feature data leakage, flows are hashed using SHA-256 over their 39 numerical features:
-1. **Strategy 1 (Primary Benchmark, N = 501,098)**: Feature hashes are grouped atomically after exact duplicate row removal ($28,464$ rows). All flows sharing an identical feature vector reside in exactly one partition (Train: 350,821; Val: 75,172; Test: 75,105). Strictly zero identical-feature coordinate overlap exists between splits. Strategy 1 retains real-world network ambiguity (including 8,740 conflicting label collision hashes).
-2. **Strategy 2 (Collision-Purged Ablation, N = 482,682)**: All 8,740 unique feature hashes associated with conflicting labels across classes ($18,416$ flows in the unique stratum; $28,608$ rows in the full sample) are completely purged from the dataset (Train: 337,838; Val: 72,390; Test: 72,454).
-3. **Cross-Capture Clean Test (N = 57,280)**: Sampled from subsequent recording sessions on the same physical IoT testbed (`Merged26.csv` through `Merged40.csv`), and filtered to remove any feature hashes present in the training set ($0.00\%$ feature overlap).
+1. **Strategy 1 (Primary Benchmark, N = 501,098)**: Feature hashes are grouped atomically after exact duplicate row removal (28,464 rows). All flows sharing an identical feature vector reside in exactly one partition (Train: 350,821; Val: 75,172; Test: 75,105). Strictly zero identical-feature coordinate overlap exists between splits. Strategy 1 retains real-world network ambiguity (including 8,740 conflicting label collision hashes).
+2. **Strategy 2 (Collision-Purged Ablation, N = 482,682)**: All 8,740 unique feature hashes associated with conflicting labels across classes (18,416 flows in the unique stratum; 28,608 rows in the full sample) are completely purged from the dataset (Train: 337,838; Val: 72,390; Test: 72,454).
+3. **Cross-Capture Clean Test (N = 57,280)**: Sampled from subsequent recording sessions on the same physical IoT testbed (`Merged26.csv` through `Merged40.csv`), and filtered to remove any feature hashes present in the training set (0.00% feature overlap).
 
 > [!NOTE]
 > All raw CSVs, processed samples, and partition assignment tables are gitignored to preserve bandwidth and repository hygiene. They are generated deterministically via [`src_v2/data_partitioning.py`](../src_v2/data_partitioning.py) and [`src_v2/cross_capture.py`](../src_v2/cross_capture.py).

@@ -21,17 +21,17 @@ Every single computational profiling metric (single-flow P50/P95 latencies, batc
 In the preliminary Stage 8C draft, several task rows in the computational profiling table and Pareto figure were transposed or generalized. We performed a cell-by-cell reconciliation against [`results_v2/tables/centralized_experiment_ledger.csv`](../results_v2/tables/centralized_experiment_ledger.csv) and individual model artifacts in [`models/active/`](../models/active/):
 
 1. **Logistic Regression (SGD)**:
-   - *Binary*: P50 latency corrected to **362.10 $\mu$s** (was 143.0 $\mu$s), P95 corrected to **518.20 $\mu$s**, throughput to **8,325,008 flows/s**, peak RSS to **481.7 MB**, on-disk size to **1.3 KB** (<0.01 MB).
-   - *Category*: P50 latency corrected to **143.20 $\mu$s** (was 198.0 $\mu$s), P95 to **247.50 $\mu$s**, throughput to **8,007,687 flows/s**, peak RSS to **484.7 MB**, on-disk size to **2.5 KB** (<0.01 MB).
-   - *Fine-Grained*: P50 latency corrected to **189.70 $\mu$s** (was 362.0 $\mu$s), P95 to **495.91 $\mu$s**, throughput to **2,901,494 flows/s**, peak RSS to **482.8 MB**, on-disk size to **7.1 KB** (<0.01 MB).
+   - *Binary*: P50 latency corrected to **362.10 µs** (was 143.0 µs), P95 corrected to **518.20 µs**, throughput to **8,325,008 flows/s**, peak RSS to **481.7 MB**, on-disk size to **1.3 KB** (<0.01 MB).
+   - *Category*: P50 latency corrected to **143.20 µs** (was 198.0 µs), P95 to **247.50 µs**, throughput to **8,007,687 flows/s**, peak RSS to **484.7 MB**, on-disk size to **2.5 KB** (<0.01 MB).
+   - *Fine-Grained*: P50 latency corrected to **189.70 µs** (was 362.0 µs), P95 to **495.91 µs**, throughput to **2,901,494 flows/s**, peak RSS to **482.8 MB**, on-disk size to **7.1 KB** (<0.01 MB).
 2. **LightGBM**:
-   - *Binary*: P50 latency corrected to **1,983.30 $\mu$s** (was 1,409.0 $\mu$s), P95 to **2,227.05 $\mu$s**, throughput to **938,430 flows/s**, peak RSS to **494.7 MB**, on-disk size to **360.9 KB** (0.36 MB).
-   - *Category*: P50 latency corrected to **1,409.80 $\mu$s** (was 2,180.0 $\mu$s), P95 to **1,852.12 $\mu$s**, throughput to **92,413 flows/s**, peak RSS to **484.8 MB**, on-disk size to **2.81 MB**.
-   - *Fine-Grained*: P50 latency verified at **3,504.40 $\mu$s**, P95 at **4,882.83 $\mu$s**, throughput at **10,989 flows/s**, peak RSS at **493.8 MB**, on-disk size at **11.88 MB**.
+   - *Binary*: P50 latency corrected to **1,983.30 µs** (was 1,409.0 µs), P95 to **2,227.05 µs**, throughput to **938,430 flows/s**, peak RSS to **494.7 MB**, on-disk size to **360.9 KB** (0.36 MB).
+   - *Category*: P50 latency corrected to **1,409.80 µs** (was 2,180.0 µs), P95 to **1,852.12 µs**, throughput to **92,413 flows/s**, peak RSS to **484.8 MB**, on-disk size to **2.81 MB**.
+   - *Fine-Grained*: P50 latency verified at **3,504.40 µs**, P95 at **4,882.83 µs**, throughput at **10,989 flows/s**, peak RSS at **493.8 MB**, on-disk size at **11.88 MB**.
 3. **Random Forest**:
-   - *Binary*: P50 latency corrected to **70,883.05 $\mu$s** (70.88 ms), P95 to **123,496.32 $\mu$s**, throughput to **62,403 flows/s**, peak RSS to **498.9 MB**, on-disk size to **12.35 MB**.
-   - *Category*: P50 latency corrected to **22,467.45 $\mu$s** (22.47 ms), P95 to **41,428.45 $\mu$s**, throughput to **330,334 flows/s**, peak RSS to **526.9 MB**, on-disk size to **36.47 MB**.
-   - *Fine-Grained*: P50 latency corrected to **31,296.10 $\mu$s** (31.30 ms), P95 to **46,911.10 $\mu$s**, throughput to **157,485 flows/s**, peak RSS to **572.6 MB**, on-disk size to **95.65 MB**.
+   - *Binary*: P50 latency corrected to **70,883.05 µs** (70.88 ms), P95 to **123,496.32 µs**, throughput to **62,403 flows/s**, peak RSS to **498.9 MB**, on-disk size to **12.35 MB**.
+   - *Category*: P50 latency corrected to **22,467.45 µs** (22.47 ms), P95 to **41,428.45 µs**, throughput to **330,334 flows/s**, peak RSS to **526.9 MB**, on-disk size to **36.47 MB**.
+   - *Fine-Grained*: P50 latency corrected to **31,296.10 µs** (31.30 ms), P95 to **46,911.10 µs**, throughput to **157,485 flows/s**, peak RSS to **572.6 MB**, on-disk size to **95.65 MB**.
 4. **PyTorch Tabular MLP & XGBoost**:
    - Reconciled exact throughputs, latencies, and on-disk model footprints across all three granularities (e.g., PyTorch MLP peak RSS is 638.6–650.9 MB; XGBoost sizes scale from 0.26 MB binary to 8.67 MB fine-grained).
 5. **Removal of Wire-Speed Claims**:
@@ -42,13 +42,13 @@ Claims regarding identical-feature data leakage and feature space collisions wer
 1. *Empirical Overlap vs. Memorization*: Documented precisely as 81.39% of test collision instances matching training coordinates under an unpartitioned 80/20 random split (representing 3.06% of the unique stratum test set and 10.14% of the un-deduplicated test set). The manuscript clarifies that this overlap creates an *empirical opportunity* or *potential* for coordinate memorization rather than definitively proving that a specific classifier relied upon coordinate lookup.
 2. *Empirical Collision Space Taxonomy*: Replaced legacy unverified claims (such as "48.2% of collision flows involve BenignTraffic") with exact empirical counts from `data/processed/sample_stratified.csv`:
    - Out of 8,740 conflicting feature hashes (28,608 flows in full sample), **96.49% of hashes (8,433 hashes, 26,697 flows; 93.32% of collision flows)** are DoS versus DDoS floods sharing identical protocols (TCP, SYN, UDP, and SynonymousIP).
-   - In contrast, collisions involving `BenignTraffic` are minimal: only **41 unique hashes (0.47% of collision hashes)** spanning **621 flows (2.17% of collision flows; 0.11% of the total dataset)**, primarily standard ARP vs. spoofed ARP (`BenignTraffic` $\leftrightarrow$ `MITM-ArpSpoofing`).
+   - In contrast, collisions involving `BenignTraffic` are minimal: only **41 unique hashes (0.47% of collision hashes)** spanning **621 flows (2.17% of collision flows; 0.11% of the total dataset)**, primarily standard ARP vs. spoofed ARP (`BenignTraffic` ↔ `MITM-ArpSpoofing`).
 3. *Hypothesized Mechanism for Flooding Collisions*: The removal of IP addresses, MAC addresses, and timestamps during benchmark feature extraction was framed as a *hypothesized contributing factor* that eliminates source-entropy indicators distinguishing single-source floods from distributed botnets, rather than an absolute factual cause.
 4. *Non-Generalization to Prior Literature*: Removed assertions that all published near-perfect (>99%) accuracies were caused by leakage. Acknowledged that class imbalance (majority floods comprising >85% of traffic) and varied subsampling strategies also contribute to published headline metrics.
 
 ### C. Model Robustness & Ambiguity Filtering Language
 - Removed sweeping assertions that GBDTs are "inherently robust to conflicting-label noise".
-- Replaced with factual empirical observations: on the common-clean validation set ($N = 72,390$), training on collision-purged data (Strategy 2) improved LightGBM Macro-F1 by only +0.0022 (+0.22%) and cross-capture Macro-F1 by +0.0013 (+0.13%) relative to Strategy 1, demonstrating that in this feature space and under the evaluated tree depth and leaf regularization parameters, training-set collisions had a minor numerical impact on clean validation performance.
+- Replaced with factual empirical observations: on the common-clean validation set (N = 72,390), training on collision-purged data (Strategy 2) improved LightGBM Macro-F1 by only +0.0022 (+0.22%) and cross-capture Macro-F1 by +0.0013 (+0.13%) relative to Strategy 1, demonstrating that in this feature space and under the evaluated tree depth and leaf regularization parameters, training-set collisions had a minor numerical impact on clean validation performance.
 - Described the observed ~41.73% accuracy on isolated collision instances as a consequence of the non-injective tabular feature space, explicitly refraining from labeling it theoretical Bayes error.
 
 ### D. Benchmark Tables & Metric Separation
@@ -56,19 +56,19 @@ All metrics across Table 4 (Master Benchmark), Table 5 (Ambiguity Routing), Tabl
 - *Binary XGBoost*: Val Acc 88.00%, Test Acc 87.79%, Test F1 0.7462, MCC 0.5785, ROC-AUC 0.9731, Macro-AP 0.9977.
 - *Binary LightGBM Strategy 2*: Val Acc 89.13%, Test Acc 89.39%, Test F1 0.7668, MCC 0.6045, ROC-AUC 0.9751, Macro-AP 0.9978.
 - *Cross-Capture Binary MCC*: Reconciled to exact ledger values (LightGBM: 0.5189; Random Forest: 0.5245; XGBoost: 0.4898; SGD: 0.4104).
-- *Strict Separation*: Validation, internal test ($N=75,105$), and cross-capture clean holdout ($N=57,280$) metrics remain segregated into independent tables and sections.
+- *Strict Separation*: Validation, internal test (N = 75,105), and cross-capture clean holdout (N = 57,280) metrics remain segregated into independent tables and sections.
 
 ### E. Cross-Capture Multiclass Interpretation & Prevalence Shift
-- Calibrated the interpretation of cross-capture Macro-F1: fine-grained LightGBM Macro-F1 increased from 0.6145 to 0.6498 (+0.0353) *partly associated with changes in class prevalence and support* between capture sessions (rare web attack support surged 3.2$\times$ to 5.2$\times$ in `Merged26`–`Merged40`, mechanically inflating per-class precision and F1 for those minority classes).
+- Calibrated the interpretation of cross-capture Macro-F1: fine-grained LightGBM Macro-F1 increased from 0.6145 to 0.6498 (+0.0353) *partly associated with changes in class prevalence and support* between capture sessions (rare web attack support surged 3.2× to 5.2× in `Merged26`–`Merged40`, mechanically inflating per-class precision and F1 for those minority classes).
 - Explicitly highlighted that global accuracy dropped by -3.01%, MCC dropped by -0.0309, and Benign F1 dropped by -0.0190, disproving any claim of improved domain transferability.
 
 ### F. Computational Profiling Methodology & Calibrated Tone
 - **Disentangling Single-Flow Latency and Batch Throughput**: Documented the host CPU profiling methodology in Section 6.4, clarifying that sequential unbatched single-flow evaluation measures end-to-end host latency (including Python/framework dispatch overhead), whereas batch throughput is measured over pre-allocated in-memory NumPy arrays (amortizing dispatch overhead). Clarified that batch throughput does not represent single-flow latency or network interface line rate.
-- **Duplication Table Arithmetic**: Clarified the population categories in Table 2, distinguishing between distinct 39-feature coordinate vectors ($cal(X) = 491,422$), single-label feature vectors / flows in the unique stratum (482,682), conflicting-label hashes (8,740) spanning 18,416 flows, and the collision-purged population ($501,098 - 18,416 = 482,682$ flows).
+- **Duplication Table Arithmetic**: Clarified the population categories in Table 2, distinguishing between distinct 39-feature coordinate vectors (cal(X) = 491,422), single-label feature vectors / flows in the unique stratum (482,682), conflicting-label hashes (8,740) spanning 18,416 flows, and the collision-purged population (501,098 - 18,416 = 482,682 flows).
 - **Calibrated Scientific Tone**: Replaced phrases exceeding the evidence:
-  - "This confirms ... the true difficulty" $\to$ "This indicates consistent partition alignment and suggests that baseline performance reflects the difficulty of separating non-injective tabular flow coordinates when identical-feature leakage is eliminated."
-  - "realistic diagnostic baselines" $\to$ "leak-free diagnostic baselines" / "diagnostic performance baselines".
-  - "frequently report classification accuracies consistently spanning 98.5% to 99.9%" $\to$ "several recent peer-reviewed studies report classification accuracies ranging from 98.5% to 99.9% under their respective evaluation protocols".
+  - "This confirms ... the true difficulty" → "This indicates consistent partition alignment and suggests that baseline performance reflects the difficulty of separating non-injective tabular flow coordinates when identical-feature leakage is eliminated."
+  - "realistic diagnostic baselines" → "leak-free diagnostic baselines" / "diagnostic performance baselines".
+  - "frequently report classification accuracies consistently spanning 98.5% to 99.9%" → "several recent peer-reviewed studies report classification accuracies ranging from 98.5% to 99.9% under their respective evaluation protocols".
 
 ---
 
@@ -76,9 +76,9 @@ All metrics across Table 4 (Master Benchmark), Table 5 (Ambiguity Routing), Tabl
 
 | Metric / Parameter | Population / Split | Ground Truth Ledger Value | Manuscript Value | Status |
 |---|---|---|---|---|
-| Full Sample Size ($N_{\text{full}}$) | Full Dataset Sample | 529,562 flows | 529,562 flows | Verified |
+| Full Sample Size (N_full) | Full Dataset Sample | 529,562 flows | 529,562 flows | Verified |
 | Exact Duplicate Rows | Full Dataset Sample | 28,464 flows (5.38%) | 28,464 flows (5.38%) | Verified |
-| Unique Stratum Size ($N_{\text{unique}}$) | Deduplicated Stratum | 501,098 flows (94.62%) | 501,098 flows (94.62%) | Verified |
+| Unique Stratum Size (N_unique) | Deduplicated Stratum | 501,098 flows (94.62%) | 501,098 flows (94.62%) | Verified |
 | Distinct 39-Feature Vectors | Full Dataset Sample | 491,422 coordinates | 491,422 coordinates | Verified |
 | Repeated Feature Vectors | Full Dataset Sample | 59,780 flows (11.29%) | 59,780 flows (11.29%) | Verified |
 | Conflicting Collision Hashes | Full & Unique Strata | 8,740 unique hashes | 8,740 unique hashes | Verified |
@@ -86,21 +86,21 @@ All metrics across Table 4 (Master Benchmark), Table 5 (Ambiguity Routing), Tabl
 | Collision Rows in Unique Stratum | Unique Stratum | 18,416 flows (3.68%) | 18,416 flows (3.68%) | Verified |
 | Collision Purged Dataset (S2) | Strategy 2 Full Set | 482,682 flows | 482,682 flows | Verified |
 | Random-Split Collision Leakage | Unique Stratum (Seed 42) | 81.39% (3,071 / 3,773) | 81.39% | Verified |
-| Random-Split Collision Leakage | Unique Stratum (5-Seed Mean)| 82.58% $\pm$ 1.05% | 82.58% $\pm$ 1.05% | Verified |
+| Random-Split Collision Leakage | Unique Stratum (5-Seed Mean)| 82.58% ± 1.05% | 82.58% ± 1.05% | Verified |
 | Total Random-Split Test Leakage | Full Sample (Seed 42) | 10.14% (10,738 / 105,913)| 10.14% | Verified |
-| Top Binary Accuracy & F1 | Internal Test ($N=75,105$) | RF: 89.61%, Macro-F1: 0.7690 | 89.61%, 0.7690 | Verified |
-| Second Binary Accuracy & F1 | Internal Test ($N=75,105$) | LGBM: 89.15%, Macro-F1: 0.7637| 89.15%, 0.7637 | Verified |
-| Top Category Accuracy & F1 | Internal Test ($N=75,105$) | LGBM: 78.93%, Macro-F1: 0.6894| 78.93%, 0.6894 | Verified |
-| Top Fine-Grained Accuracy & F1 | Internal Test ($N=75,105$) | LGBM: 72.65%, Macro-F1: 0.6145| 72.65%, 0.6145 | Verified |
-| Generalization Gap Bound | Internal Val vs. Test | $|\Delta_{\text{gen}}| \le 0.0079$ | $|\Delta_{\text{gen}}| \le 0.0079$ | Verified |
-| Clean Validation Delta (S1 vs S2)| Common-Clean ($N=72,390$) | $\Delta = +0.0022$ Macro-F1 | +0.0022 (+0.22%) | Verified |
-| Ambiguous Validation Accuracy | Ambiguous Subset ($N=2,782$) | 41.73% accuracy | 41.73% | Verified |
-| Class Weighting Accuracy Change | Internal Test ($N=75,105$) | 72.65% $\to$ 74.45% (+1.80%) | +1.80% | Verified |
-| SQL Injection Recall Change | Internal Test ($N=75,105$) | 35.83% $\to$ 7.48% (-79.12%) | -79.12% | Verified |
-| Recon-PingSweep Recall Change | Internal Test ($N=75,105$) | 26.40% $\to$ 4.80% (-81.82%) | -81.82% | Verified |
-| XSS Recall Change | Internal Test ($N=75,105$) | 20.22% $\to$ 3.83% (-81.08%) | -81.08% | Verified |
-| False Negatives to Benign Surge | Internal Test ($N=75,105$) | 1,517 $\to$ 3,418 flows (+125.31%)| +125.31% | Verified |
-| Binary Cross-Capture Degradation| Cross Holdout ($N=57,280$) | LGBM F1: 0.7637 $\to$ 0.7034 | -0.0603 | Verified |
+| Top Binary Accuracy & F1 | Internal Test (N = 75,105) | RF: 89.61%, Macro-F1: 0.7690 | 89.61%, 0.7690 | Verified |
+| Second Binary Accuracy & F1 | Internal Test (N = 75,105) | LGBM: 89.15%, Macro-F1: 0.7637| 89.15%, 0.7637 | Verified |
+| Top Category Accuracy & F1 | Internal Test (N = 75,105) | LGBM: 78.93%, Macro-F1: 0.6894| 78.93%, 0.6894 | Verified |
+| Top Fine-Grained Accuracy & F1 | Internal Test (N = 75,105) | LGBM: 72.65%, Macro-F1: 0.6145| 72.65%, 0.6145 | Verified |
+| Generalization Gap Bound | Internal Val vs. Test | |Δ_gen| ≤ 0.0079 | |Δ_gen| ≤ 0.0079 | Verified |
+| Clean Validation Delta (S1 vs S2)| Common-Clean (N = 72,390) | Δ = +0.0022 Macro-F1 | +0.0022 (+0.22%) | Verified |
+| Ambiguous Validation Accuracy | Ambiguous Subset (N = 2,782) | 41.73% accuracy | 41.73% | Verified |
+| Class Weighting Accuracy Change | Internal Test (N = 75,105) | 72.65% → 74.45% (+1.80%) | +1.80% | Verified |
+| SQL Injection Recall Change | Internal Test (N = 75,105) | 35.83% → 7.48% (-79.12%) | -79.12% | Verified |
+| Recon-PingSweep Recall Change | Internal Test (N = 75,105) | 26.40% → 4.80% (-81.82%) | -81.82% | Verified |
+| XSS Recall Change | Internal Test (N = 75,105) | 20.22% → 3.83% (-81.08%) | -81.08% | Verified |
+| False Negatives to Benign Surge | Internal Test (N = 75,105) | 1,517 → 3,418 flows (+125.31%)| +125.31% | Verified |
+| Binary Cross-Capture Degradation| Cross Holdout (N = 57,280) | LGBM F1: 0.7637 → 0.7034 | -0.0603 | Verified |
 
 ---
 

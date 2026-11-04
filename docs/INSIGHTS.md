@@ -54,7 +54,7 @@ Attempting to load all 63 raw CSV files concurrently caused Out-Of-Memory (OOM) 
   - Final working dataset: **529,562 rows &times; 40 columns** (106.5 MB), perfectly balanced for multi-class research.
 
 ### 3. Data Cleaning & Numerical Sanitization
-- **Infinite Packet Rate**: Flows with duration tending to zero ($dt \to 0$) yielded 19 `inf` values in the `Rate` column. These were capped to the maximum observed finite rate ($3,355,443.2 \text{ packets/sec}$).
+- **Infinite Packet Rate**: Flows with duration tending to zero (`dt → 0`) yielded 19 `inf` values in the `Rate` column. These were capped to the maximum observed finite rate (3,355,443.2 packets/sec).
 - **Single-Packet Windows**: Features measuring sample standard deviation (`Std`) or variance (`Variance`) produced `NaN` for single-packet flows. These were cleanly imputed to `0.0`.
 - **Zero-Leakage Preprocessing**: Feature scaling (`StandardScaler`) was strictly fitted on the training split (80% / 423,649 rows) and applied to the test split (20% / 105,913 rows).
 
@@ -236,7 +236,11 @@ To reconcile our balanced dataset findings with papers in *IEEE Access*, *Nature
 
 ### 2. The Literature Accuracy Paradox Deconstructed
 When evaluated on raw traffic where DDoS/DoS floods comprise over 85% of flows:
-$$\text{Accuracy} = \frac{TP_{\text{Flood}} + TP_{\text{Benign}} + TP_{\text{Exploits}}}{N_{\text{Total}}} \approx \frac{TP_{\text{Flood}}}{N_{\text{Total}}}$$
+
+```
+Accuracy = (TP_Flood + TP_Benign + TP_Exploits) / N_Total ≈ TP_Flood / N_Total
+```
+
 A model can score **98.6% overall accuracy** while missing **100% of brute force and web exploits** (0% recall), because rare attacks make up only 0.02% of natural traffic. Literature papers celebrate this headline accuracy while leaving IoT networks completely unprotected against targeted penetration.
 
 ---
@@ -245,9 +249,9 @@ A model can score **98.6% overall accuracy** while missing **100% of brute force
 
 ### 1. The Physical Layer Ethernet Constraints
 Intrusion detection at the network perimeter is governed by hardware line-rate math:
-- **1500-Byte Standard MTU**: $10\text{ Gbps} / (1500 \times 8) = \mathbf{833,333\text{ pps}}$ (budget: $\le 1.20\text{ us/packet}$).
-- **512-Byte Average IoT Frame**: $10\text{ Gbps} / (512 \times 8) = \mathbf{2,441,406\text{ pps}}$ (budget: $\le 0.41\text{ us/packet}$).
-- **64-Byte Minimum Ethernet Frame**: $10\text{ Gbps} / (64 \times 8) = \mathbf{19,531,250\text{ pps}}$ (budget: $\le 0.051\text{ us/packet}$).
+- **1500-Byte Standard MTU**: 10 Gbps / (1500 × 8) = **833,333 pps** (budget: ≤ 1.20 µs/packet).
+- **512-Byte Average IoT Frame**: 10 Gbps / (512 × 8) = **2,441,406 pps** (budget: ≤ 0.41 µs/packet).
+- **64-Byte Minimum Ethernet Frame**: 10 Gbps / (64 × 8) = **19,531,250 pps** (budget: ≤ 0.051 µs/packet).
 
 ### 2. Empirical Benchmark Across All Pipeline Models (`benchmark_throughput.py`)
 Evaluated across 20,000 live evaluation flows with DMA ring-buffer burst profiling (`burst_size=64`):

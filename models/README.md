@@ -34,7 +34,7 @@ models/
    - Preserves unscaled feature values for tree models (Random Forest, LightGBM, XGBoost).
 2. **Inference Pipeline**:
    - `clean_transform(df)` &rarr; replaces infinities with training maximums, fills NaNs with zeros.
-   - `transform_scaler(X)` &rarr; applies StandardScaler $z$-score transformation (for scaled models only).
+   - `transform_scaler(X)` &rarr; applies StandardScaler z-score transformation (for scaled models only).
 
 > [!IMPORTANT]
 > Model binaries (`*.joblib`, `*.pt`, `*.pkl`) are gitignored to preserve bandwidth and repository cleanliness.
