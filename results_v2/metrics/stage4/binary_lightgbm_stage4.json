@@ -1,0 +1,92 @@
+{
+  "experiment_id": "binary_lightgbm",
+  "target_type": "binary",
+  "model_name": "lightgbm",
+  "strategy": "Strategy 1 (Primary)",
+  "internal_test_metrics": {
+    "accuracy": 0.89151,
+    "macro_f1": 0.76371,
+    "weighted_f1": 0.90963,
+    "mcc": 0.60074,
+    "macro_precision": 0.71028,
+    "macro_recall": 0.92905,
+    "macro_ap_ovr": 0.99783,
+    "roc_auc_ovr": 0.9751,
+    "per_class_report": {
+      "Benign": {
+        "precision": 0.42314634322431594,
+        "recall": 0.9737497923243064,
+        "f1-score": 0.5899345747357826,
+        "support": 6019.0
+      },
+      "Attack": {
+        "precision": 0.9974205766154047,
+        "recall": 0.8843470457111426,
+        "f1-score": 0.9374865735767991,
+        "support": 69086.0
+      },
+      "accuracy": 0.8915118833632913,
+      "macro avg": {
+        "precision": 0.7102834599198603,
+        "recall": 0.9290484190177245,
+        "f1-score": 0.7637105741562908,
+        "support": 75105.0
+      },
+      "weighted avg": {
+        "precision": 0.9513975873233341,
+        "recall": 0.8915118833632913,
+        "f1-score": 0.9096333616598286,
+        "support": 75105.0
+      }
+    },
+    "threat_tier_summary": {}
+  },
+  "cross_capture_metrics": {
+    "accuracy": 0.83479,
+    "macro_f1": 0.70344,
+    "weighted_f1": 0.86648,
+    "mcc": 0.51894,
+    "macro_precision": 0.66943,
+    "macro_recall": 0.89736,
+    "macro_ap_ovr": 0.99643,
+    "roc_auc_ovr": 0.96327,
+    "per_class_report": {
+      "Benign": {
+        "precision": 0.3419623333568456,
+        "recall": 0.9731031714171016,
+        "f1-score": 0.5060806931468239,
+        "support": 4982.0
+      },
+      "Attack": {
+        "precision": 0.9968911676681438,
+        "recall": 0.8216184175303071,
+        "f1-score": 0.9008081676292702,
+        "support": 52298.0
+      },
+      "accuracy": 0.8347939944134078,
+      "macro avg": {
+        "precision": 0.6694267505124947,
+        "recall": 0.8973607944737043,
+        "f1-score": 0.703444430388047,
+        "support": 57280.0
+      },
+      "weighted avg": {
+        "precision": 0.9399279090693503,
+        "recall": 0.8347939944134078,
+        "f1-score": 0.8664762493703396,
+        "support": 57280.0
+      }
+    },
+    "threat_tier_summary": {}
+  },
+  "generalization_deltas": {
+    "delta_accuracy_test_vs_val": -0.00124,
+    "delta_macro_f1_test_vs_val": -0.00284,
+    "delta_mcc_test_vs_val": -0.00383
+  },
+  "domain_shift_deltas": {
+    "delta_accuracy_cross_vs_test": -0.05672,
+    "delta_macro_f1_cross_vs_test": -0.06027,
+    "delta_mcc_cross_vs_test": -0.0818
+  }
+}

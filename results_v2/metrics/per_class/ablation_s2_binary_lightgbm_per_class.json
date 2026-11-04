@@ -1,0 +1,58 @@
+{
+  "full_validation": {
+    "Benign": {
+      "precision": 0.43426470588235294,
+      "recall": 0.9709025152063127,
+      "f1-score": 0.6001117715795357,
+      "support": 6083.0
+    },
+    "Attack": {
+      "precision": 0.9969892838918183,
+      "recall": 0.8839639857028669,
+      "f1-score": 0.937080825279583,
+      "support": 66307.0
+    },
+    "accuracy": 0.8912695123635861,
+    "macro avg": {
+      "precision": 0.7156269948870856,
+      "recall": 0.9274332504545898,
+      "f1-score": 0.7685962984295593,
+      "support": 72390.0
+    },
+    "weighted avg": {
+      "precision": 0.9497030066707716,
+      "recall": 0.8912695123635861,
+      "f1-score": 0.9087649977667028,
+      "support": 72390.0
+    }
+  },
+  "threat_tier_summary": {},
+  "clean_validation": {
+    "Benign": {
+      "precision": 0.43426470588235294,
+      "recall": 0.9709025152063127,
+      "f1-score": 0.6001117715795357,
+      "support": 6083.0
+    },
+    "Attack": {
+      "precision": 0.9969892838918183,
+      "recall": 0.8839639857028669,
+      "f1-score": 0.937080825279583,
+      "support": 66307.0
+    },
+    "accuracy": 0.8912695123635861,
+    "macro avg": {
+      "precision": 0.7156269948870856,
+      "recall": 0.9274332504545898,
+      "f1-score": 0.7685962984295593,
+      "support": 72390.0
+    },
+    "weighted avg": {
+      "precision": 0.9497030066707716,
+      "recall": 0.8912695123635861,
+      "f1-score": 0.9087649977667028,
+      "support": 72390.0
+    }
+  },
+  "ambiguous_validation": null
+}
