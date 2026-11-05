@@ -165,6 +165,8 @@ Unique Feature-Label Stratum Flows ($N_{\text{unique}}$) & 501,098 & 100.00\% (f
 \quad --- Conflicting-Label Collision Flows ($N_{\text{ambig}}$) & 18,416 & 3.68\% (flows) \\ \midrule
 Collision-Purged Stratum (Strategy 2: $N_{\text{unique}} - N_{\text{ambig}}$) & 482,682 & 96.32\% (flows) \\ \bottomrule
 \end{tabular}
+  \vspace{1mm}\\
+  {\footnotesize \textit{Note: The em-dash (---) denotes a hierarchical sub-category breakdown of the preceding parent row, not a negative quantity.}}
 \end{table}
 
 Of the 529,562 records, exactly 28,464 rows (5.38\%) are byte-identical exact duplicates ($X_i = X_j \land y_i = y_j$). Removing these produces the \textit{Unique Feature-Label Stratum} of $N = 501,098$ flows. Within this unique stratum, deduplication ensures that each single-label feature vector corresponds to exactly one flow ($N = 482,682$), while 8,740 conflicting-label collision hashes span 18,416 flows. Across the full sample, exactly 491,422 distinct 39-feature coordinate vectors exist, with 21,640 repeated hashes spanning \textbf{59,780 flows (11.29\% feature redundancy)}.

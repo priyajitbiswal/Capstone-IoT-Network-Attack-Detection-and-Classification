@@ -9,6 +9,14 @@
   spacing: 110%,
 )
 #set par(justify: true, leading: 0.52em)
+#show figure.where(kind: table): set figure.caption(position: top)
+#show figure.where(kind: table): set text(size: 7.5pt)
+#show table: set text(size: 7.5pt)
+#set table(
+  stroke: 0.5pt + luma(180),
+  fill: (col, row) => if row == 0 { luma(230) } else { none },
+  inset: (x: 4pt, y: 3pt),
+)
 
 // Paper Title and Authors spanning both columns
 #place(
@@ -124,32 +132,33 @@ To contextualize our findings, we conducted a systematic methodological audit of
 
 *Theme D: Benchmark Generation and Baselining.* The foundational CICIoT2023 study by Neto et al. @neto2023ciciot benchmarked eight ML/DL algorithms across 105 devices, reporting 99.16% accuracy with Random Forest. However, their DNN baseline exhibited low minority recall: 14.7% on Dictionary Brute Force and 3.8% on Web attacks. Booij et al. @booij2022toniot and Moustafa @moustafa2021distributed evaluated ToN_IoT, demonstrating that models trained with static IP addresses fail to generalize across network environments. Essop et al. @essop2021dataset and Umar et al. @umar2025energy addressed dataset generation fidelity and knowledge distillation for edge deployment.
 
-#align(center)[
-#table(
-  columns: (1.2fr, 1.2fr, 1fr, 1.1fr, 1.3fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => left,
-  table.header(
-    [*Study & Venue*], [*Dataset(s)*], [*Models*], [*Reported Metric*], [*Methodological Focus & Limitations*]
-  ),
-  [Neto et al. @neto2023ciciot \ _Sensors 2023_], [CICIoT2023], [RF, DNN, DT, LR], [Acc: 99.16% (RF)], [Foundational paper; random split; low DNN recall on web attacks (3.8%).],
-  [Khan et al. @khan2026resource \ _Sci. Rep. 2026_], [CICIoT2023, ToN_IoT], [LightGBM, CatBoost], [Acc: 99.72%--99.94%], [Feature selection (10-15 feats); SMOTE oversampling; random holdout.],
-  [Almahaqeri @almahaqeri2026optimized \ _Preprint 2026_], [CICIoT2023], [XGBoost, LightGBM], [Acc: 99.61% (Bin)], [Stratified undersampling; reported 0.355 $mu$s latency; no collision audit.],
-  [Ullah et al. @ullah2026comparative \ _Sci. Rep. 2026_], [BoT-IoT, CICIoT2023], [CNN, LSTM, RF], [Acc: 99.20% (CIC)], [Multi-model framework; applied SMOTE; full duplicate rows removed only.],
-  [Gulzar @gulzar2025enhancing \ _IJMLC 2025_], [ToN_IoT, BoT-IoT], [DeepCLG (CNN-LSTM)], [Acc: 99.82% (BoT)], [Recurrent architecture; accuracy dropped to 57.77% on UNSW-NB15.],
-  [Abdelrahman @abdelrahman2026feature \ _IEEE ICEENG 2026_], [CICIoT2023], [FEC-IDS (RF, XGB)], [Acc: 98.88% (34-Cl)], [Removed exact duplicate rows; evaluated on random holdout slices.],
-  [Al-Hejri et al. @alhejri2026improving \ _Sci. Rep. 2026_], [ToN_IoT, BoT-IoT], [CNN-Transformer], [Acc: 94.89% (IID)], [Federated learning; non-IID client drift reduced accuracy to 69.35%.],
-  [Booij et al. @booij2022toniot \ _IEEE IoT-J 2022_], [ToN_IoT, BoT-IoT], [RF, Decision Tree], [Acc: 99.68% (In-Dom)], [Showed cross-dataset accuracy drops to 40--60%; noted IP shortcut leakage.],
-  [Essop et al. @essop2021dataset \ _Sensors 2021_], [Contiki-Cooja Sims], [RF, SVM, KNN], [Survey & Baseline], [Simulation-based scenarios; noted absence of natural packet burst dynamics.],
-  [Fenanir @fenanir2023smart \ _Rev. Intell. Artif. 2023_], [NSL-KDD, IoT-23], [CNN, LSTM, GRU], [Acc: 99.99% (NSL)], [Federated edge clients; evaluated on legacy datasets; no collision audit.],
-  [Moussaoui @moussaoui2026resilient \ _Sci. Rep. 2026_], [CICIoT2023, ToN_IoT], [CNN-LSTM + FL], [F1: 97.36% (Centr.)], [Noted flow summary blindness to application payloads; non-IID skew.],
-  [Moustafa @moustafa2021distributed \ _IEEE TNSM 2021_], [ToN_IoT Telemetry], [Distributed RF, LSTM], [Acc: $approx$ 98.5%], [Edge gateway deployment; documented IP leakage; 100-packet windowing.],
-  [Qaddos et al. @qaddos2024novel \ _Sci. Rep. 2024_], [BoT-IoT, UNSW-NB15], [FW-SMOTE + 1D-CNN], [Acc: 99.60% (BoT)], [Applied synthetic oversampling; evaluated only on in-distribution random splits.],
-  [Umar et al. @umar2025energy \ _J. Cloud Comp. 2025_], [CICIDS2017, NSL-KDD], [DNN-KDQ (INT8 Quant)], [Acc: 99.43%], [Host CPU profiling (0.12 ms); teacher-student distillation on legacy sets.],
-  [*Our Study*], [*CICIoT2023*], [*5 Families (21 Models)*], [*Acc: 72.65% (34-Cl)*], [*Zero-leakage group hashing; ambiguity routing; cost-sensitive trade-offs.*]
-)
-]
+#figure(
+  placement: top,
+  scope: "parent",
+  caption: [Systematic Methodological Audit of 14 Peer-Reviewed IoT NIDS Studies (2021--2026)],
+  table(
+    columns: (1.5fr, 1.2fr, 1.2fr, 1.1fr, 3.2fr),
+    align: (col, row) => left,
+    table.header(
+      [*Study & Venue*], [*Dataset(s)*], [*Models*], [*Reported Metric*], [*Methodological Focus & Limitations*]
+    ),
+    [Neto et al. @neto2023ciciot \ _Sensors 2023_], [CICIoT2023], [RF, DNN, DT, LR], [Acc: 99.16% (RF)], [Foundational paper; random split; low DNN recall on web attacks (3.8%).],
+    [Khan et al. @khan2026resource \ _Sci. Rep. 2026_], [CICIoT2023, ToN_IoT], [LightGBM, CatBoost], [Acc: 99.72%--99.94%], [Feature selection (10-15 feats); SMOTE oversampling; random holdout.],
+    [Almahaqeri @almahaqeri2026optimized \ _Preprint 2026_], [CICIoT2023], [XGBoost, LightGBM], [Acc: 99.61% (Bin)], [Stratified undersampling; reported 0.355 $mu$s latency; no collision audit.],
+    [Ullah et al. @ullah2026comparative \ _Sci. Rep. 2026_], [BoT-IoT, CICIoT2023], [CNN, LSTM, RF], [Acc: 99.20% (CIC)], [Multi-model framework; applied SMOTE; full duplicate rows removed only.],
+    [Gulzar @gulzar2025enhancing \ _IJMLC 2025_], [ToN_IoT, BoT-IoT], [DeepCLG (CNN-LSTM)], [Acc: 99.82% (BoT)], [Recurrent architecture; accuracy dropped to 57.77% on UNSW-NB15.],
+    [Abdelrahman @abdelrahman2026feature \ _IEEE ICEENG 2026_], [CICIoT2023], [FEC-IDS (RF, XGB)], [Acc: 98.88% (34-Cl)], [Removed exact duplicate rows; evaluated on random holdout slices.],
+    [Al-Hejri et al. @alhejri2026improving \ _Sci. Rep. 2026_], [ToN_IoT, BoT-IoT], [CNN-Transformer], [Acc: 94.89% (IID)], [Federated learning; non-IID client drift reduced accuracy to 69.35%.],
+    [Booij et al. @booij2022toniot \ _IEEE IoT-J 2022_], [ToN_IoT, BoT-IoT], [RF, Decision Tree], [Acc: 99.68% (In-Dom)], [Showed cross-dataset accuracy drops to 40--60%; noted IP shortcut leakage.],
+    [Essop et al. @essop2021dataset \ _Sensors 2021_], [Contiki-Cooja Sims], [RF, SVM, KNN], [Survey & Baseline], [Simulation-based scenarios; noted absence of natural packet burst dynamics.],
+    [Fenanir @fenanir2023smart \ _Rev. Intell. Artif. 2023_], [NSL-KDD, IoT-23], [CNN, LSTM, GRU], [Acc: 99.99% (NSL)], [Federated edge clients; evaluated on legacy datasets; no collision audit.],
+    [Moussaoui @moussaoui2026resilient \ _Sci. Rep. 2026_], [CICIoT2023, ToN_IoT], [CNN-LSTM + FL], [F1: 97.36% (Centr.)], [Noted flow summary blindness to application payloads; non-IID skew.],
+    [Moustafa @moustafa2021distributed \ _IEEE TNSM 2021_], [ToN_IoT Telemetry], [Distributed RF, LSTM], [Acc: $approx$ 98.5%], [Edge gateway deployment; documented IP leakage; 100-packet windowing.],
+    [Qaddos et al. @qaddos2024novel \ _Sci. Rep. 2024_], [BoT-IoT, UNSW-NB15], [FW-SMOTE + 1D-CNN], [Acc: 99.60% (BoT)], [Applied synthetic oversampling; evaluated only on in-distribution random splits.],
+    [Umar et al. @umar2025energy \ _J. Cloud Comp. 2025_], [CICIDS2017, NSL-KDD], [DNN-KDQ (INT8 Quant)], [Acc: 99.43%], [Host CPU profiling (0.12 ms); teacher-student distillation on legacy sets.],
+    [*Our Study*], [*CICIoT2023*], [*5 Families (21 Models)*], [*Acc: 72.65% (34-Cl)*], [*Zero-leakage group hashing; ambiguity routing; cost-sensitive trade-offs.*]
+  )
+) <tab_literature>
 
 === 2.2 The Research Gap in the Reviewed Sample
 Within the 14 surveyed studies, we observe specific methodological patterns:
@@ -167,76 +176,76 @@ The resulting public tabular schema consists of *39 numerical features* plus a g
 === 3.2 Granular Census of Duplication
 We performed a mathematical census on our stratified sample of $N = 529,562$ flows, preserving all 34 classes. The results are summarized in Table 2.
 
-#align(center)[
-#table(
-  columns: (2.5fr, 1.2fr, 1.2fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col == 0 { left } else { right },
-  table.header(
-    [*Population Parameter*], [*Count*], [*% of Category*]
-  ),
-  [Full Stratified Sample ($N_("full")$)], [529,562], [100.00% (flows)],
-  [Exact Duplicate Rows (identical $X$ and identical $y$)], [28,464], [5.38% (flows)],
-  [Unique Feature-Label Stratum ($N_("unique")$)], [501,098], [94.62% (flows)],
-  [Distinct 39-Feature Coordinates in Unique Stratum], [491,422], [100.00% (vectors)],
-  [--- Single-Label Feature Vectors], [482,682], [98.22% (vectors)],
-  [--- Conflicting-Label Collision Hashes], [8,740], [1.78% (vectors)],
-  [Unique Feature-Label Stratum Flows ($N_("unique")$)], [501,098], [100.00% (flows)],
-  [--- Single-Label Stratum Flows], [482,682], [96.32% (flows)],
-  [--- Conflicting-Label Collision Flows ($N_("ambig")$)], [18,416], [3.68% (flows)],
-  [Collision-Purged Stratum (Strategy 2: $N_("unique") - N_("ambig")$)], [482,682], [96.32% (flows)]
-)
-]
+#figure(
+  caption: [Granular Duplication Census in CICIoT2023 Sample],
+  table(
+    columns: (2.3fr, 1fr, 1.1fr),
+    align: (col, row) => if col == 0 { left } else { right },
+    table.header(
+      [*Population Parameter*], [*Count*], [*% of Category*]
+    ),
+    [Full Stratified Sample ($N_("full")$)], [529,562], [100.00% (flows)],
+    [Exact Duplicate Rows (identical $X$ and identical $y$)], [28,464], [5.38% (flows)],
+    [Unique Feature-Label Stratum ($N_("unique")$)], [501,098], [94.62% (flows)],
+    [Distinct 39-Feature Coordinates in Unique Stratum], [491,422], [100.00% (vectors)],
+    [#h(8pt)--- Single-Label Feature Vectors], [482,682], [98.22% (vectors)],
+    [#h(8pt)--- Conflicting-Label Collision Hashes], [8,740], [1.78% (vectors)],
+    [Unique Feature-Label Stratum Flows ($N_("unique")$)], [501,098], [100.00% (flows)],
+    [#h(8pt)--- Single-Label Stratum Flows], [482,682], [96.32% (flows)],
+    [#h(8pt)--- Conflicting-Label Collision Flows ($N_("ambig")$)], [18,416], [3.68% (flows)],
+    [Collision-Purged Stratum (Strategy 2: $N_("unique") - N_("ambig")$)], [482,682], [96.32% (flows)]
+  )
+) <tab_census>
+#align(center)[#text(size: 7.2pt, style: "italic")[Note: The em-dash (---) denotes a hierarchical sub-category breakdown of the preceding parent row, not a negative quantity.]]
 
 Of the 529,562 records, exactly 28,464 rows (5.38%) are byte-identical exact duplicates ($X_i = X_j and y_i = y_j$). Removing these produces the _Unique Feature-Label Stratum_ of $N = 501,098$ flows. Within this unique stratum, deduplication ensures that each single-label feature vector corresponds to exactly one flow ($N = 482,682$), while 8,740 conflicting-label collision hashes span 18,416 flows. Across the full sample, exactly 491,422 distinct 39-feature coordinate vectors exist, with 21,640 repeated hashes spanning *59,780 flows (11.29% feature redundancy)*.
 
 === 3.3 Conflicting Label Collision Taxonomy
 Among the repeated feature coordinates, we identified *8,740 unique 39-feature coordinate hashes* that map simultaneously to two or more conflicting ground-truth labels. These conflicting hashes span *28,608 rows (5.40%)* in the full sample and *18,416 rows (3.68%)* in the unique stratum.
 
-#align(center)[
-#table(
-  columns: (1.5fr, 1.5fr, 1.2fr, 1.2fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col < 2 { left } else { right },
-  table.header(
-    [*Class A*], [*Class B*], [*Conflicting Hashes*], [*Total Flows*]
-  ),
-  [DDoS-TCP_Flood], [DoS-TCP_Flood], [2,722], [8,984],
-  [DDoS-SynonymousIP_Flood], [DDoS-SYN_Flood], [1,509], [4,362],
-  [DDoS-UDP_Flood], [DoS-UDP_Flood], [1,333], [3,708],
-  [DDoS-SYN_Flood], [DoS-SYN_Flood], [1,099], [3,193],
-  [DDoS-SynonymousIP_Flood], [DoS-SYN_Flood], [933], [2,497],
-  [DDoS-SynonymousIP_Flood], [DDoS-SYN <-> DoS-SYN], [837], [3,953],
-  [Recon-OSScan], [Recon-PortScan], [148], [573],
-  [DNS_Spoofing], [MITM-ArpSpoofing], [23], [117],
-  [MITM-ArpSpoofing], [Recon-HostDiscovery], [18], [73],
-  [BenignTraffic], [MITM-ArpSpoofing], [13], [88],
-  [Other Multi-Class Groups], [(Various Subsets)], [105], [1,060],
-  [*Total Collision Space*], [], [*8,740*], [*28,608*]
-)
-]
+#figure(
+  placement: top,
+  scope: "parent",
+  caption: [Top Inter-Class Conflicting Label Collisions in Feature Space],
+  table(
+    columns: (2fr, 2fr, 1.2fr, 1fr),
+    align: (col, row) => if col < 2 { left } else { right },
+    table.header(
+      [*Class A*], [*Class B*], [*Conflicting Hashes*], [*Total Flows*]
+    ),
+    [DDoS-TCP\_Flood], [DoS-TCP\_Flood], [2,722], [8,984],
+    [DDoS-Synonymous\ IP\_Flood], [DDoS-SYN\_Flood], [1,509], [4,362],
+    [DDoS-UDP\_Flood], [DoS-UDP\_Flood], [1,333], [3,708],
+    [DDoS-SYN\_Flood], [DoS-SYN\_Flood], [1,099], [3,193],
+    [DDoS-Synonymous\ IP\_Flood], [DoS-SYN\_Flood], [933], [2,497],
+    [DDoS-Synonymous\ IP\_Flood], [DDoS-SYN #sym.arrow.l.r DoS-SYN], [837], [3,953],
+    [Recon-OSScan], [Recon-PortScan], [148], [573],
+    [DNS\_Spoofing], [MITM-Arp-Spoofing], [23], [117],
+    [MITM-Arp-Spoofing], [Recon-Host-Discovery], [18], [73],
+    [BenignTraffic], [MITM-Arp-Spoofing], [13], [88],
+    [Other Multi-Class Groups], [(Various Subsets)], [105], [1,060],
+    [*Total Collision Space*], [], [*8,740*], [*28,608*]
+  )
+) <tab_collisions>
 
 Table 3 catalogs dominant collision groups. Because each unique 39-feature hash is assigned to its exact set of associated labels, the rows represent mutually disjoint collision subsets that sum additively to the 8,740 unique collision hashes and 28,608 total collision flows. A structural contributor to DoS and DDoS feature collisions is the composition of the benchmark feature set, which consists of statistical flow counters and rate metrics without source or destination IP addresses, MAC addresses, or timestamps @neto2023ciciot. The omission of source-entropy and topological identifiers eliminates the information needed to distinguish single-source flooding (DoS) from distributed multi-source botnets (DDoS). Consequently, single-packet TCP datagrams or SYN handshakes produced by a single attacker can possess identical 39-feature statistical values as those produced across a distributed botnet. In total, DoS versus DDoS collisions sharing identical protocols account for 8,433 out of 8,740 conflicting hashes (96.49%) and 26,697 out of 28,608 collision flows (93.32%). In contrast, collisions directly involving BenignTraffic are minimal, comprising only 41 unique coordinate hashes (0.47% of collision hashes) and 621 flows (2.17% of collision flows, representing 0.11% of the total dataset), primarily between standard ARP exchanges and spoofed ARP replies (`BenignTraffic` <-> `MITM-ArpSpoofing`). This indicates that while the 39-feature space of CICIoT2023 is non-injective for high-rate flooding profiles, benign-attack boundary ambiguity is concentrated in specific low-level protocol exchanges rather than widespread across the feature space.
 
 === 3.4 Feature Overlap Under Simulated Random Splitting
 To quantify the extent of potential data leakage, we simulated standard stratified 80/20 random train/test splits across five distinct random seeds (0, 42, 123, 999, 2024). The results are documented in Table 4.
 
-#align(center)[
-#table(
-  columns: (1.8fr, 1.1fr, 1.1fr, 1.3fr, 1.1fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col == 0 { left } else { right },
-  table.header(
-    [*Dataset Stratum*], [*Total Test*], [*Leaked Rows*], [*Collision Leak %*], [*Total Leak %*]
-  ),
-  [Unique Stratum (Seed 42)], [100,220], [3,071], [*81.39%*], [3.06%],
-  [Unique Stratum (5-Seed Mean)], [100,220], [3,037 $plus.minus$ 31], [*82.58% $plus.minus$ 1.05%*], [3.03% $plus.minus$ 0.03%],
-  [Full Sample (Seed 42)], [105,913], [10,738], [*93.00%*], [*10.14%*]
-)
-]
+#figure(
+  caption: [Simulated Feature Overlap Under Stratified 80/20 Random Splits],
+  table(
+    columns: (1.6fr, 1fr, 1fr, 1.2fr, 1fr),
+    align: (col, row) => if col == 0 { left } else { right },
+    table.header(
+      [*Dataset Stratum*], [*Total Test*], [*Leaked Rows*], [*Collision Leak %*], [*Total Leak %*]
+    ),
+    [Unique Stratum (Seed 42)], [100,220], [3,071], [*81.39%*], [3.06%],
+    [Unique Stratum (5-Seed Mean)], [100,220], [3,037 $plus.minus$ 31], [*82.58% $plus.minus$ 1.05%*], [3.03% $plus.minus$ 0.03%],
+    [Full Sample (Seed 42)], [105,913], [10,738], [*93.00%*], [*10.14%*]
+  )
+) <tab_leakage>
 
 In the unique stratum, out of 3,773 test flows belonging to collision groups, *3,071 flows (81.39%)* match identical coordinate vectors in the training set. Across five random seeds, collision leakage averages *82.58% $plus.minus$ 1.05%*. In the un-deduplicated full sample, *10.14% of the entire test set (10,738 flows)* consists of feature coordinates identical to training samples. This overlap creates an empirical opportunity for classifiers to predict labels on those test instances via coordinate memorization rather than learning generalized flow patterns, though the extent to which a specific model exploits this overlap depends on its inductive bias, capacity, and training objective.
 
@@ -277,38 +286,39 @@ where $K$ is the number of classes and $N_c$ is the support of class $c$.
 === 5.1 Multi-Granularity Benchmark Results
 Table 5 reports the leak-free in-distribution performance across all 21 models evaluated on the Internal Test Set ($N = 75,105$).
 
-#align(center)[
-#table(
-  columns: (1fr, 1.4fr, 0.9fr, 1fr, 1.1fr, 1fr, 0.9fr, 1fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col < 2 { left } else { right },
-  table.header(
-    [*Task*], [*Model*], [*Strategy*], [*Val F1*], [*Test Acc*], [*Test F1*], [*MCC*], [*ROC-AUC*]
-  ),
-  [Binary], [SGD Linear], [S1], [0.6803], [81.73%], [0.6761], [0.4849], [0.9442],
-  [Binary], [PyTorch MLP], [S1], [0.7143], [85.11%], [0.7125], [0.5315], [0.9646],
-  [Binary], [*Random Forest*], [S1], [*0.7733*], [*89.61%*], [*0.7690*], [*0.6057*], [0.9738],
-  [Binary], [LightGBM], [S1], [0.7666], [89.15%], [0.7637], [0.6007], [*0.9751*],
-  [Binary], [XGBoost], [S1], [0.7501], [87.79%], [0.7462], [0.5785], [0.9731],
-  [Binary], [LightGBM (S2)], [S2], [0.7686], [89.39%], [0.7668], [0.6045], [0.9751],
-  [Category], [SGD Linear], [S1], [0.6006], [74.04%], [0.6036], [0.6723], [0.9521],
-  [Category], [PyTorch MLP], [S1], [0.6104], [73.41%], [0.6130], [0.6834], [0.9663],
-  [Category], [Random Forest], [S1], [0.6802], [78.22%], [0.6805], [0.7399], [0.9765],
-  [Category], [*LightGBM*], [S1], [*0.6865*], [*78.93%*], [*0.6894*], [*0.7468*], [*0.9789*],
-  [Category], [XGBoost], [S1], [0.6615], [76.08%], [0.6619], [0.7180], [0.9748],
-  [Category], [LightGBM (S2)], [S2], [0.6925], [79.12%], [0.6903], [0.7482], [0.9789],
-  [Fine-34], [SGD Linear], [S1], [0.5260], [64.29%], [0.5272], [0.6308], [0.9621],
-  [Fine-34], [PyTorch MLP], [S1], [0.5211], [62.42%], [0.5216], [0.6137], [0.9710],
-  [Fine-34], [Random Forest], [S1], [0.5956], [70.58%], [0.5966], [0.6972], [0.9781],
-  [Fine-34], [*LightGBM*], [S1], [*0.6142*], [*72.65%*], [*0.6145*], [*0.7170*], [*0.9811*],
-  [Fine-34], [XGBoost], [S1], [0.5984], [71.04%], [0.6001], [0.7012], [0.9790],
-  [Fine-34], [LightGBM (S2)], [S2], [0.6218], [72.69%], [0.6140], [0.7175], [0.9811],
-  [Fine-34], [XGBoost (S2)], [S2], [0.6034], [70.97%], [0.5993], [0.7005], [0.9791],
-  [Fine-34], [LightGBM (Unw)], [S1], [0.6239], [74.45%], [0.6220], [0.7346], [0.9712],
-  [Fine-34], [XGBoost (Unw)], [S1], [0.6139], [74.03%], [0.6148], [0.7306], [0.9806]
-)
-]
+#figure(
+  placement: top,
+  scope: "parent",
+  caption: [Leak-Free Multi-Granularity Benchmark Results on Internal Test Partition ($N = 75,105$)],
+  table(
+    columns: (1fr, 1.4fr, 0.9fr, 1fr, 1.1fr, 1fr, 0.9fr, 1fr),
+    align: (col, row) => if col < 2 { left } else { right },
+    table.header(
+      [*Task*], [*Model*], [*Strategy*], [*Val F1*], [*Test Acc*], [*Test F1*], [*MCC*], [*ROC-AUC*]
+    ),
+    [Binary], [SGD Linear], [S1], [0.6803], [81.73%], [0.6761], [0.4849], [0.9442],
+    [Binary], [PyTorch MLP], [S1], [0.7143], [85.11%], [0.7125], [0.5315], [0.9646],
+    [Binary], [*Random Forest*], [S1], [*0.7733*], [*89.61%*], [*0.7690*], [*0.6057*], [0.9738],
+    [Binary], [LightGBM], [S1], [0.7666], [89.15%], [0.7637], [0.6007], [*0.9751*],
+    [Binary], [XGBoost], [S1], [0.7501], [87.79%], [0.7462], [0.5785], [0.9731],
+    [Binary], [LightGBM (S2)], [S2], [0.7686], [89.39%], [0.7668], [0.6045], [0.9751],
+    [Category], [SGD Linear], [S1], [0.6006], [74.04%], [0.6036], [0.6723], [0.9521],
+    [Category], [PyTorch MLP], [S1], [0.6104], [73.41%], [0.6130], [0.6834], [0.9663],
+    [Category], [Random Forest], [S1], [0.6802], [78.22%], [0.6805], [0.7399], [0.9765],
+    [Category], [*LightGBM*], [S1], [*0.6865*], [*78.93%*], [*0.6894*], [*0.7468*], [*0.9789*],
+    [Category], [XGBoost], [S1], [0.6615], [76.08%], [0.6619], [0.7180], [0.9748],
+    [Category], [LightGBM (S2)], [S2], [0.6925], [79.12%], [0.6903], [0.7482], [0.9789],
+    [Fine-34], [SGD Linear], [S1], [0.5260], [64.29%], [0.5272], [0.6308], [0.9621],
+    [Fine-34], [PyTorch MLP], [S1], [0.5211], [62.42%], [0.5216], [0.6137], [0.9710],
+    [Fine-34], [Random Forest], [S1], [0.5956], [70.58%], [0.5966], [0.6972], [0.9781],
+    [Fine-34], [*LightGBM*], [S1], [*0.6142*], [*72.65%*], [*0.6145*], [*0.7170*], [*0.9811*],
+    [Fine-34], [XGBoost], [S1], [0.5984], [71.04%], [0.6001], [0.7012], [0.9790],
+    [Fine-34], [LightGBM (S2)], [S2], [0.6218], [72.69%], [0.6140], [0.7175], [0.9811],
+    [Fine-34], [XGBoost (S2)], [S2], [0.6034], [70.97%], [0.5993], [0.7005], [0.9791],
+    [Fine-34], [LightGBM (Unw)], [S1], [0.6239], [74.45%], [0.6220], [0.7346], [0.9712],
+    [Fine-34], [XGBoost (Unw)], [S1], [0.6139], [74.03%], [0.6148], [0.7306], [0.9806]
+  )
+) <tab_benchmark>
 
 #figure(
   image("figures/fig2_accuracy_vs_macro_f1.png", width: 95%),
@@ -328,20 +338,19 @@ This indicates consistent partition alignment and suggests that baseline perform
 === 5.3 Empirical Analysis of Ambiguity Filtering
 To assess the effect of label collisions, Table 6 presents decomposed routing results on the Common-Clean validation set ($N = 72,390$) and the Isolated Ambiguous collision set ($N = 2,782$).
 
-#align(center)[
-#table(
-  columns: (2.2fr, 1.1fr, 1.1fr, 1.1fr, 1.1fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col == 0 { left } else { right },
-  table.header(
-    [*Validation Slice*], [*Size ($N$)*], [*Strategy 1 F1*], [*Strategy 2 F1*], [*Delta ($Delta$)*]
-  ),
-  [Common-Clean Population], [72,390], [0.6196], [0.6218], [*+0.0022*],
-  [Isolated Ambiguous Population], [2,782], [0.2386], [N/A], [N/A],
-  [Cross-Capture Clean Holdout], [57,280], [0.6498], [0.6511], [*+0.0013*]
-)
-]
+#figure(
+  caption: [Ambiguity-Aware Decomposed Validation Routing Analysis (LightGBM 34-Class)],
+  table(
+    columns: (2fr, 1fr, 1fr, 1fr, 1fr),
+    align: (col, row) => if col == 0 { left } else { right },
+    table.header(
+      [*Validation Slice*], [*Size ($N$)*], [*Strategy 1 F1*], [*Strategy 2 F1*], [*Delta ($Delta$)*]
+    ),
+    [Common-Clean Population], [72,390], [0.6196], [0.6218], [*+0.0022*],
+    [Isolated Ambiguous Population], [2,782], [0.2386], [N/A], [N/A],
+    [Cross-Capture Clean Holdout], [57,280], [0.6498], [0.6511], [*+0.0013*]
+  )
+) <tab_routing>
 
 This decomposition provides two empirical findings:
 1. *Measured Impact of Collision Purging*: Purging conflicting label collisions during training (Strategy 2) improves clean validation Macro-F1 by *+0.0022 (+0.22%)*, and cross-capture Macro-F1 by *+0.0013 (+0.13%)*. Under the evaluated tree depth and leaf regularization parameters, training on ambiguous vectors had a minor numerical impact on clean validation performance.
@@ -357,31 +366,30 @@ Standard empirical risk minimization optimizes aggregate sample loss, favoring m
   caption: [The Accuracy Paradox: Minority Attack Recall Disparity under Unweighted Loss Optimization (LightGBM 34-Class, Internal Test Set).],
 ) <fig_minority_recall_collapse>
 
-#align(center)[
-#table(
-  columns: (2fr, 1.2fr, 1.2fr, 1.3fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col == 0 { left } else { right },
-  table.header(
-    [*Metric / Attack Class*], [*Balanced (Test)*], [*Unweighted (Test)*], [*Relative Change*]
-  ),
-  [Overall Accuracy], [72.65%], [74.45%], [+1.80%],
-  [Macro-F1 Score], [0.6145], [0.6220], [+0.0075],
-  [Matthews Correlation (MCC)], [0.7170], [0.7346], [+0.0176],
-  [Macro Average Precision (AP)], [0.6619], [0.6431], [-0.0188],
-  [ROC-AUC (OvR)], [0.9811], [0.9712], [-0.0099],
-  [Benign Traffic Recall], [65.71%], [83.70%], [+17.99%],
-  [Benign Traffic Precision], [72.28%], [59.58%], [-12.70%],
-  [*False Negatives to Benign*], [*1,517 flows*], [*3,418 flows*], [*+125.31%*],
-  [*SQL Injection Recall*], [35.83%], [7.48%], [*-79.12%*],
-  [*Recon-PingSweep Recall*], [26.40%], [4.80%], [*-81.82%*],
-  [*XSS Recall*], [20.22%], [3.83%], [*-81.08%*],
-  [Backdoor Malware Recall], [25.18%], [12.23%], [-51.43%],
-  [Browser Hijacking Recall], [53.06%], [31.29%], [-41.03%],
-  [Tier 4 (Web) Macro-Recall], [34.63%], [16.81%], [-51.46%]
-)
-]
+#figure(
+  caption: [Cost-Sensitive vs. Unweighted Ablation Comparison (LightGBM 34-Class Task)],
+  table(
+    columns: (1.8fr, 1fr, 1.1fr, 1fr),
+    align: (col, row) => if col == 0 { left } else { right },
+    table.header(
+      [*Metric / Attack Class*], [*Balanced (Test)*], [*Unweighted (Test)*], [*Relative Change*]
+    ),
+    [Overall Accuracy], [72.65%], [74.45%], [+1.80%],
+    [Macro-F1 Score], [0.6145], [0.6220], [+0.0075],
+    [Matthews Correlation (MCC)], [0.7170], [0.7346], [+0.0176],
+    [Macro Average Precision (AP)], [0.6619], [0.6431], [-0.0188],
+    [ROC-AUC (OvR)], [0.9811], [0.9712], [-0.0099],
+    [Benign Traffic Recall], [65.71%], [83.70%], [+17.99%],
+    [Benign Traffic Precision], [72.28%], [59.58%], [-12.70%],
+    [*False Negatives to Benign*], [*1,517 flows*], [*3,418 flows*], [*+125.31%*],
+    [*SQL Injection Recall*], [35.83%], [7.48%], [*-79.12%*],
+    [*Recon-PingSweep Recall*], [26.40%], [4.80%], [*-81.82%*],
+    [*XSS Recall*], [20.22%], [3.83%], [*-81.08%*],
+    [Backdoor Malware Recall], [25.18%], [12.23%], [-51.43%],
+    [Browser Hijacking Recall], [53.06%], [31.29%], [-41.03%],
+    [Tier 4 (Web) Macro-Recall], [34.63%], [16.81%], [-51.46%]
+  )
+) <tab_ablation>
 
 As illustrated in Figure 3, switching from balanced to unweighted training produces an apparent gain in aggregate test metrics: accuracy increases by *+1.80%* (72.65% $->$ 74.45%) and MCC improves by *+0.0176*. However, this aggregate gain conceals a substantial reduction in minority attack detection:
 - *SQL Injection*: Recall drops by *-79.12%* relative (from 35.83% down to 7.48%).
@@ -397,24 +405,25 @@ Table 8 evaluates temporal stability by testing models trained on earlier captur
   caption: [Temporal Cross-Capture Evaluation across Threat Tiers for Fine-Grained LightGBM.],
 ) <fig_threat_tier_cross_capture>
 
-#align(center)[
-#table(
-  columns: (1fr, 1.4fr, 1.2fr, 1.2fr, 1.2fr, 1.2fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col < 2 { left } else { right },
-  table.header(
-    [*Task*], [*Model*], [*Internal Acc*], [*Cross Acc*], [*Internal F1*], [*Cross F1*]
-  ),
-  [Binary], [*LightGBM*], [*89.15%*], [*83.48%* (-5.67%)], [*0.7637*], [*0.7034* (-0.0603)],
-  [Binary], [Random Forest], [89.61%], [84.30% (-5.31%)], [0.7690], [0.7108 (-0.0582)],
-  [Binary], [XGBoost], [87.79%], [81.04% (-6.75%)], [0.7462], [0.6789 (-0.0673)],
-  [Binary], [SGD Linear], [81.73%], [73.88% (-7.85%)], [0.6761], [0.6137 (-0.0624)],
-  [Category], [*LightGBM*], [*78.93%*], [*77.17%* (-1.76%)], [*0.6894*], [*0.7399* (+0.0505)],
-  [Fine-34], [*LightGBM*], [*72.65%*], [*69.64%* (-3.01%)], [*0.6145*], [*0.6498* (+0.0353)],
-  [Fine-34], [XGBoost], [71.04%], [67.87% (-3.17%)], [0.6001], [0.6341 (+0.0340)]
-)
-]
+#figure(
+  placement: top,
+  scope: "parent",
+  caption: [Temporal Cross-Capture Generalization Degradation (Internal Test $N = 75,105$ vs. Cross-Capture $N = 57,280$). Delta values show cross-capture minus internal.],
+  table(
+    columns: (0.9fr, 1.3fr, 1.1fr, 1.1fr, 1.1fr, 1.1fr, 1.1fr, 1.1fr),
+    align: (col, row) => if col < 2 { left } else { right },
+    table.header(
+      [*Task*], [*Model*], [*Int. Acc*], [*Cross Acc*], [*Delta Acc*], [*Int. F1*], [*Cross F1*], [*Delta F1*]
+    ),
+    [Binary], [*LightGBM*], [*89.15%*], [*83.48%*], [*-5.67%*], [*0.7637*], [*0.7034*], [*-0.0603*],
+    [Binary], [Random Forest], [89.61%], [84.30%], [-5.31%], [0.7690], [0.7108], [-0.0582],
+    [Binary], [XGBoost], [87.79%], [81.04%], [-6.75%], [0.7462], [0.6789], [-0.0673],
+    [Binary], [SGD Linear], [81.73%], [73.88%], [-7.85%], [0.6761], [0.6137], [-0.0624],
+    [Category], [*LightGBM*], [*78.93%*], [*77.17%*], [*-1.76%*], [*0.6894*], [*0.7399*], [*+0.0505*],
+    [Fine-34], [*LightGBM*], [*72.65%*], [*69.64%*], [*-3.01%*], [*0.6145*], [*0.6498*], [*+0.0353*],
+    [Fine-34], [XGBoost], [71.04%], [67.87%], [-3.17%], [0.6001], [0.6341], [+0.0340]
+  )
+) <tab_cross_capture>
 
 On the binary detection task, cross-capture evaluation indicates measurable degradation:
 - Binary LightGBM accuracy drops by *-5.67%* (from 89.15% to 83.48%), Macro-F1 degrades by *-0.0603* (0.7637 to 0.7034), and MCC drops by *-0.0818* (0.6007 to 0.5189).
@@ -445,33 +454,34 @@ It is critical to distinguish between sequential single-flow latency and batch i
   caption: [Host-Side Inference Latency vs. Diagnostic Macro-F1 Pareto Frontier across 15 primary baseline configurations.],
 ) <fig_latency_pareto>
 
-#align(center)[
-#table(
-  columns: (1fr, 1.4fr, 1.1fr, 1.1fr, 1.3fr, 1fr),
-  stroke: 0.5pt + luma(180),
-  fill: (col, row) => if row == 0 { luma(230) } else { none },
-  align: (col, row) => if col < 2 { left } else { right },
-  table.header(
-    [*Task*], [*Model Architecture*], [*P50 ($mu$s)*], [*P95 ($mu$s)*], [*Batch Tput (fps)*], [*Peak RSS*]
-  ),
-  [Binary], [SGD Linear], [362.1], [518.2], [8,325,000], [481.7 MB],
-  [Binary], [PyTorch MLP], [247.1], [557.3], [163,500], [650.9 MB],
-  [Binary], [*LightGBM*], [1,983.3], [2,227.0], [938,400], [494.7 MB],
-  [Binary], [XGBoost], [1,575.3], [2,130.2], [1,424,300], [497.5 MB],
-  [Binary], [Random Forest], [70,883.1], [123,496.3], [62,400], [498.9 MB],
-  [Category], [SGD Linear], [143.2], [247.5], [8,007,700], [484.7 MB],
-  [Category], [PyTorch MLP], [613.8], [1,372.0], [123,600], [638.6 MB],
-  [Category], [LightGBM], [1,409.8], [1,852.1], [92,400], [484.8 MB],
-  [Category], [XGBoost], [2,244.0], [3,235.0], [264,800], [483.6 MB],
-  [Category], [Random Forest], [22,467.5], [41,428.5], [330,300], [526.9 MB],
-  [Fine-34], [SGD Linear], [189.7], [495.9], [2,901,500], [482.8 MB],
-  [Fine-34], [PyTorch MLP], [942.3], [1,405.9], [74,700], [638.9 MB],
-  [Fine-34], [*LightGBM*], [3,504.4], [4,882.8], [10,990], [493.8 MB],
-  [Fine-34], [XGBoost], [3,732.5], [6,092.7], [47,560], [501.8 MB],
-  [Fine-34], [Random Forest], [31,296.1], [46,911.1], [157,490], [572.6 MB]
-)
-]
-#align(center)[#text(size: 8pt, style: "italic")[Note: P50 and P95 latencies measure sequential unbatched single-flow evaluation. Batch throughput is measured on in-memory pre-allocated NumPy arrays, which amortizes dispatch overhead; it does not represent single-flow latency or network interface line rate.]]
+#figure(
+  placement: top,
+  scope: "parent",
+  caption: [Host-Side Computational Profiling on Intel Core i5-1135G7 CPU],
+  table(
+    columns: (1fr, 1.4fr, 1.1fr, 1.1fr, 1.3fr, 1.1fr),
+    align: (col, row) => if col < 2 { left } else { right },
+    table.header(
+      [*Task*], [*Model Architecture*], [*P50 ($mu$s)*], [*P95 ($mu$s)*], [*Batch Tput (fps)*], [*Peak RSS*]
+    ),
+    [Binary], [SGD Linear], [362.1], [518.2], [8,325,000], [481.7 MB],
+    [Binary], [PyTorch MLP], [247.1], [557.3], [163,500], [650.9 MB],
+    [Binary], [*LightGBM*], [1,983.3], [2,227.0], [938,400], [494.7 MB],
+    [Binary], [XGBoost], [1,575.3], [2,130.2], [1,424,300], [497.5 MB],
+    [Binary], [Random Forest], [70,883.1], [123,496.3], [62,400], [498.9 MB],
+    [Category], [SGD Linear], [143.2], [247.5], [8,007,700], [484.7 MB],
+    [Category], [PyTorch MLP], [613.8], [1,372.0], [123,600], [638.6 MB],
+    [Category], [LightGBM], [1,409.8], [1,852.1], [92,400], [484.8 MB],
+    [Category], [XGBoost], [2,244.0], [3,235.0], [264,800], [483.6 MB],
+    [Category], [Random Forest], [22,467.5], [41,428.5], [330,300], [526.9 MB],
+    [Fine-34], [SGD Linear], [189.7], [495.9], [2,901,500], [482.8 MB],
+    [Fine-34], [PyTorch MLP], [942.3], [1,405.9], [74,700], [638.9 MB],
+    [Fine-34], [*LightGBM*], [3,504.4], [4,882.8], [10,990], [493.8 MB],
+    [Fine-34], [XGBoost], [3,732.5], [6,092.7], [47,560], [501.8 MB],
+    [Fine-34], [Random Forest], [31,296.1], [46,911.1], [157,490], [572.6 MB]
+  )
+) <tab_profiling>
+#align(center)[#text(size: 7.5pt, style: "italic")[Note: P50 and P95 latencies measure sequential unbatched single-flow evaluation. Batch throughput is measured on in-memory pre-allocated NumPy arrays, which amortizes dispatch overhead; it does not represent single-flow latency or network interface line rate.]]
 
 The profiling highlights distinct computational characteristics:
 - *Linear Baseline Latency*: SGD Logistic Regression executes in 143.2 to 362.1 $mu$s P50 latency with high batch evaluation throughput (>2.9M flows/sec), serving as a lightweight candidate for early-stage filtering.
@@ -506,5 +516,7 @@ We explicitly delineate the scientific boundaries of this investigation:
 
 This paper conducted a data integrity audit and empirical evaluation of machine learning models on the CICIoT2023 benchmark. We demonstrated that standard random splitting---widely adopted across the surveyed benchmark literature---causes extensive coordinate leakage (81.39% in the unique stratum, 93.00% in the full sample), creating opportunities for coordinate memorization, while unweighted training optimizes overall accuracy at the expense of minority attack detection, establishing a steep accuracy-versus-minority-recall trade-off. By introducing an atomic SHA-256 group-hash partitioning protocol, we established leak-free diagnostic baselines (89.61% binary, 78.93% category, and 72.65% fine-grained accuracy). We analyzed the operational trade-offs of class weighting, showing that unweighted training trades a 79% to 82% reduction in minority attack recall for a +1.80% gain in headline accuracy. Furthermore, temporal evaluation across distinct capture sessions revealed measurable performance degradation, highlighting the need to evaluate cross-session stability. Future work will investigate physical edge deployment on microcontroller hardware, multi-modal tabular-payload architectures, and cross-dataset evaluation across heterogeneous IoT environments.
 
-#v(1em)
+#v(0.8em)
+#show bibliography: set text(size: 7.0pt)
+#show bibliography: set par(leading: 0.35em, spacing: 0.55em)
 #bibliography("references.bib", style: "ieee")
