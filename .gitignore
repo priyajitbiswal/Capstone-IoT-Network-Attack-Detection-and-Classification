@@ -24,7 +24,6 @@ track2_ids_engineering/data/*/*.csv
 track1_dataset_evaluation/models/*
 !track1_dataset_evaluation/models/README.md
 track2_ids_engineering/models/*
-!track2_ids_engineering/models/README.md
 models_saved/
 models_saved_v2/
 *.pkl

@@ -1,37 +1,47 @@
-# Track 2: Practical Intrusion Detection System Engineering (`track2_ids_engineering/`)
+# Track 2: Practical IDS Engineering (`track2_ids_engineering/`)
 
-This track encompasses all engineering, modeling, optimization, deployment, and system-design research focused on **building a more accurate, efficient, and operationally useful IoT Intrusion Detection System** on CICIoT2023—including the initial multi-granularity baselines, edge latency optimization, wire-speed profiling, interactive SOC console, and the proposed **Three-Stage Hierarchical IDS (Flood vs. Non-Flood Specialists)**.
+Active Track 2 engineering work focused on practical IoT intrusion detection performance, feature/latency optimization, operational dashboards, and evaluating whether hierarchical Flood vs. Non-Flood specialization beats improved flat models on CICIoT2023.
 
 ---
 
-## Directory Contents
+## Contents
 
-| Path | Role & Contents |
+| Path | Role & Key Files |
 |---|---|
-| [`src/`](src/) | Initial baseline pipeline across three classification granularities: Binary (`train_binary.py`), 8-Class Category (`train_category_8class.py`), 34-Class Fine-Grained (`train_attack_34class.py`), Top-20 feature selection (`feature_selection.py`), master synthesis (`capstone_synthesis.py`), data streaming (`data_loader.py`, `create_sample.py`), preprocessing, models, and evaluation utilities. |
-| [`models/`](models/README.md) | Trained baseline model checkpoints and scalers for `binary/`, `category_8class/`, `attack_34class/`, and `reduced_features/` (Top-20 edge subset). *(Gitignored binaries; see [`models/README.md`](models/README.md).)* |
-| [`results/`](results/) | Evaluation tables (`tables/`: 24 benchmark/ablation/throughput CSV & JSON files) and visualizations (`figures/`: 30 confusion matrices, ROC/PR curves, feature importance/decay plots, throughput chart, and multi-tier defense architecture diagram). |
-| [`experiments/`](experiments/) | IDS model & architecture optimization ablations: `weight_calibration.py`, `hyperparameter_tuning.py`, `feature_pruning.py`, `feature_decay_sweep.py`, and the earlier 2-stage 8-category cascade prototype (`hierarchical_cascade.py`). |
-| [`scripts/`](scripts/) | Operational IDS tools: Archon Edge IDS Streamlit SOC Console ([`demo_app.py`](scripts/demo_app.py)) and 10 Gbps wire-speed throughput/burst latency benchmark ([`benchmark_throughput.py`](scripts/benchmark_throughput.py)). |
-| [`docs/`](docs/) | Original engineering roadmap ([`PROGRESS.md`](docs/PROGRESS.md)) and technical insights ledger ([`INSIGHTS.md`](docs/INSIGHTS.md)). |
-| [`data/`](data/) | Data specification for Track 2 derived training splits (future Datasets A, B, C1, C2); raw/stratified flows are read from [`../data/`](../data/). |
-| [`hierarchical_ids/`](hierarchical_ids/) | **Implemented & Evaluated** comparison of 3-Stage Flood vs. Non-Flood Cascade (E2), Parallel Fusion (E3), and Improved Flat 34-Class (E4) against Track 1 E1 (`docs/COMPARISON_REPORT.md`). |
+| [`src/`](src/) | Multi-granularity baselines across Binary (`train_binary.py`), 8-Class (`train_category_8class.py`), 34-Class (`train_attack_34class.py`), Top-20 feature selection (`feature_selection.py`), sampling (`create_sample.py`), and synthesis (`capstone_synthesis.py`). |
+| [`models/`](models/) | Saved `.joblib`/`.pt` checkpoints for `binary/`, `category_8class/`, `attack_34class/`, and `reduced_features/` *(gitignored binaries)*. |
+| [`results/`](results/) | Baseline tables (`tables/*.csv`, `*.json`) and 30 plots (`figures/*.png`). |
+| [`experiments/`](experiments/) | Standalone ablations: `weight_calibration.py`, `hyperparameter_tuning.py`, `feature_pruning.py`, `feature_decay_sweep.py`, and early 2-stage prototype (`hierarchical_cascade.py`). |
+| [`scripts/`](scripts/) | `demo_app.py` (Streamlit 3-tier SOC console) and `benchmark_throughput.py` (10 Gbps host throughput & DMA burst latency profiler). |
+| [`docs/INSIGHTS.md`](docs/INSIGHTS.md) | Complete chronological engineering ledger (Steps 0–9), schemas, trade-offs, hardware limits, and IP-less `DDoS/DoS` findings. |
+| [`hierarchical_ids/`](hierarchical_ids/docs/COMPARISON_REPORT.md) | **Completed E1–E4 Study**: clean modular implementation (`src/{data_utils,architectures,metrics_eval}.py`), Train/Val trainer (`experiments/train_and_tune_val.py`), frozen read-only evaluator (`experiments/run_final_evaluation.py`), 18 `.joblib` models (gitignored), CSV/JSON/`.npy` results (`results/`), and [`docs/COMPARISON_REPORT.md`](hierarchical_ids/docs/COMPARISON_REPORT.md). |
 
 ---
 
-## Research Progression in Track 2
+## E1–E4 Hierarchical vs. Improved Flat Summary
 
-1. **Multi-Granularity Baselines (Completed)**: Benchmarked SGD Logistic Regression, Random Forest, LightGBM, XGBoost, and PyTorch Tabular DNN across 2-class, 8-class, and 34-class tasks (`src/`, `results/`).
-2. **Feature Reduction & Edge Optimization (Completed)**: Ranked consensus feature importance across RF, XGBoost, and LightGBM; evaluated Top-20 edge subset (`feature_selection.py`) and feature decay sweeps (`feature_decay_sweep.py`, `feature_pruning.py`).
-3. **Wire-Speed & Multi-Tier Deployment Prototyping (Completed)**: Benchmarked Tier 1–3 models (`benchmark_throughput.py`) and built an interactive SOC inspection console (`demo_app.py`).
-4. **Early 2-Stage Cascade Prototype (Exploratory)**: Tested an 8-category macro classifier routing into per-category specialists (`experiments/hierarchical_cascade.py`).
-5. **3-Stage Hierarchical vs. Improved Flat IDS Study (Completed)**: Implemented and evaluated under Track 1 leakage-free splits in [`hierarchical_ids/README.md`](hierarchical_ids/README.md), [`hierarchical_ids/docs/COMPARISON_REPORT.md`](hierarchical_ids/docs/COMPARISON_REPORT.md), and [`../notebooks/09_hierarchical_ids_evaluation.ipynb`](../notebooks/09_hierarchical_ids_evaluation.ipynb).
+Full charts live in [`../notebooks/09_hierarchical_ids_evaluation.ipynb`](../notebooks/09_hierarchical_ids_evaluation.ipynb) and detailed error/per-class tables in [`hierarchical_ids/docs/COMPARISON_REPORT.md`](hierarchical_ids/docs/COMPARISON_REPORT.md):
+
+| Architecture | Test Acc (N=75,105) | Test Macro-F1 | Test Minority F1 | Cross Acc (N=57,280) | Cross Macro-F1 | Execs / Flow | P50 Latency (Test) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **`E1_Flat34_LGBM_Balanced`** (Track 1) | 72.65% | 0.6145 | 0.1624 | 69.64% | **0.6498** | 1.00 | **3.43 ms** |
+| **`E2_Cascade_Default_T050`** | 73.59% | 0.6185 | 0.2115 | 68.61% | 0.6213 | 2.63 | 7.88 ms |
+| **`E2_Cascade_ValTuned`** (`tau_att=0.15`) | 75.04% | **0.6361** | **0.2264** | 70.50% | 0.6453 | 2.82 | 53.30 ms* |
+| **`E4_LGBM_Leaves63_Sqrt`** (Flat L63) | **75.37%** | 0.6352 | 0.2196 | **70.72%** | 0.6441 | 1.00 | 4.15 ms |
+
+*\*E2 Tuned uses Track 1 `binary_random_forest.joblib` (`n_jobs=-1`), creating single-row thread dispatch overhead (`8,042.5 fps` in batches).*  
+**Operational Note**: `hierarchical_ids/src/data_utils.py` slices Train/Val/Test/Cross in memory directly from [`../track1_dataset_evaluation/data/partitions/`](../track1_dataset_evaluation/data/partitions/) and [`../data/processed/sample_stratified.csv`](../data/processed/sample_stratified.csv) without duplicating CSV datasets on disk.
 
 ---
 
-## Cross-References
+## Key Commands (Run From Repo Root)
 
-- Shared raw & stratified datasets: [`../data/`](../data/)
-- Track 1 dataset audit & academic paper: [`../track1_dataset_evaluation/`](../track1_dataset_evaluation/)
-- Exploratory notebooks retained at root: [`../notebooks/`](../notebooks/) (`01`–`06` and `08` align with Track 2 workflows)
-- Overall two-track guide: [`../TRACKS_OVERVIEW.md`](../TRACKS_OVERVIEW.md)
+```powershell
+# Re-train/tune E2/E3/E4 checkpoints (Train + Val only) & evaluate read-only on Val/Test/Cross
+.\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.train_and_tune_val --phase all
+.\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.run_final_evaluation
+
+# Launch SOC demo or 10 Gbps benchmark
+.\.venv\Scripts\streamlit.exe run track2_ids_engineering/scripts/demo_app.py
+.\.venv\Scripts\python.exe track2_ids_engineering/scripts/benchmark_throughput.py --samples 50000 --warmup 1000
+```
