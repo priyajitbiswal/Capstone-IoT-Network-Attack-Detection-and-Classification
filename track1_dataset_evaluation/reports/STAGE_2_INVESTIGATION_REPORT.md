@@ -13,9 +13,8 @@ Pursuant to the approved Stage 1 Audit and the user's specific Stage 2 condition
 Key outcomes:
 1. **Separation and Characterization of Duplicate Types**: Differentiated exact duplicate rows (28,464 instances, 5.38%), redundant feature vectors (38,140 instances, 7.20%), and conflicting label collisions (8,740 unique vectors, 28,608 rows, 5.40%). Identified their physical causes (automated packet flood repetition and protocol ambiguity caused by stripped IP headers).
 2. **Deterministic, Leak-Free 70/15/15 Partitioning**: Implemented deterministic feature-hash group partitioning on deduplicated clean rows (501,098 flows). Formally verified **exactly 0.00% feature overlap between Train (350,821), Validation (75,172), and Test (75,105)**, while retaining all 34 classes across every partition.
-3. **Cross-Capture Provenance & Coverage Verified**: Crawled files `Merged26.csv` through `Merged63.csv` (38 files, 26,376,916 flows). Confirmed that **all 34 classes are fully represented**. Extracted an independent, clean holdout evaluation dataset of **58,176 flows** (`cross_capture_test_clean.csv`) with **0.00% overlap with the training set**.
-4. **Corrected Preprocessing & XGBoost Weighting**: Created an isolated revised pipeline directory (`src_v2/`). Corrected feature cleaning and `StandardScaler` to fit strictly on training data, and resolved the XGBoost class weighting flaw via `BalancedXGBClassifier`.
-5. **No Models Retrained**: In strict adherence to user instructions, no model retraining was performed.
+3. **Cross-Capture Provenance & Coverage Verified**: Crawled files `Merged26.csv` through `Merged63.csv` (38 files, 26,376,916 flows). Confirmed that **all 34 classes are fully represented**. Extracted an independent, clean holdout evaluation dataset of **57,280 flows** (`cross_capture_test_clean.csv`) with **0.00% overlap with Train/Val/Test**.
+4. **Corrected Preprocessing & XGBoost Weighting**: Engineered the isolated revised pipeline (`track1_dataset_evaluation/src/`, originally `src_v2/`). Corrected feature cleaning and `StandardScaler` to fit strictly on training data, and resolved the XGBoost class weighting flaw via `BalancedXGBClassifier`.
 
 ---
 
@@ -147,11 +146,9 @@ A full scan of all 26.37 million flows confirmed that **all 34 classes are prese
 Using [`src_v2/cross_capture.py`](file:///c:/Users/priya/Downloads/capstone/src_v2/cross_capture.py), we extracted a representative sample across `Merged26.csv`–`Merged40.csv`.
 - **Initial extraction**: 63,423 flows across 34 classes.
 - **Overlap check against Train**: Found 3,925 feature hashes (6.26%) that matched training feature vectors (caused by identical automated packet flooding scripts across recording days).
-- **Leak-Free Filtering**: Purged the overlapping hashes to create [`data/partitions/cross_capture_test_clean.csv`](file:///c:/Users/priya/Downloads/capstone/data/partitions/cross_capture_test_clean.csv).
-  - **Clean flow count**: **58,176 flows**.
+- **Leak-Free Filtering**: Purged overlapping hashes against Train/Val/Test (`cross_capture_metadata.json`) to create `cross_capture_test_clean.csv`:
+  - **Clean flow count**: **57,280 flows** (`57,148` unique feature vectors; exact overlaps with Train = `0`, Val = `0`, Test = `0`).
   - **Class coverage**: **34 of 34 classes verified present**.
-  - **Overlap with Training set**: **EXACTLY 0 (0.00%)**.
-  - **Overlap with Validation set**: **EXACTLY 0 (0.00%)**.
 
 ---
 
@@ -173,48 +170,12 @@ Using [`src_v2/cross_capture.py`](file:///c:/Users/priya/Downloads/capstone/src_
 
 ---
 
-## 6. Directory Structure for Revised Pipeline (Condition 8)
+## 6. Revised Pipeline Isolation
 
-The revised experimental pipeline is completely decoupled from the legacy implementation:
-
-```
-capstone/
-├── src/                          # Original legacy source code (preserved untouched)
-├── models_saved/                 # Original model checkpoints (preserved untouched)
-├── results/                      # Original results & tables (preserved untouched)
-│
-├── src_v2/                       # NEW: Revised experimental pipeline
-│   ├── __init__.py
-│   ├── config.py                 # Paths, schema, seeds for v2
-│   ├── data_partitioning.py      # Deduplication & group-hash 70/15/15 partitioner
-│   ├── preprocessing.py          # Leak-free preprocessor & scaler
-│   ├── cross_capture.py          # Cross-capture holdout extractor
-│   └── models.py                 # Corrected models with BalancedXGBClassifier
-│
-├── data/partitions/              # NEW: Verified partition assignments & holdouts
-│   ├── partition_assignments.csv # Assignment mapping (orig_idx, hash, label, partition)
-│   ├── partition_metadata.json   # Full provenance, counts, and zero-overlap verification
-│   ├── cross_capture_test.csv    # Raw cross-capture sample (63,423 flows)
-│   ├── cross_capture_test_clean.csv # Leak-free cross-capture holdout (58,176 flows)
-│   └── cross_capture_metadata.json
-│
-├── models_saved_v2/              # NEW: Dedicated directory for retrained v2 models
-└── results_v2/                   # NEW: Dedicated directory for revised experiment outputs
-    ├── figures/
-    └── tables/
-```
+The revised Track 1 pipeline (`track1_dataset_evaluation/src/`, originally `src_v2/`) is cleanly separated from Track 2's baseline pipeline (`track2_ids_engineering/src/`), with hash partition maps and metadata saved under `track1_dataset_evaluation/data/partitions/` (`partition_assignments.csv`, `partition_metadata.json`, `cross_capture_test_clean.csv`, `cross_capture_metadata.json`, `ablation_strategy2/`).
 
 ---
 
-## 7. Stage 2 Verification Summary
+## 7. Stage 2 Verification Checklist
 
-- [x] Original dataset files [`MERGED_CSV/`](file:///c:/Users/priya/Downloads/capstone/MERGED_CSV/) and [`data/sample_stratified.csv`](file:///c:/Users/priya/Downloads/capstone/data/sample_stratified.csv) remain unmodified.
-- [x] Exact duplicate rows, duplicate feature vectors, and conflicting labels characterized.
-- [x] Duplicate handling strategy C justified and verified.
-- [x] Reproducible 70/15/15 partition created with **0.00% feature overlap**.
-- [x] `Merged26.csv`–`Merged63.csv` investigated; all 34 classes verified; clean holdout extracted.
-- [x] Preprocessing transformations fitted strictly on training data.
-- [x] XGBoost sample weighting bug resolved and unit-tested.
-- [x] Original experiment outputs preserved; separate `src_v2/` directory created.
-- [x] All transformations, partitions, seeds, and class distributions recorded.
-- [x] **No models retrained yet** — awaiting user approval for Stage 3.
+- Raw `Merged01–63.csv` and `data/processed/sample_stratified.csv` kept strictly read-only; Strategy C (`70.01% / 15.00% / 14.99%`) verified at **0.00% feature overlap** across all 6 pairs; `LeakFreePreprocessor` and `BalancedXGBClassifier` unit-verified prior to Stage 3 execution.

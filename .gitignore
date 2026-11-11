@@ -22,7 +22,6 @@ track2_ids_engineering/data/*/*.csv
 
 # Model Checkpoints & Large Artifacts
 track1_dataset_evaluation/models/*
-!track1_dataset_evaluation/models/README.md
 track2_ids_engineering/models/*
 models_saved/
 models_saved_v2/
