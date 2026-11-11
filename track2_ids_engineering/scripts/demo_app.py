@@ -1,728 +1,942 @@
-import time
+"""
+Track 2 SOC Defense Console (Streamlit) — Final Presentation Version.
+
+Primary IDS Architecture:
+  - E4_LGBM_Leaves63_Sqrt (Single-pass 34-class LightGBM, 75.37% Test Acc, 0.7440 MCC, 4.15 ms Test P50)
+
+Comparative Hierarchical IDS Architecture:
+  - E2_Cascade_ValTuned_LGBM (3-Stage Hierarchy using Track 1 binary_lightgbm.joblib in Stage 1,
+    tau_att=0.15, Stage 2 malicious-only 7-cat router f_tau=0.40, Stages 3A/3B specialists;
+    75.13% Test Acc, 0.6357 Macro-F1, 8.44 ms Test P50)
+
+Strictly reuses Track 1's training-fitted LeakFreePreprocessor (`preprocessor_strategy1.joblib`),
+exact canonical 39 `FEATURE_COLUMNS`, and draws unseen test traffic directly from Track 1's
+zero-overlap Internal Test partition (`partition == 'test'`, N = 75,105) when available.
+"""
+
+import json
 import random
+import sys
+import time
+import warnings
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import joblib
 import numpy as np
 import pandas as pd
-import joblib
 import streamlit as st
 
-# Configure page metadata
-st.set_page_config(
-    page_title="Archon Edge IDS - Security Operations Console",
-    layout="wide",
-    initial_sidebar_state="expanded",
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+import track1_dataset_evaluation.src as _t1_compat  # noqa: F401
+from track1_dataset_evaluation.src.config import (
+    FEATURE_COLUMNS,
+    LABEL_MAPPING_8CLASSES,
+    MODELS_V2_DIR as TRACK1_MODELS_DIR,
+    ORIGINAL_SAMPLE_FILE,
+    PARTITION_ASSIGNMENTS_FILE,
+    TARGET_COLUMN,
+    THIRTY_FOUR_CLASSES,
+    THIRTY_FOUR_TO_IDX,
+)
+from track2_ids_engineering.hierarchical_ids.src.architectures import (
+    Flat34BaselineArchitecture,
+    HierarchicalCascade3Stage,
+)
+from track2_ids_engineering.hierarchical_ids.src.data_utils import (
+    FLOOD_CATEGORIES,
+    HIER_MODELS_DIR,
+    HIER_RESULTS_DIR,
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Color mappings
-STATUS_COLORS = {
+# Color mappings (preserved SOC console palette)
+STATUS_COLORS: Dict[str, str] = {
     "BENIGN_PASSED": "#10B981",       # Emerald
-    "FLOOD_DROPPED_EDGE": "#EF4444",   # Crimson
+    "FLOOD_DROPPED_EDGE": "#EF4444",  # Crimson
     "BOTNET_QUARANTINED": "#F59E0B",  # Amber
     "EXPLOIT_ESCALATED": "#8B5CF6",   # Violet
 }
 
-# Label mappings
-LABEL_MAPPING_8CLASSES = {
-    "DDoS-RSTFINFlood": "DDoS", "DDoS-PSHACK_Flood": "DDoS", "DDoS-SYN_Flood": "DDoS",
-    "DDoS-UDP_Flood": "DDoS", "DDoS-TCP_Flood": "DDoS", "DDoS-ICMP_Flood": "DDoS",
-    "DDoS-SynonymousIP_Flood": "DDoS", "DDoS-ACK_Fragmentation": "DDoS",
-    "DDoS-UDP_Fragmentation": "DDoS", "DDoS-ICMP_Fragmentation": "DDoS",
-    "DDoS-SlowLoris": "DDoS", "DDoS-HTTP_Flood": "DDoS",
-    "DoS-UDP_Flood": "DoS", "DoS-TCP_Flood": "DoS", "DoS-SYN_Flood": "DoS", "DoS-HTTP_Flood": "DoS",
-    "Mirai-greeth_flood": "Mirai", "Mirai-greip_flood": "Mirai", "Mirai-udpplain": "Mirai",
-    "Recon-PingSweep": "Recon", "Recon-OSScan": "Recon", "Recon-PortScan": "Recon",
-    "VulnerabilityScan": "Recon", "Recon-HostDiscovery": "Recon",
-    "DNS_Spoofing": "Spoofing", "MITM-ArpSpoofing": "Spoofing",
-    "BenignTraffic": "Benign",
-    "BrowserHijacking": "Web", "Backdoor_Malware": "Web", "XSS": "Web",
-    "CommandInjection": "Web", "SqlInjection": "Web", "Uploading_Attack": "Web",
-    "DictionaryBruteForce": "BruteForce",
+# Verified 34 -> 29 Operational Mitigation Flood Twin Groups (identical L4/L7 protocol remediation)
+DEFAULT_OP29_MERGE_GROUPS: Dict[str, List[str]] = {
+    "FLOOD_SYN": ["DDOS-SYN_FLOOD", "DOS-SYN_FLOOD", "DDOS-SYNONYMOUSIP_FLOOD"],
+    "FLOOD_TCP": ["DDOS-TCP_FLOOD", "DOS-TCP_FLOOD"],
+    "FLOOD_UDP": ["DDOS-UDP_FLOOD", "DOS-UDP_FLOOD"],
+    "FLOOD_HTTP": ["DDOS-HTTP_FLOOD", "DOS-HTTP_FLOOD"],
 }
 
-# Custom CSS for Professional SOC Dashboard
-st.markdown(
+ARCH_E4_KEY = "E4_Primary_Flat34"
+ARCH_E2_KEY = "E2_Fast_Cascade"
+ARCH_DISPLAY_OPTIONS: Dict[str, str] = {
+    ARCH_E4_KEY: "E4: Improved Flat LightGBM (Primary Recommended — 4.15 ms P50)",
+    ARCH_E2_KEY: "E2: 3-Stage Fast Cascade (LightGBM Stage 1 Comparison — 8.44 ms P50)",
+}
+
+CUSTOM_CSS = """
+<style>
+header[data-testid="stHeader"] { display: none !important; }
+#MainMenu { visibility: hidden !important; }
+footer { visibility: hidden !important; }
+.stDeployButton { display: none !important; }
+.block-container {
+    padding-top: 1.25rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 96% !important;
+}
+h1, h2, h3, h4 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+.header-card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: 1px solid #334155 !important;
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin-top: 0.4rem;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+.header-title {
+    color: #f8fafc;
+    font-size: 23px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.header-sub {
+    color: #94a3b8;
+    font-size: 13.5px;
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+.header-status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+    background: #064e3b;
+    color: #34d399;
+    border: 1px solid #059669;
+}
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background-color: #0b1120 !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 8px !important;
+    padding: 16px 20px !important;
+    margin-bottom: 16px !important;
+}
+button[kind="primary"], .stButton > button[kind="primary"] {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #3b82f6 !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+}
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+}
+.stTabs [data-baseweb="tab"] {
+    font-weight: 500;
+    font-size: 14px;
+    color: #94a3b8;
+    border-radius: 4px 4px 0 0;
+    padding: 8px 16px;
+    border: none;
+}
+.stTabs [aria-selected="true"] {
+    color: #38bdf8 !important;
+    border-bottom: 2px solid #38bdf8 !important;
+}
+.control-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+.badge {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #ffffff;
+    letter-spacing: 0.04em;
+}
+</style>
+"""
+
+
+def _build_op29_map() -> Dict[str, str]:
+    """Builds exact 34 -> 29 class lookup mapping using frozen JSON artifact when available."""
+    map_path = HIER_RESULTS_DIR / "merged_flood_taxonomy_map.json"
+    if map_path.exists():
+        with open(map_path, "r") as f:
+            data = json.load(f)
+        if "old_to_new_34_to_29" in data:
+            return dict(data["old_to_new_34_to_29"])
+
+    mapping: Dict[str, str] = {}
+    for grp_name, members in DEFAULT_OP29_MERGE_GROUPS.items():
+        for m in members:
+            mapping[m] = grp_name
+    for cls_name in THIRTY_FOUR_CLASSES:
+        mapping.setdefault(cls_name, cls_name)
+    return mapping
+
+
+def load_soc_resources() -> Dict[str, Any]:
+    """Loads Track 1 Strategy 1 preprocessor, E4 primary model, and Fast E2 cascade."""
+    prep_path = TRACK1_MODELS_DIR / "preprocessor_strategy1.joblib"
+    e4_path = HIER_MODELS_DIR / "e4_lgbm_leaves63_sqrt.joblib"
+    s1_path = TRACK1_MODELS_DIR / "binary_lightgbm.joblib"
+    s2_path = HIER_MODELS_DIR / "stage2_cat7_lgbm_sqrt_balanced.joblib"
+    s3a_path = HIER_MODELS_DIR / "stage3a_flood_lgbm_d63_sqrt.joblib"
+    s3b_path = HIER_MODELS_DIR / "stage3b_nonflood_lgbm_d63_sqrt.joblib"
+
+    required = [prep_path, e4_path, s1_path, s2_path, s3a_path, s3b_path]
+    missing = [str(p) for p in required if not p.exists()]
+    if missing:
+        raise FileNotFoundError(f"Missing required model/preprocessor checkpoint(s): {missing}")
+
+    preprocessor = joblib.load(prep_path)
+    e4_arch = Flat34BaselineArchitecture(
+        name="E4_LGBM_Leaves63_Sqrt",
+        model=joblib.load(e4_path),
+        checkpoint_path=e4_path,
+    )
+    e2_arch = HierarchicalCascade3Stage(
+        name="E2_Cascade_ValTuned_LGBM",
+        stage1_model=joblib.load(s1_path),
+        stage2_model=joblib.load(s2_path),
+        flood_model=joblib.load(s3a_path),
+        non_flood_model=joblib.load(s3b_path),
+        stage2_mode="cat7_attack",
+        attack_threshold=0.15,
+        flood_route_threshold=0.40,
+        checkpoint_paths=[s1_path, s2_path, s3a_path, s3b_path],
+    )
+
+    return {
+        "preprocessor": preprocessor,
+        "architectures": {
+            ARCH_E4_KEY: e4_arch,
+            ARCH_E2_KEY: e2_arch,
+        },
+        "op29_map": _build_op29_map(),
+        "feature_columns": list(FEATURE_COLUMNS),
+    }
+
+
+def load_evaluation_traffic() -> Tuple[pd.DataFrame, str]:
     """
-    <style>
-    /* Hide default Streamlit header overlay that clips top border */
-    header[data-testid="stHeader"] {
-        display: none !important;
+    Loads real CICIoT2023 flows mapped through Track 1's Strategy 1 partition index so
+    dashboard demos replay strictly unseen Internal Test flows (`partition == 'test'`).
+    """
+    if not ORIGINAL_SAMPLE_FILE.exists():
+        raise FileNotFoundError(f"Missing stratified sample dataset: {ORIGINAL_SAMPLE_FILE}")
+
+    df_raw = pd.read_csv(ORIGINAL_SAMPLE_FILE)
+    if PARTITION_ASSIGNMENTS_FILE.exists():
+        df_assign = pd.read_csv(PARTITION_ASSIGNMENTS_FILE)
+        df_clean = df_raw.iloc[df_assign["orig_idx"]].copy().reset_index(drop=True)
+        df_clean["partition"] = df_assign["partition"].values
+        df_test = df_clean[df_clean["partition"] == "test"].drop(columns=["partition"]).reset_index(drop=True)
+        df_test["LabelUpper"] = df_test[TARGET_COLUMN].astype(str).str.strip().str.upper()
+        return df_test, f"Track 1 Held-Out Internal Test (N = {len(df_test):,}, Zero Overlap)"
+
+    df_raw["LabelUpper"] = df_raw[TARGET_COLUMN].astype(str).str.strip().str.upper()
+    return df_raw, f"CICIoT2023 Stratified Sample (N = {len(df_raw):,})"
+
+
+def preprocess_flows(df_rows: pd.DataFrame, preprocessor: Any) -> np.ndarray:
+    """Applies exact Track 1 leak-free cleaning (+inf/-inf/NaN + 39-col order) and StandardScaler."""
+    missing_cols = [c for c in FEATURE_COLUMNS if c not in df_rows.columns]
+    if missing_cols:
+        raise ValueError(f"Input frame missing canonical CICIoT2023 features: {missing_cols}")
+
+    ordered_df = df_rows[FEATURE_COLUMNS]
+    X_clean = preprocessor.clean_transform(ordered_df)
+    X_scaled = preprocessor.transform_scaler(X_clean)
+    return X_scaled
+
+
+def map_verdict_playbook(pred_label_34: str, op29_label: str) -> Dict[str, str]:
+    """Maps a predicted class label into an actionable SOC gateway mitigation playbook."""
+    if pred_label_34 == "BENIGN":
+        return {
+            "verdict": "BENIGN_PASSED",
+            "tier": "Perimeter Pass",
+            "action": "Forward cleanly to internal IoT VLAN",
+            "severity": "None",
+            "color": STATUS_COLORS["BENIGN_PASSED"],
+        }
+
+    cat8 = LABEL_MAPPING_8CLASSES.get(pred_label_34, "Web")
+    if cat8 in FLOOD_CATEGORIES:
+        if op29_label == "FLOOD_SYN":
+            playbook = "SYN Cookies + Embryonic Half-Open Rate-Limit (plus L3 src==dst ACL if spoofed)"
+        elif op29_label == "FLOOD_TCP":
+            playbook = "Edge TCP Volumetric FlowSpec Drop & State Scrubbing"
+        elif op29_label == "FLOOD_UDP":
+            playbook = "Upstream UDP Rate-Limit & QoS Ingress Policing"
+        elif op29_label == "FLOOD_HTTP":
+            playbook = "L7 Reverse-Proxy HTTP Challenge & Connection Throttle"
+        else:
+            playbook = f"Line-Rate Edge Flood Drop ({op29_label})"
+        return {
+            "verdict": "FLOOD_DROPPED_EDGE",
+            "tier": f"Volumetric Flood Mitigation ({op29_label})",
+            "action": playbook,
+            "severity": "High (Volumetric Flood)",
+            "color": STATUS_COLORS["FLOOD_DROPPED_EDGE"],
+        }
+
+    if cat8 == "Mirai":
+        return {
+            "verdict": "BOTNET_QUARANTINED",
+            "tier": "Edge Botnet Quarantine",
+            "action": f"Isolate Device Port & Reset Credentials ({pred_label_34})",
+            "severity": "Critical (Botnet Compromise)",
+            "color": STATUS_COLORS["BOTNET_QUARANTINED"],
+        }
+
+    if cat8 in {"Recon", "Spoofing"}:
+        action = (
+            f"Dynamic ARP / DNSSEC Guard ({pred_label_34})"
+            if cat8 == "Spoofing"
+            else f"Stealth Probe Block & Firewall Hardening ({pred_label_34})"
+        )
+        return {
+            "verdict": "EXPLOIT_ESCALATED",
+            "tier": f"SOC Escalation ({cat8})",
+            "action": action,
+            "severity": "Elevated (Recon / Spoofing)",
+            "color": STATUS_COLORS["EXPLOIT_ESCALATED"],
+        }
+
+    return {
+        "verdict": "EXPLOIT_ESCALATED",
+        "tier": "SOC WAF / Host IR",
+        "action": f"Trigger Dynamic WAF Signature & Host Alert ({pred_label_34})",
+        "severity": "Severe (Application Exploit)",
+        "color": STATUS_COLORS["EXPLOIT_ESCALATED"],
     }
-    #MainMenu {
-        visibility: hidden !important;
-    }
-    footer {
-        visibility: hidden !important;
-    }
-    .stDeployButton {
-        display: none !important;
-    }
-    
-    /* Global layout & typography */
-    .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 96% !important;
-    }
-    h1, h2, h3, h4 {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-    }
-    
-    /* Header Card - Full 4-Sided Border with Clearance */
-    .header-card {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        border: 1px solid #334155 !important;
-        border-radius: 8px;
-        padding: 20px 24px;
-        margin-top: 0.5rem;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-    }
-    .header-title {
-        color: #f8fafc;
-        font-size: 24px;
-        font-weight: 700;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .header-sub {
-        color: #94a3b8;
-        font-size: 14px;
-        margin-top: 6px;
-        margin-bottom: 0;
-    }
-    .header-status {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 4px;
-        font-size: 11px;
-        font-weight: 700;
-        font-family: monospace;
-        letter-spacing: 0.05em;
-        background: #064e3b;
-        color: #34d399;
-        border: 1px solid #059669;
-        margin-left: 10px;
-    }
-    
-    /* Native Streamlit Bordered Container Styling */
-    [data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #0b1120 !important;
-        border: 1px solid #1e293b !important;
-        border-radius: 8px !important;
-        padding: 16px 20px !important;
-        margin-bottom: 16px !important;
-    }
-    
-    /* Button primary styling: Executive Slate/Blue instead of bright red */
-    button[kind="primary"], .stButton > button[kind="primary"] {
-        background-color: #2563eb !important;
-        color: #ffffff !important;
-        border: 1px solid #3b82f6 !important;
-        font-weight: 600 !important;
-        border-radius: 6px !important;
-        padding: 0.5rem 1rem !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-    button[kind="primary"]:hover, .stButton > button[kind="primary"]:hover {
-        background-color: #1d4ed8 !important;
-        border-color: #60a5fa !important;
-        box-shadow: 0 0 12px rgba(37, 99, 235, 0.45) !important;
-    }
-    button[kind="primary"]:active, .stButton > button[kind="primary"]:active {
-        background-color: #1e40af !important;
-    }
-    
-    /* Tab Styling */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        border-bottom: 1px solid #1e293b;
-        padding-bottom: 4px;
-        margin-bottom: 16px;
-    }
-    .stTabs [data-baseweb="tab"] {
-        font-weight: 500;
-        font-size: 14px;
-        color: #94a3b8;
-        border-radius: 4px 4px 0 0;
-        padding: 8px 16px;
-        border: none;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #38bdf8 !important;
-        border-bottom: 2px solid #38bdf8 !important;
-    }
-    
-    /* Control Box */
-    .control-card {
-        background: #0f172a;
-        border: 1px solid #1e293b;
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin-bottom: 20px;
-    }
-    
-    /* Feed item */
-    .feed-item {
-        font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-        font-size: 13px;
-        padding: 10px 14px;
-        border-radius: 6px;
-        margin-bottom: 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 4px solid;
-    }
-    .badge {
-        font-family: monospace;
-        font-weight: 700;
-        font-size: 11px;
-        padding: 2px 8px;
-        border-radius: 4px;
-        color: #ffffff;
-        letter-spacing: 0.04em;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+
+
+def infer_batch(
+    df_rows: pd.DataFrame,
+    arch_key: str,
+    resources: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    """Preprocesses and classifies a batch of rows cleanly with timed model inference."""
+    arch = resources["architectures"][arch_key]
+    preprocessor = resources["preprocessor"]
+    op29_map = resources["op29_map"]
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        t0_prep = time.perf_counter_ns()
+        X_scaled = preprocess_flows(df_rows, preprocessor)
+        prep_total_us = (time.perf_counter_ns() - t0_prep) / 1000.0
+
+        t0_inf = time.perf_counter_ns()
+        trace = arch.predict_with_trace(X_scaled)
+        inf_total_us = (time.perf_counter_ns() - t0_inf) / 1000.0
+
+    y_pred = trace["y_pred"]
+    y_prob = trace["y_prob"]
+    n_rows = len(df_rows)
+    per_flow_prep_us = prep_total_us / max(1, n_rows)
+    per_flow_inf_us = inf_total_us / max(1, n_rows)
+
+    flood_indices = [THIRTY_FOUR_TO_IDX[c] for c in THIRTY_FOUR_CLASSES if LABEL_MAPPING_8CLASSES[c] in FLOOD_CATEGORIES]
+    non_flood_indices = [
+        THIRTY_FOUR_TO_IDX[c]
+        for c in THIRTY_FOUR_CLASSES
+        if c != "BENIGN" and LABEL_MAPPING_8CLASSES[c] not in FLOOD_CATEGORIES
+    ]
+    benign_idx = THIRTY_FOUR_TO_IDX["BENIGN"]
+
+    results: List[Dict[str, Any]] = []
+    for i in range(n_rows):
+        row = df_rows.iloc[i]
+        true_raw = str(row[TARGET_COLUMN]).strip().upper()
+        true_op29 = op29_map.get(true_raw, true_raw)
+        pred_idx = int(y_pred[i])
+        pred_34 = THIRTY_FOUR_CLASSES[pred_idx]
+        pred_op29 = op29_map.get(pred_34, pred_34)
+
+        probs = y_prob[i]
+        top3_idx = np.argsort(probs)[::-1][:3]
+        top3 = [(THIRTY_FOUR_CLASSES[int(j)], float(probs[int(j)])) for j in top3_idx]
+
+        stage_info: Dict[str, Any] = {
+            "benign_prob": float(probs[benign_idx]),
+            "flood_prob": float(np.sum(probs[flood_indices])),
+            "non_flood_prob": float(np.sum(probs[non_flood_indices])),
+            "executions": int(trace["executions_per_flow"][i]),
+        }
+        if "stage1_prob_attack" in trace:
+            stage_info.update({
+                "mode": "E2_CASCADE",
+                "s1_prob_attack": float(trace["stage1_prob_attack"][i]),
+                "s1_passed_attack": bool(trace["stage1_pred_attack"][i]),
+                "s2_cat": str(trace["stage2_pred_cat"][i]),
+                "route": str(trace["specialist_route"][i]),
+            })
+        else:
+            stage_info["mode"] = "E4_FLAT34"
+
+        results.append({
+            "true_34": true_raw,
+            "true_op29": true_op29,
+            "pred_34": pred_34,
+            "pred_op29": pred_op29,
+            "confidence": float(probs[pred_idx]),
+            "top3": top3,
+            "exact_34_match": (true_raw == pred_34),
+            "op29_match": (true_op29 == pred_op29),
+            "prep_us": round(per_flow_prep_us, 1),
+            "inf_us": round(per_flow_inf_us, 1),
+            "stage": stage_info,
+            "action": map_verdict_playbook(pred_34, pred_op29),
+            "features": {c: float(row[c]) for c in FEATURE_COLUMNS},
+        })
+
+    return results
+
+
+def infer_single_flow(
+    row: pd.Series,
+    arch_key: str,
+    resources: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Runs timed single-row end-to-end preprocessing + inference for the live inspector."""
+    df_one = pd.DataFrame([row[FEATURE_COLUMNS + [TARGET_COLUMN]]])
+    return infer_batch(df_one, arch_key=arch_key, resources=resources)[0]
+
 
 @st.cache_resource
-def load_models():
-    """Load pre-trained models and scalers for all 3 tiers."""
-    models_dir = BASE_DIR / "models"
+def get_cached_resources() -> Dict[str, Any]:
+    return load_soc_resources()
 
-    t1_lr = joblib.load(models_dir / "binary" / "logistic_regression.joblib")
-    t1_xgb = joblib.load(models_dir / "binary" / "xgboost.joblib")
-    t1_lgb = joblib.load(models_dir / "binary" / "lightgbm.joblib")
-    t1_scaler = joblib.load(models_dir / "binary" / "binary_scaler.joblib")
-    
-    t2_model = joblib.load(models_dir / "reduced_features" / "xgboost_top20.joblib")
-    t2_scaler = joblib.load(models_dir / "reduced_features" / "reduced_20_scaler.joblib")
-    top_20_feats = joblib.load(models_dir / "reduced_features" / "top_20_feature_names.joblib")
-    
-    t3_model = joblib.load(models_dir / "attack_34class" / "xgboost.joblib")
-    t3_scaler = joblib.load(models_dir / "attack_34class" / "attack34_scaler.joblib")
-    
-    return {
-        "t1_lr": t1_lr, "t1_xgb": t1_xgb, "t1_lgb": t1_lgb, "t1_scaler": t1_scaler,
-        "t2_model": t2_model, "t2_scaler": t2_scaler, "top_20_feats": top_20_feats,
-        "t3_model": t3_model, "t3_scaler": t3_scaler
-    }
 
 @st.cache_data
-def load_sample_dataset():
-    """Load stratified sample dataset to draw realistic traffic flows."""
-    sample_file = BASE_DIR.parent / "data" / "processed" / "sample_stratified.csv"
-    if not sample_file.exists():
-        sample_file = BASE_DIR / "data" / "processed" / "sample_stratified.csv"
-    df = pd.read_csv(sample_file)
-    return df
+def get_cached_traffic() -> Tuple[pd.DataFrame, str]:
+    return load_evaluation_traffic()
 
-# Initialize models and data
-models = load_models()
-data_df = load_sample_dataset()
-feature_cols = [c for c in data_df.columns if c not in ["Label", "label"]]
 
-# ----------------- Header Banner -----------------
-st.markdown(
-    """
-    <div class="header-card">
-        <div class="header-title">
-            ARCHON GATEWAY DEFENSE CONSOLE
-            <span class="header-status">SYSTEM ACTIVE [10 Gbps WIRE-SPEED]</span>
-        </div>
-        <p class="header-sub">
-            Autonomous 3-Tier Multi-Stage Intrusion Detection Engine | Evaluated on CICIoT2023 Benchmark
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# ----------------- Top Level Navigation Tabs -----------------
-tab_live, tab_single, tab_batch, tab_specs = st.tabs([
-    "Live Attack Campaign Replay",
-    "Targeted Flow Inspector",
-    "Batch Flow Telemetry",
-    "Architecture & Throughput Specifications"
-])
-
-# ----------------- Flow Processing Logic -----------------
-def process_flow(row, t1_engine):
-    """Core 3-Tier Pipeline Execution."""
-    flow_features = row[feature_cols].to_dict()
-    true_label = str(row["Label"]).strip()
-    
-    # Tier 1: Wire-Speed Binary Screen
-    x_full = np.array([row[feature_cols].values], dtype=np.float32)
-    x_full = np.nan_to_num(x_full, nan=0.0, posinf=3.35e6, neginf=0.0)
-    
-    t0 = time.perf_counter_ns()
-    x_t1_scaled = models["t1_scaler"].transform(x_full)
-    t1_pred = t1_engine.predict(x_t1_scaled)[0]
-    t1_prob = t1_engine.predict_proba(x_t1_scaled)[0]
-    t1_time_us = (time.perf_counter_ns() - t0) / 1000.0
-    
-    # 0 = Benign, 1 = Attack
-    is_benign = (t1_pred == 0) and (t1_prob[0] > 0.85)
-    
-    tier1_res = {
-        "status": "PASSED" if is_benign else "ESCALATED",
-        "label": "BENIGN" if is_benign else "ANOMALY",
-        "confidence": float(max(t1_prob)),
-        "latency_us": round(t1_time_us, 2),
+@st.cache_data
+def load_benchmark_tables() -> Dict[str, Optional[pd.DataFrame]]:
+    """Loads verified Track 2 presentation CSVs read-only for the Architecture Specs tab."""
+    paths = {
+        "final_test": HIER_RESULTS_DIR / "final_comparison_test.csv",
+        "e2_fast": HIER_RESULTS_DIR / "e2_fast_lgbm_evaluation.csv",
+        "merged": HIER_RESULTS_DIR / "merged_flood_e4_summary.csv",
     }
-    
-    tier2_res = None
-    tier3_res = None
-    action_res = None
-    
-    is_minority_exploit = true_label.upper() in [
-        "DICTIONARYBRUTEFORCE", "SQLINJECTION", "COMMANDINJECTION", "XSS", "BACKDOOR_MALWARE", "UPLOADING_ATTACK"
-    ]
-    lit_single_model_status = "MISSED (0% Recall)" if is_minority_exploit else "CAUGHT"
-    
-    if is_benign:
-        action_res = {
-            "verdict": "BENIGN_PASSED",
-            "tier": "Tier 1: Wire-Filter",
-            "action": "Forwarded to IoT Internal LAN",
-            "severity": "None",
-            "color": STATUS_COLORS["BENIGN_PASSED"]
-        }
+    return {k: (pd.read_csv(p) if p.exists() else None) for k, p in paths.items()}
+
+
+def _sample_campaign_df(data_df: pd.DataFrame, campaign_choice: str, pkt_count: int, seed: int) -> pd.DataFrame:
+    """Samples multi-stage scenario traffic cleanly without assuming missing label variants."""
+    rng = np.random.default_rng(seed)
+
+    def _draw(mask: pd.Series, n: int) -> pd.DataFrame:
+        sub = data_df[mask]
+        if sub.empty or n <= 0:
+            return data_df.iloc[0:0]
+        return sub.sample(n=n, replace=(len(sub) < n), random_state=int(rng.integers(1, 100000)))
+
+    lbl = data_df["LabelUpper"]
+    if "APT Multi-Stage" in campaign_choice:
+        n_flood = int(pkt_count * 0.40)
+        n_bf = max(2, int(pkt_count * 0.15))
+        n_web = max(2, int(pkt_count * 0.15))
+        n_mirai = max(2, int(pkt_count * 0.10))
+        n_benign = max(1, pkt_count - (n_flood + n_bf + n_web + n_mirai))
+        parts = [
+            _draw(lbl.str.startswith(("DDOS-", "DOS-")), n_flood),
+            _draw(lbl == "DICTIONARYBRUTEFORCE", n_bf),
+            _draw(lbl.isin(["SQLINJECTION", "COMMANDINJECTION", "XSS", "BACKDOOR_MALWARE", "UPLOADING_ATTACK"]), n_web),
+            _draw(lbl.str.startswith("MIRAI-"), n_mirai),
+            _draw(lbl == "BENIGN", n_benign),
+        ]
+    elif "Volumetric" in campaign_choice:
+        n_flood = int(pkt_count * 0.90)
+        n_benign = max(1, pkt_count - n_flood)
+        parts = [
+            _draw(lbl.str.startswith(("DDOS-", "DOS-")), n_flood),
+            _draw(lbl == "BENIGN", n_benign),
+        ]
+    elif "Stealthy Web" in campaign_choice:
+        n_web = int(pkt_count * 0.60)
+        n_bf = int(pkt_count * 0.20)
+        n_benign = max(1, pkt_count - (n_web + n_bf))
+        parts = [
+            _draw(lbl.isin(["SQLINJECTION", "COMMANDINJECTION", "XSS", "BACKDOOR_MALWARE", "UPLOADING_ATTACK"]), n_web),
+            _draw(lbl == "DICTIONARYBRUTEFORCE", n_bf),
+            _draw(lbl == "BENIGN", n_benign),
+        ]
     else:
-        # Tier 2: Edge Gateway Triage (20 features)
-        top_20 = models["top_20_feats"]
-        x_top20 = np.array([row[top_20].values], dtype=np.float32)
-        x_top20 = np.nan_to_num(x_top20, nan=0.0, posinf=3.35e6, neginf=0.0)
-        
-        t0 = time.perf_counter_ns()
-        x_t2_scaled = models["t2_scaler"].transform(x_top20)
-        t2_pred_idx = models["t2_model"].predict(x_t2_scaled)[0]
-        t2_time_us = (time.perf_counter_ns() - t0) / 1000.0
-        tier2_label = str(t2_pred_idx)
-        
-        tier2_res = {
-            "category": tier2_label,
-            "features": 20,
-            "latency_us": round(t2_time_us, 2),
-            "ram_savings": "48.7%"
-        }
-        
-        if "DDoS" in tier2_label or "DoS" in tier2_label or "FLOOD" in tier2_label.upper():
-            action_res = {
-                "verdict": "FLOOD_DROPPED_EDGE",
-                "tier": "Tier 2: Edge Gateway",
-                "action": "Line-Rate Packet Drop (BGP FlowSpec)",
-                "severity": "High (Volumetric Flood)",
-                "color": STATUS_COLORS["FLOOD_DROPPED_EDGE"]
-            }
-        elif "Mirai" in tier2_label or "Spoof" in tier2_label:
-            action_res = {
-                "verdict": "BOTNET_QUARANTINED",
-                "tier": "Tier 2: Edge Gateway",
-                "action": "MAC Address Quarantine & Port Isolation",
-                "severity": "Critical (Compromised Device)",
-                "color": STATUS_COLORS["BOTNET_QUARANTINED"]
-            }
-        else:
-            # Tier 3: Cloud Forensic Attribution
-            t0 = time.perf_counter_ns()
-            x_t3_scaled = models["t3_scaler"].transform(x_full)
-            t3_pred = models["t3_model"].predict(x_t3_scaled)[0]
-            t3_time_us = (time.perf_counter_ns() - t0) / 1000.0
-            
-            tier3_res = {
-                "attack": str(t3_pred),
-                "features": 39,
-                "latency_us": round(t3_time_us, 2),
-                "playbook": "Dynamic WAF Signature & Host Null-Route"
-            }
-            
-            action_res = {
-                "verdict": "EXPLOIT_ESCALATED",
-                "tier": "Tier 3: Cloud SIEM",
-                "action": f"Signature Attribution: {t3_pred} -> Pushed WAF Regex",
-                "severity": "Severe (Targeted Application Exploit)",
-                "color": STATUS_COLORS["EXPLOIT_ESCALATED"]
-            }
-            
-    return {
-        "true_label": true_label,
-        "features": flow_features,
-        "tier1": tier1_res,
-        "tier2": tier2_res,
-        "tier3": tier3_res,
-        "action": action_res,
-        "lit_status": lit_single_model_status,
-        "is_minority": is_minority_exploit
-    }
+        n_mirai = int(pkt_count * 0.60)
+        n_recon = int(pkt_count * 0.20)
+        n_benign = max(1, pkt_count - (n_mirai + n_recon))
+        parts = [
+            _draw(lbl.str.startswith("MIRAI-"), n_mirai),
+            _draw(lbl.str.contains("RECON|VULNERABILITYSCAN", na=False), n_recon),
+            _draw(lbl == "BENIGN", n_benign),
+        ]
 
-# ==============================================================================
-# TAB 1: LIVE ATTACK CAMPAIGN REPLAY
-# ==============================================================================
-with tab_live:
-    st.markdown("### Live Ingress Campaign Replay")
-    st.caption("Inject multi-stage network flows to evaluate wire-speed flood suppression versus stateful minority exploit detection.")
-    
-    # Clean Control Card
-    with st.container(border=True):
-        col_c1, col_c2, col_c3 = st.columns([3, 1, 1])
-        
-        with col_c1:
-            campaign_choice = st.selectbox(
-                "Campaign Attack Profile:",
-                [
-                    "APT Multi-Stage Attack (Volumetric Flood + SSH Brute-Force + SQL Injection + Mirai + Benign)",
-                    "10 Gbps Volumetric Flood Tsunami (Pure SYN, UDP, and ICMP Floods)",
-                    "Stealthy Web Application Exploits (SQLi, Command Shells, Backdoors)",
-                    "Mirai Botnet Lateral Infection Stream"
-                ]
-            )
-        with col_c2:
-            pkt_count = st.slider("Ingress Flow Count:", min_value=15, max_value=60, value=25, step=5)
-        with col_c3:
-            wire_engine = st.selectbox(
-                "Tier 1 Engine:",
-                ["XGBoost Hist (0.65 us)", "LightGBM (1.19 us)", "SGD Logistic Regression (0.20 us)"]
-            )
-            
-        selected_t1_model = models["t1_xgb"] if "XGBoost" in wire_engine else (models["t1_lgb"] if "LightGBM" in wire_engine else models["t1_lr"])
-        
-        btn_col1, btn_col2 = st.columns([1, 4])
-        with btn_col1:
-            run_btn = st.button("Start Ingress Simulation", type="primary", use_container_width=True)
-        with btn_col2:
-            st.markdown(
-                '<div style="color: #64748b; font-size: 13px; padding-top: 10px;">'
-                'Real-time packet streaming from CICIoT2023 dataset partitions without synthetic oversampling.'
-                '</div>',
-                unsafe_allow_html=True
-            )
-        
-    if run_btn:
-        # Build scenario flow set
-        if "APT Multi-Stage" in campaign_choice:
-            n_flood = int(pkt_count * 0.40)
-            n_bf = max(2, int(pkt_count * 0.15))
-            n_web = max(2, int(pkt_count * 0.15))
-            n_mirai = max(2, int(pkt_count * 0.10))
-            n_benign = pkt_count - (n_flood + n_bf + n_web + n_mirai)
-            
-            s_flood = data_df[data_df["Label"].str.contains("DDoS|DoS", case=False, na=False)].sample(n_flood, replace=True)
-            s_bf = data_df[data_df["Label"].str.contains("BruteForce", case=False, na=False)].sample(n_bf, replace=True)
-            s_web = data_df[data_df["Label"].str.contains("SqlInjection|CommandInjection|XSS|Backdoor", case=False, na=False)].sample(n_web, replace=True)
-            s_mirai = data_df[data_df["Label"].str.contains("Mirai", case=False, na=False)].sample(n_mirai, replace=True)
-            s_benign = data_df[data_df["Label"].str.upper() == "BENIGN"].sample(n_benign, replace=True)
-            combined = pd.concat([s_flood, s_bf, s_web, s_mirai, s_benign]).sample(frac=1.0, random_state=random.randint(1, 9999))
-            
-        elif "10 Gbps Volumetric" in campaign_choice:
-            n_flood = int(pkt_count * 0.90)
-            n_benign = pkt_count - n_flood
-            s_flood = data_df[data_df["Label"].str.contains("DDoS|DoS", case=False, na=False)].sample(n_flood, replace=True)
-            s_benign = data_df[data_df["Label"].str.upper() == "BENIGN"].sample(n_benign, replace=True)
-            combined = pd.concat([s_flood, s_benign]).sample(frac=1.0, random_state=random.randint(1, 9999))
-            
-        elif "Stealthy Web" in campaign_choice:
-            n_web = int(pkt_count * 0.60)
-            n_bf = int(pkt_count * 0.20)
-            n_benign = pkt_count - (n_web + n_bf)
-            s_web = data_df[data_df["Label"].str.contains("SqlInjection|CommandInjection|XSS|Backdoor", case=False, na=False)].sample(n_web, replace=True)
-            s_bf = data_df[data_df["Label"].str.contains("BruteForce", case=False, na=False)].sample(n_bf, replace=True)
-            s_benign = data_df[data_df["Label"].str.upper() == "BENIGN"].sample(n_benign, replace=True)
-            combined = pd.concat([s_web, s_bf, s_benign]).sample(frac=1.0, random_state=random.randint(1, 9999))
-            
-        else:
-            n_mirai = int(pkt_count * 0.60)
-            n_recon = int(pkt_count * 0.20)
-            n_benign = pkt_count - (n_mirai + n_recon)
-            s_mirai = data_df[data_df["Label"].str.contains("Mirai", case=False, na=False)].sample(n_mirai, replace=True)
-            s_recon = data_df[data_df["Label"].str.contains("Recon|Scan", case=False, na=False)].sample(n_recon, replace=True)
-            s_benign = data_df[data_df["Label"].str.upper() == "BENIGN"].sample(n_benign, replace=True)
-            combined = pd.concat([s_mirai, s_recon, s_benign]).sample(frac=1.0, random_state=random.randint(1, 9999))
-            
-        stream_rows = [r for _, r in combined.iterrows()]
-        
-        # Real-time UI placeholders
-        kpi_holder = st.empty()
-        feed_holder = st.empty()
-        
-        history = []
-        c_flood_drop = 0
-        c_quarantine = 0
-        c_exploit = 0
-        c_benign = 0
-        c_lit_miss = 0
-        
-        for idx, row in enumerate(stream_rows):
-            r = process_flow(row, selected_t1_model)
-            history.append(r)
-            
-            v = r["action"]["verdict"]
-            if v == "FLOOD_DROPPED_EDGE":
-                c_flood_drop += 1
-            elif v == "BOTNET_QUARANTINED":
-                c_quarantine += 1
-            elif v == "EXPLOIT_ESCALATED":
-                c_exploit += 1
-            elif v == "BENIGN_PASSED":
-                c_benign += 1
-                
-            if r["lit_status"].startswith("MISSED"):
-                c_lit_miss += 1
-                
-            # Render KPI scorecards
-            with kpi_holder.container():
-                m1, m2, m3, m4, m5 = st.columns(5)
-                m1.metric("Ingress Processed", f"{idx + 1} / {len(stream_rows)}")
-                m2.metric("Tier 1 Line-Dropped", f"{c_flood_drop}", f"{(c_flood_drop/(idx+1))*100:.0f}% stream")
-                m3.metric("Tier 2 Quarantined", f"{c_quarantine}")
-                m4.metric("Tier 3 Deep Exploits", f"{c_exploit}")
-                m5.metric("Literature Single-Model Misses", f"{c_lit_miss}", "0% Recall on Rare Attacks")
-                
-            # Render Live Status Feed
-            act = r["action"]
-            with feed_holder.container():
-                st.markdown(
-                    f"""
-                    <div style="background: #0f172a; border-left: 4px solid {act['color']}; padding: 12px 16px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #1e293b; border-left: 5px solid {act['color']};">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <span class="badge" style="background-color: {act['color']};">{act['verdict']}</span>
-                                <strong style="color: #f1f5f9; margin-left: 10px; font-size: 14px;">Packet #{idx+1}: {r['true_label']}</strong>
-                            </div>
-                            <div style="color: #64748b; font-size: 12px; font-family: monospace;">
-                                {act['tier']} | Ingress Latency: {r['tier1']['latency_us']} us
-                            </div>
-                        </div>
-                        <div style="color: #94a3b8; font-size: 13px; margin-top: 6px;">
-                            <strong>Enforced Mitigation:</strong> {act['action']}
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-            time.sleep(0.06)
-            
-        st.markdown("#### Incident Telemetry & Defense Log")
-        log_rows = []
-        for i, h in enumerate(history):
-            a = h["action"]
-            log_rows.append({
-                "Seq": i + 1,
-                "Attack Signature": h["true_label"],
-                "Tier 1 Decision": h["tier1"]["status"] + f" ({h['tier1']['latency_us']} us)",
-                "Tier 2 Category": h["tier2"]["category"] if h["tier2"] else "Bypassed",
-                "Tier 3 Attribution": h["tier3"]["attack"] if h["tier3"] else "Not Needed",
-                "Gateway Action": a["verdict"],
-                "Literature Model (Neto et al.)": h["lit_status"],
-                "Automated Firewall Mitigation": a["action"]
-            })
-        st.dataframe(pd.DataFrame(log_rows), use_container_width=True)
-        
-        # Technical Defense Summary Card
-        st.markdown(
-            f"""
-            <div style="background: #0f172a; border: 1px solid #334155; padding: 16px 20px; border-radius: 8px; margin-top: 12px;">
-                <h4 style="color: #38bdf8; margin: 0 0 8px 0; font-size: 16px;">Core Technical Findings from Ingress Campaign</h4>
-                <ul style="color: #cbd5e1; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.6;">
-                    <li><strong>Line-Rate Volumetric Deflection:</strong> Tier 1 deflected <strong>{c_flood_drop} flood packets</strong> in under 1 microsecond, preserving 48.7% of edge gateway RAM and preventing buffer exhaustion.</li>
-                    <li><strong>Stateful Exploit Capture:</strong> Tier 2/3 successfully caught <strong>{c_exploit} application-layer attacks</strong> (SQLi, brute force, command execution) that standard single-tier classifiers miss.</li>
-                    <li><strong>Literature Accuracy Paradox Exposed:</strong> A standard monolithic model (Neto et al. 2023) reporting 98.6% accuracy would have missed <strong>{c_lit_miss} stealthy attacks</strong>, allowing attackers to establish persistence.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True
+    combined = pd.concat(parts, ignore_index=True)
+    return combined.sample(frac=1.0, random_state=int(rng.integers(1, 100000))).reset_index(drop=True)
+
+
+def run_ui() -> None:
+    st.set_page_config(
+        page_title="Archon Track 2 IDS - Security Operations Console",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
+    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
+    resources = get_cached_resources()
+    data_df, data_source_desc = get_cached_traffic()
+    bench_tables = load_benchmark_tables()
+
+    # ----------------- Sidebar Controls -----------------
+    with st.sidebar:
+        st.markdown("### Inference Engine Control")
+        arch_key = st.radio(
+            "Select Active IDS Model:",
+            options=[ARCH_E4_KEY, ARCH_E2_KEY],
+            format_func=lambda k: ARCH_DISPLAY_OPTIONS[k],
+            index=0,
         )
-
-# ==============================================================================
-# TAB 2: TARGETED FLOW INSPECTOR
-# ==============================================================================
-with tab_single:
-    st.markdown("### Targeted Flow Profiler")
-    st.caption("Inspect single network flow vectors across the 3-Tier detection swimlane.")
-    
-    with st.container(border=True):
-        col_t1, col_t2 = st.columns([3, 1])
-        with col_t1:
-            target_choice = st.selectbox(
-                "Select Flow Signature to Ingest:",
-                [
-                    "BENIGN (Normal IoT Sensor Telemetry)",
-                    "SQLINJECTION (Web Database Query Exploit)",
-                    "COMMANDINJECTION (Host Remote Command Execution)",
-                    "DICTIONARYBRUTEFORCE (Telnet/SSH Password Attack)",
-                    "MIRAI-GREETH_FLOOD (IoT Botnet Command & Control)",
-                    "DDOS-SYN_FLOOD (TCP Volumetric Bandwidth Exhaustion)",
-                    "RECON-PORTSCAN (Attacker Network Reconnaissance)",
-                    "DNS_SPOOFING (DNS Cache Poisoning Attack)",
-                    "BROWSERHIJACKING (Web Portal Attack)"
-                ]
+        show_op29 = st.checkbox(
+            "Enable 29-Class Operational Mitigation Grouping (Flood Twins)",
+            value=False,
+            help=(
+                "Groups mitigation-equivalent IP-less protocol twins (SYN+SynIP, TCP, UDP, HTTP). "
+                "Distinct from the 34-class academic benchmark."
+            ),
+        )
+        st.divider()
+        if arch_key == ARCH_E4_KEY:
+            st.info(
+                "**E4 (`E4_LGBM_Leaves63_Sqrt`)**\n"
+                "- Role: **Primary Recommended IDS**\n"
+                "- Executions / Flow: `1.0` single pass\n"
+                "- Internal Test (34-cls): **75.37% Acc**, `0.6352` Macro-F1, **`0.7440` MCC**\n"
+                "- Test P50 Latency: **`4.15 ms`** | Disk: `33.90 MB`"
             )
-        with col_t2:
-            st.write("")
-            st.write("")
-            ingest_single_btn = st.button("Inspect Ingress Flow", type="primary", use_container_width=True)
-        
-    tag_clean = target_choice.split(" ")[0].strip()
-    matches = data_df[data_df["Label"].str.upper() == tag_clean.upper()]
-    if matches.empty:
-        matches = data_df[data_df["Label"].str.contains(tag_clean, case=False, na=False)]
-    selected_sample = matches.sample(1, random_state=random.randint(1, 10000)).iloc[0] if not matches.empty else data_df.iloc[0]
-    
-    res = process_flow(selected_sample, models["t1_xgb"])
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("#### Tier 1: Wire-Speed Filter")
-        st.caption("Perimeter Screen (Line-Rate Deflection)")
-        t1 = res["tier1"]
-        st.write(f"Status: **{t1['status']}**")
-        st.write(f"Classification: **{t1['label']}**")
-        st.write(f"Confidence: **{t1['confidence']*100:.2f}%**")
-        st.write(f"Latency: **{t1['latency_us']} us**")
-        
-    with col2:
-        st.markdown("#### Tier 2: Edge Gateway")
-        st.caption("Embedded Router (Top 20 Features)")
-        if res["tier2"]:
-            t2 = res["tier2"]
-            st.write(f"Category: **{t2['category']}**")
-            st.write(f"Features Evaluated: **{t2['features']} / 39**")
-            st.write(f"Memory Reduction: **{t2['ram_savings']}**")
-            st.write(f"Latency: **{t2['latency_us']} us**")
         else:
-            st.write("Status: *Bypassed (Flow verified benign at Tier 1)*")
-            
-    with col3:
-        st.markdown("#### Tier 3: Cloud Forensic SIEM")
-        st.caption("Deep Stateful Signature Engine")
-        if res["tier3"]:
-            t3 = res["tier3"]
-            st.write(f"Identified Signature: **{t3['attack']}**")
-            st.write(f"Features Evaluated: **{t3['features']} / 39**")
-            st.write(f"Mitigation Rule: **{t3['playbook']}**")
-            st.write(f"Latency: **{t3['latency_us']} us**")
-        else:
-            st.write("Status: *Not Required (Resolved at Edge)*")
-            
-    st.divider()
-    
-    act = res["action"]
+            st.info(
+                "**E2 Fast (`E2_Cascade_ValTuned_LGBM`)**\n"
+                "- Role: **Comparative 3-Stage Hierarchy**\n"
+                "- Stage 1: Track 1 `binary_lightgbm` (`tau_att=0.15`)\n"
+                "- Stage 2: 7-Class Attack Router (`f_tau=0.40`)\n"
+                "- Internal Test (34-cls): `75.13%` Acc, **`0.6357`** Macro-F1, `0.7416` MCC\n"
+                "- Test P50 Latency: **`8.44 ms`** *(6.31x faster vs legacy 53.30 ms RF)*"
+            )
+        st.caption(f"Traffic Pool: {data_source_desc}")
+        st.caption("Preprocessor: Track 1 `preprocessor_strategy1.joblib` (39 features)")
+
+    # ----------------- Header Banner -----------------
+    active_badge = "PRIMARY: E4 FLAT L63" if arch_key == ARCH_E4_KEY else "COMPARATIVE: E2 FAST CASCADE"
     st.markdown(
         f"""
-        <div style="background: #0f172a; border-left: 5px solid {act['color']}; padding: 16px 20px; border-radius: 8px; border: 1px solid #1e293b; border-left: 5px solid {act['color']};">
-            <h4 style="color: {act['color']}; margin: 0 0 8px 0;">Gateway Decision: {act['verdict']}</h4>
-            <p style="color: #f1f5f9; margin: 0; font-size: 15px;"><strong>Resolved By:</strong> {act['tier']} | <strong>Threat Level:</strong> {act['severity']}</p>
-            <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;"><strong>Automated Mitigation Action:</strong> {act['action']}</p>
-            <p style="color: {'#ef4444' if res['lit_status'].startswith('MISSED') else '#10b981'}; margin: 4px 0 0 0; font-size: 14px;">
-                <strong>Standard 98.6% Literature Model (Neto et al. 2023):</strong> {res['lit_status']}
+        <div class="header-card">
+            <div class="header-title">
+                ARCHON GATEWAY DEFENSE CONSOLE — TRACK 2 IDS
+                <span class="header-status">{active_badge}</span>
+            </div>
+            <p class="header-sub">
+                CICIoT2023 Real-Time Inference Engine | Track 1 Leak-Free Strategy 1 Preprocessing (39 Features) |
+                34-Class Benchmark + Operational Mitigation Mapping
             </p>
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
-    
-    with st.expander("Examine 39 Flow Vector Features"):
-        feat_df = pd.DataFrame([
-            {"Feature": k, "Value": round(float(v), 4) if isinstance(v, (int, float, np.floating)) else str(v)}
-            for k, v in selected_sample[feature_cols].items()
-        ])
-        st.dataframe(feat_df, use_container_width=True)
 
-# ==============================================================================
-# TAB 3: BATCH FLOW TELEMETRY
-# ==============================================================================
-with tab_batch:
-    st.markdown("### Batch Flow Telemetry")
-    st.caption("Random batch sampling across all 34 CICIoT2023 attack classes.")
-    
-    with st.container(border=True):
-        col_b1, col_b2 = st.columns([3, 1])
-        with col_b1:
-            b_size = st.slider("Select Batch Size:", min_value=10, max_value=50, value=20, step=5)
-        with col_b2:
-            st.write("")
-            st.write("")
-            run_batch_btn = st.button("Execute Batch Analysis", type="primary", use_container_width=True)
-        
-    sample_batch = data_df.sample(b_size, random_state=random.randint(1, 999999))
-    batch_records = []
-    
-    for _, row in sample_batch.iterrows():
-        res = process_flow(row, models["t1_xgb"])
+    tab_live, tab_single, tab_batch, tab_specs = st.tabs([
+        "Live Attack Campaign Replay",
+        "Targeted Flow Inspector",
+        "Batch Flow Telemetry",
+        "Architecture & Benchmark Specifications",
+    ])
+
+    # ==============================================================================
+    # TAB 1: LIVE ATTACK CAMPAIGN REPLAY
+    # ==============================================================================
+    with tab_live:
+        st.markdown("### Live Ingress Campaign Replay")
+        st.caption("Stream unseen CICIoT2023 Internal Test flows through Track 1 preprocessing and the selected Track 2 IDS engine.")
+
+        with st.container(border=True):
+            col_c1, col_c2 = st.columns([3, 1])
+            with col_c1:
+                campaign_choice = st.selectbox(
+                    "Campaign Attack Profile:",
+                    [
+                        "APT Multi-Stage Attack (Volumetric Flood + Brute-Force + Web Exploits + Mirai + Benign)",
+                        "Volumetric Flood Tsunami (SYN, SynonymousIP, TCP, UDP, and HTTP Floods)",
+                        "Stealthy Web Application Exploits (SQLi, Command Injection, XSS, Backdoor)",
+                        "Mirai Botnet & Reconnaissance Stream",
+                    ],
+                )
+            with col_c2:
+                pkt_count = st.slider("Ingress Flow Count:", min_value=15, max_value=60, value=25, step=5)
+
+            run_btn = st.button("Start Ingress Simulation", type="primary", width="stretch")
+
+        if run_btn:
+            combined = _sample_campaign_df(data_df, campaign_choice, pkt_count, seed=random.randint(1, 999999))
+            kpi_holder = st.empty()
+            feed_holder = st.empty()
+
+            history: List[Dict[str, Any]] = []
+            c_benign = c_flood = c_botnet = c_exploit = c_34_ok = c_29_ok = 0
+
+            for idx, (_, row) in enumerate(combined.iterrows()):
+                res = infer_single_flow(row, arch_key=arch_key, resources=resources)
+                history.append(res)
+
+                verdict = res["action"]["verdict"]
+                if verdict == "BENIGN_PASSED":
+                    c_benign += 1
+                elif verdict == "FLOOD_DROPPED_EDGE":
+                    c_flood += 1
+                elif verdict == "BOTNET_QUARANTINED":
+                    c_botnet += 1
+                else:
+                    c_exploit += 1
+
+                if res["exact_34_match"]:
+                    c_34_ok += 1
+                if res["op29_match"]:
+                    c_29_ok += 1
+
+                total_seen = idx + 1
+                with kpi_holder.container():
+                    m1, m2, m3, m4, m5 = st.columns(5)
+                    m1.metric("Flows Processed", f"{total_seen} / {len(combined)}")
+                    m2.metric("Flood Drops", f"{c_flood}")
+                    m3.metric("Botnet / Exploit / Recon", f"{c_botnet + c_exploit}")
+                    m4.metric("Benign Passed", f"{c_benign}")
+                    if show_op29:
+                        m5.metric("29-Class Mitigation Match", f"{(c_29_ok / total_seen) * 100:.1f}%", f"34-cls exact: {(c_34_ok / total_seen) * 100:.1f}%")
+                    else:
+                        m5.metric("Exact 34-Class Match", f"{(c_34_ok / total_seen) * 100:.1f}%")
+
+                act = res["action"]
+                display_pred = res["pred_op29"] if show_op29 else res["pred_34"]
+                stage_tag = (
+                    f"Single-Pass Flat34 | Conf: {res['confidence']*100:.1f}%"
+                    if res["stage"]["mode"] == "E4_FLAT34"
+                    else f"S1 Att: {res['stage']['s1_prob_attack']*100:.1f}% -> {res['stage']['route']}"
+                )
+                with feed_holder.container():
+                    st.markdown(
+                        f"""
+                        <div style="background: #0f172a; border: 1px solid #1e293b; border-left: 5px solid {act['color']}; padding: 12px 16px; border-radius: 6px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                                <div>
+                                    <span class="badge" style="background-color: {act['color']};">{act['verdict']}</span>
+                                    <strong style="color: #f1f5f9; margin-left: 10px; font-size: 14px;">
+                                        Flow #{total_seen}: True={res['true_34']} | Pred={display_pred}
+                                    </strong>
+                                </div>
+                                <div style="color: #64748b; font-size: 12px; font-family: monospace;">
+                                    {stage_tag} | Infer: {res['inf_us']:.0f} us
+                                </div>
+                            </div>
+                            <div style="color: #94a3b8; font-size: 13px; margin-top: 6px;">
+                                <strong>Mitigation:</strong> {act['action']} (34-Class: {res['pred_34']} | Op Group: {res['pred_op29']})
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                time.sleep(0.04)
+
+            st.markdown("#### Incident Telemetry & Defense Log")
+            log_rows = []
+            for i, h in enumerate(history):
+                stg = h["stage"]
+                route_desc = (
+                    f"Single-Pass ({stg['executions']}x)"
+                    if stg["mode"] == "E4_FLAT34"
+                    else f"S1={stg['s1_prob_attack']:.2f} -> {stg['s2_cat']} -> {stg['route']}"
+                )
+                log_rows.append({
+                    "Seq": i + 1,
+                    "True Label (34-Cls)": h["true_34"],
+                    "Predicted (34-Cls)": h["pred_34"],
+                    "Op Mitigation Class (29-Cls)": h["pred_op29"],
+                    "Confidence": f"{h['confidence']*100:.1f}%",
+                    "Pipeline Trace": route_desc,
+                    "Inf Latency (us)": h["inf_us"],
+                    "Gateway Action": h["action"]["verdict"],
+                    "Mitigation Playbook": h["action"]["action"],
+                })
+            st.dataframe(pd.DataFrame(log_rows), width="stretch")
+
+            st.markdown(
+                f"""
+                <div style="background: #0f172a; border: 1px solid #334155; padding: 14px 18px; border-radius: 8px; margin-top: 10px;">
+                    <h4 style="color: #38bdf8; margin: 0 0 6px 0; font-size: 15px;">Replay Diagnostics</h4>
+                    <p style="color: #cbd5e1; font-size: 13.5px; margin: 0; line-height: 1.55;">
+                        Exact 34-class attribution matched <strong>{c_34_ok}/{len(history)} ({(c_34_ok/len(history))*100:.1f}%)</strong> flows.
+                        Under the 29-class IP-less Flood-twin mitigation taxonomy (merging SYN+SynonymousIP, TCP, UDP, and HTTP protocol twins),
+                        operational remediation aligned on <strong>{c_29_ok}/{len(history)} ({(c_29_ok/len(history))*100:.1f}%)</strong> flows.
+                        Notice minority Web/Recon classes remain inherently challenging (~0.22 Minority F1 on Test) due to overlapping 39-feature representations without packet payloads.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    # ==============================================================================
+    # TAB 2: TARGETED FLOW INSPECTOR
+    # ==============================================================================
+    with tab_single:
+        st.markdown("### Targeted Flow Inspector")
+        st.caption("Inspect an individual unseen flow across Track 1 preprocessing, model probability outputs, and automated gateway mitigation.")
+
+        with st.container(border=True):
+            col_t1, col_t2 = st.columns([3, 1])
+            with col_t1:
+                target_choice = st.selectbox(
+                    "Select Ground-Truth Class to Sample from Internal Test:",
+                    [
+                        "BENIGN (Normal IoT Sensor Telemetry)",
+                        "DDOS-SYN_FLOOD (Flood Twin Test: Often swaps w/ DOS-SYN & SYNONYMOUSIP)",
+                        "DOS-SYN_FLOOD (Flood Twin Test: Protocol-identical TCP SYN)",
+                        "DDOS-TCP_FLOOD (Flood Twin Test: TCP Volumetric)",
+                        "DDOS-UDP_FLOOD (Flood Twin Test: UDP Volumetric)",
+                        "DDOS-HTTP_FLOOD (Flood Twin Test: HTTP Volumetric)",
+                        "SQLINJECTION (Minority Web Exploit)",
+                        "COMMANDINJECTION (Minority Web Exploit)",
+                        "DICTIONARYBRUTEFORCE (Credential Brute Force)",
+                        "MIRAI-GREETH_FLOOD (IoT Botnet Traffic)",
+                        "RECON-PORTSCAN (Network Reconnaissance)",
+                        "DNS_SPOOFING (DNS Cache Poisoning)",
+                        "BROWSERHIJACKING (Web Hijack Attack)",
+                    ],
+                )
+            with col_t2:
+                st.write("")
+                st.write("")
+                resample_btn = st.button("Sample & Inspect Flow", type="primary", width="stretch")
+
+        if "inspector_seed" not in st.session_state:
+            st.session_state["inspector_seed"] = 42
+        if resample_btn:
+            st.session_state["inspector_seed"] = random.randint(1, 1000000)
+
+        tag_clean = target_choice.split(" ")[0].strip().upper()
+        matches = data_df[data_df["LabelUpper"] == tag_clean]
+        selected_row = (
+            matches.sample(1, random_state=st.session_state["inspector_seed"]).iloc[0]
+            if not matches.empty
+            else data_df.iloc[0]
+        )
+
+        res = infer_single_flow(selected_row, arch_key=arch_key, resources=resources)
+        stg = res["stage"]
+
+        col1, col2, col3 = st.columns(3)
+        if stg["mode"] == "E4_FLAT34":
+            with col1:
+                st.markdown("#### Pass 1: Preprocessing + Flat E4")
+                st.caption("Single-pass LightGBM (`num_leaves=63, sqrt_balanced`)")
+                st.write(f"Benign Probability: **{stg['benign_prob']*100:.2f}%**")
+                st.write(f"Volumetric Flood Sum: **{stg['flood_prob']*100:.2f}%**")
+                st.write(f"Non-Flood Attack Sum: **{stg['non_flood_prob']*100:.2f}%**")
+                st.write(f"Executions: **{stg['executions']} model pass** ({res['inf_us']} us)")
+            with col2:
+                st.markdown("#### Pass 2: Top-3 34-Class Attribution")
+                st.caption("Fine-grained 34-class posterior ranking")
+                for rank_i, (cname, cprob) in enumerate(res["top3"], start=1):
+                    st.write(f"#{rank_i} **{cname}**: `{cprob*100:.2f}%`")
+                st.write(f"Preprocess Time: **{res['prep_us']} us**")
+            with col3:
+                st.markdown("#### Pass 3: Operational Policy View")
+                st.caption("Original 34-class vs. 29-class Flood group")
+                st.write(f"Ground Truth (34-Cls): **{res['true_34']}**")
+                st.write(f"Predicted (34-Cls): **{res['pred_34']}** ({'MATCH' if res['exact_34_match'] else 'DIFF'})")
+                st.write(f"Operational Group (29-Cls): **{res['pred_op29']}** ({'MATCH' if res['op29_match'] else 'DIFF'})")
+        else:
+            with col1:
+                st.markdown("#### Stage 1: Binary LightGBM Filter")
+                st.caption("Track 1 `binary_lightgbm.joblib` (`tau_att = 0.15`)")
+                st.write(f"P(Attack): **{stg['s1_prob_attack']*100:.2f}%**")
+                st.write(f"Gate Decision: **{'ESCALATED TO S2' if stg['s1_passed_attack'] else 'EXIT BENIGN'}**")
+                st.write(f"Total Pipeline Inf: **{res['inf_us']} us** ({stg['executions']} execs)")
+            with col2:
+                st.markdown("#### Stage 2: 7-Category Attack Router")
+                st.caption("Malicious-only LightGBM (`f_tau = 0.40`)")
+                st.write(f"Stage 2 Category: **{stg['s2_cat']}**")
+                st.write(f"Routed Branch: **{stg['route']}**")
+                st.write(f"Flood Group Sum: **{stg['flood_prob']*100:.2f}%**")
+            with col3:
+                st.markdown("#### Stage 3: Specialist Fine Attribution")
+                st.caption("Stage 3A (16 Flood) / Stage 3B (17 Non-Flood)")
+                for rank_i, (cname, cprob) in enumerate(res["top3"], start=1):
+                    st.write(f"#{rank_i} **{cname}**: `{cprob*100:.2f}%`")
+                st.write(f"Op Group: **{res['pred_op29']}** (True: {res['true_34']})")
+
+        st.divider()
         act = res["action"]
-        batch_records.append({
-            "True Label": res["true_label"],
-            "Tier 1 Status": res["tier1"]["status"],
-            "Tier 1 Latency (us)": res["tier1"]["latency_us"],
-            "Resolved At": act["tier"],
-            "Verdict": act["verdict"],
-            "Mitigation Action": act["action"]
-        })
-        
-    df_batch = pd.DataFrame(batch_records)
-    
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Batch Flows", len(df_batch))
-    benign_pct = (df_batch["Tier 1 Status"] == "PASSED").mean() * 100
-    m2.metric("Benign Line-Passed", f"{benign_pct:.1f}%")
-    edge_deflected = df_batch["Resolved At"].str.contains("Tier 1|Tier 2").sum()
-    m3.metric("Edge Deflected", f"{edge_deflected}")
-    cloud_attributed = df_batch["Resolved At"].str.contains("Tier 3").sum()
-    m4.metric("Cloud SOC Attributed", f"{cloud_attributed}")
-    
-    st.dataframe(df_batch, use_container_width=True)
+        st.markdown(
+            f"""
+            <div style="background: #0f172a; border: 1px solid #1e293b; border-left: 5px solid {act['color']}; padding: 16px 20px; border-radius: 8px;">
+                <h4 style="color: {act['color']}; margin: 0 0 8px 0;">Gateway Decision: {act['verdict']}</h4>
+                <p style="color: #f1f5f9; margin: 0; font-size: 14.5px;">
+                    <strong>34-Class Prediction:</strong> {res['pred_34']} ({res['confidence']*100:.2f}%) |
+                    <strong>29-Class Mitigation Group:</strong> {res['pred_op29']} |
+                    <strong>Ground Truth:</strong> {res['true_34']}
+                </p>
+                <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 14px;">
+                    <strong>Playbook Action ({act['severity']}):</strong> {act['action']}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-# ==============================================================================
-# TAB 4: ARCHITECTURE & SPECIFICATIONS
-# ==============================================================================
-with tab_specs:
-    st.markdown("### System Architecture & Hardware Latency Specifications")
-    st.caption("Empirical measurements across embedded hardware tiers.")
-    
-    spec_col1, spec_col2 = st.columns(2)
-    with spec_col1:
+        with st.expander("Examine Exact 39 CICIoT2023 Input Features (`FEATURE_COLUMNS`)"):
+            feat_df = pd.DataFrame([
+                {"Feature": c, "Raw Value": round(float(res["features"][c]), 5)}
+                for c in FEATURE_COLUMNS
+            ])
+            st.dataframe(feat_df, width="stretch")
+
+    # ==============================================================================
+    # TAB 3: BATCH FLOW TELEMETRY
+    # ==============================================================================
+    with tab_batch:
+        st.markdown("### Batch Flow Telemetry")
+        st.caption("Randomly sample unseen Internal Test flows across all 34 classes and profile vectorized batch execution.")
+
+        with st.container(border=True):
+            col_b1, col_b2 = st.columns([3, 1])
+            with col_b1:
+                b_size = st.slider("Select Batch Size:", min_value=10, max_value=100, value=25, step=5)
+            with col_b2:
+                st.write("")
+                st.write("")
+                run_batch_btn = st.button("Execute New Batch Sample", type="primary", width="stretch")
+
+        if "batch_seed" not in st.session_state:
+            st.session_state["batch_seed"] = 101
+        if run_batch_btn:
+            st.session_state["batch_seed"] = random.randint(1, 1000000)
+
+        sample_batch = data_df.sample(n=min(b_size, len(data_df)), random_state=st.session_state["batch_seed"]).reset_index(drop=True)
+        batch_res = infer_batch(sample_batch, arch_key=arch_key, resources=resources)
+
+        acc_34 = np.mean([r["exact_34_match"] for r in batch_res]) * 100.0
+        acc_29 = np.mean([r["op29_match"] for r in batch_res]) * 100.0
+        mean_inf_us = float(np.mean([r["inf_us"] for r in batch_res]))
+
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Batch Flows Evaluated", len(batch_res))
+        m2.metric("Exact 34-Class Match", f"{acc_34:.1f}%")
+        m3.metric("29-Class Operational Match", f"{acc_29:.1f}%", "Flood twins unified")
+        m4.metric("Mean Amortized Infer Time", f"{mean_inf_us:.1f} us/flow")
+
+        df_batch_view = pd.DataFrame([
+            {
+                "True Label": r["true_34"],
+                "Pred (34-Cls)": r["pred_34"],
+                "Match (34)": "YES" if r["exact_34_match"] else "NO",
+                "Op Mitigation Group": r["pred_op29"],
+                "Match (Op 29)": "YES" if r["op29_match"] else "NO",
+                "Conf": f"{r['confidence']*100:.1f}%",
+                "Action": r["action"]["verdict"],
+            }
+            for r in batch_res
+        ])
+        st.dataframe(df_batch_view, width="stretch")
+
+    # ==============================================================================
+    # TAB 4: ARCHITECTURE & BENCHMARK SPECIFICATIONS
+    # ==============================================================================
+    with tab_specs:
+        st.markdown("### Track 2 Verified Experimental Results & Deployment Trade-Offs")
+        st.caption(
+            "All figures reflect strict Track 1 Strategy 1 zero-overlap evaluation on Internal Test (N = 75,105) "
+            "and Cross-Capture Clean (N = 57,280). Operational 29-class numbers are a separate mitigation view — not a gain on the 34-class task."
+        )
+
+        df_test_orig = bench_tables.get("final_test")
+        df_e2_fast = bench_tables.get("e2_fast")
+        df_merged = bench_tables.get("merged")
+
+        if df_test_orig is not None:
+            st.markdown("#### 1. Original 34-Class Internal Test Benchmark (`N = 75,105`, Including Updated Fast E2)")
+            cols_keep = [
+                "architecture", "accuracy", "macro_f1", "mcc",
+                "flood_macro_f1", "non_flood_macro_f1", "minority_macro_recall",
+                "benign_recall", "single_latency_p50_us", "batch_throughput_fps", "model_size_mb",
+            ]
+            combined_rows = df_test_orig[cols_keep].copy()
+            if df_e2_fast is not None:
+                e2_row = df_e2_fast[df_e2_fast["split"] == "test"][cols_keep]
+                combined_rows = pd.concat([combined_rows, e2_row], ignore_index=True)
+            st.dataframe(combined_rows, width="stretch")
+
+        if df_merged is not None:
+            st.markdown("#### 2. E4 Original 34-Class vs. Operational 29-Class Flood-Merged View (`N = 75,105` Test)")
+            st.dataframe(
+                df_merged[df_merged["split"] == "test"][[
+                    "taxonomy", "inference_mode", "n_classes", "accuracy", "macro_f1",
+                    "mcc", "flood_macro_f1", "non_flood_macro_f1", "minority_macro_f1",
+                ]],
+                width="stretch",
+            )
+
+        fig_tradeoff = HIER_RESULTS_DIR / "figures" / "e1_e4_architecture_tradeoffs.png"
+        fig_merged = HIER_RESULTS_DIR / "figures" / "e4_34class_vs_merged_flood.png"
+        c_fig1, c_fig2 = st.columns(2)
+        if fig_tradeoff.exists():
+            with c_fig1:
+                st.image(str(fig_tradeoff), caption="E1-E4 Performance & E2 Latency Fix (53.30 ms -> 8.44 ms)")
+        if fig_merged.exists():
+            with c_fig2:
+                st.image(str(fig_merged), caption="Distinct Tasks: Standard 34-Class vs. 29-Class Operational Mitigation")
+
         st.markdown(
             """
             <div class="control-card">
-                <h4 style="color: #38bdf8; margin: 0 0 12px 0;">Tier Specifications</h4>
-                <table style="width: 100%; color: #cbd5e1; font-size: 13px; line-height: 1.8;">
-                    <tr><td><strong>Tier 1 Target:</strong></td><td>Wire-Speed Ingress Filter (NIC / Edge Switch)</td></tr>
-                    <tr><td><strong>Tier 1 Model:</strong></td><td>XGBoost Hist / LightGBM (0.65 - 1.19 us/packet)</td></tr>
-                    <tr><td><strong>Tier 1 Line-Rate:</strong></td><td>1,538,460 packets/second (10 Gbps capability)</td></tr>
-                    <tr><td><strong>Tier 2 Target:</strong></td><td>IoT Edge Gateway (ARM Cortex-A72 / RPi 4)</td></tr>
-                    <tr><td><strong>Tier 2 Model:</strong></td><td>20-Feature Pruned XGBoost (12.15 us/packet)</td></tr>
-                    <tr><td><strong>Tier 2 Memory:</strong></td><td>80 bytes/flow (48.7% RAM savings)</td></tr>
-                    <tr><td><strong>Tier 3 Target:</strong></td><td>Centralized Cloud SIEM / SOC (34 Attack Classes)</td></tr>
-                    <tr><td><strong>Dataset Source:</strong></td><td>CICIoT2023 (105 Real IoT Devices, 33 Attack Classes)</td></tr>
-                </table>
+                <h4 style="color: #38bdf8; margin: 0 0 8px 0;">Deployment Trade-Offs & Dataset Limitations</h4>
+                <ul style="color: #cbd5e1; font-size: 13.5px; line-height: 1.65; margin: 0; padding-left: 20px;">
+                    <li><strong>Primary Recommendation (E4):</strong> Achieves top Internal Test Accuracy (<code>75.37%</code>) and MCC (<code>0.7440</code>) at <code>4.15 ms</code> single-flow P50 with 1 model execution, proving capacity + <code>sqrt_balanced</code> weighting match 3-stage cascades without pipeline complexity.</li>
+                    <li><strong>Comparative Fast Hierarchy (E2 LGBM):</strong> Replacing Track 1's <code>n_jobs=-1</code> Random Forest Stage 1 with <code>binary_lightgbm.joblib</code> cuts Test P50 latency by <strong>6.31x</strong> (<code>53.30 ms -> 8.44 ms</code>) while matching or improving Test Accuracy (<code>75.13%</code>) and MCC (<code>0.7416</code>). Use when Flood vs. Non-Flood policy stages must be tuned or swapped independently.</li>
+                    <li><strong>IP-Stripped Dataset Limit (7,840 Flood Twin Errors):</strong> Raw CICIoT2023 CSVs export 39 packet/flow statistics with zero IP, port, or attacker-cardinality columns. Four protocol twins (<code>SYN/SynonymousIP</code>, <code>TCP</code>, <code>UDP</code>, <code>HTTP</code>) account for <strong>42.4%</strong> of E4's Test errors while sharing identical protocol remediation.</li>
+                    <li><strong>Minority & Generalization Limits:</strong> Rare Web/Recon attacks (~2.58% of Test) plateau around ~0.22 Minority Macro-F1 across all 39-feature tabular models; Cross-Capture Holdout (<code>Merged26-40</code>) comes from the same CIC lab testbed with 5.67x capped minority prevalence.</li>
+                </ul>
             </div>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-    with spec_col2:
-        st.markdown(
-            """
-            <div class="control-card">
-                <h4 style="color: #38bdf8; margin: 0 0 12px 0;">Paradigm Comparison: Archon vs Literature</h4>
-                <table style="width: 100%; color: #cbd5e1; font-size: 13px; line-height: 1.8;">
-                    <tr><td><strong>Literature (Neto et al. 2023):</strong></td><td>Monolithic DNN / Random Forest</td></tr>
-                    <tr><td><strong>Literature Reported Accuracy:</strong></td><td>98.60% (Mathematically driven by floods)</td></tr>
-                    <tr><td><strong>Literature Brute Force Recall:</strong></td><td>14.70% (Missed 2,542 attacks)</td></tr>
-                    <tr><td><strong>Literature Web Exploit Recall:</strong></td><td>3.80% (Missed 5,225 attacks)</td></tr>
-                    <tr><td><strong>Archon Tier 1 Accuracy:</strong></td><td>99.18% (Wire-Speed Ingress Filter)</td></tr>
-                    <tr><td><strong>Archon Tier 2/3 Brute Force:</strong></td><td>88.50% Recall (Balanced Inspection)</td></tr>
-                    <tr><td><strong>Archon Tier 2/3 Web Precision:</strong></td><td>81.44% Precision</td></tr>
-                </table>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+
+
+if __name__ == "__main__":
+    run_ui()

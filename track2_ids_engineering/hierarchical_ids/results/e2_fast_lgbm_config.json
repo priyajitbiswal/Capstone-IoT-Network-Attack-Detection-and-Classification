@@ -1,0 +1,14 @@
+{
+  "name": "E2_Cascade_ValTuned_LGBM",
+  "selection_origin": "val_e2_e3_sweeps.csv row E2_bin_lgbm_cat7_sqrt_t15_f0.40 (Val Macro-F1=0.63811)",
+  "tuning_on_test": false,
+  "s1_id": "bin_lgbm",
+  "s1_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\binary_lightgbm.joblib",
+  "s2_id": "cat7_sqrt",
+  "s2_mode": "cat7_attack",
+  "s2_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage2_cat7_lgbm_sqrt_balanced.joblib",
+  "attack_threshold": 0.15,
+  "flood_route_threshold": 0.4,
+  "stage3a_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3a_flood_lgbm_d63_sqrt.joblib",
+  "stage3b_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3b_nonflood_lgbm_d63_sqrt.joblib"
+}

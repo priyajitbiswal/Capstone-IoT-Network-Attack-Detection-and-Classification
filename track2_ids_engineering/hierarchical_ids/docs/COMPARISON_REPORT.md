@@ -8,26 +8,27 @@
 
 ## 1. Executive Summary
 
-This study tests whether hierarchical Flood vs. Non-Flood specialization improves 34-class IoT intrusion detection—especially minority-class detection—over both an existing Track 1 flat baseline (**E1**) and an equally parameterized, class-aware flat classifier (**E4**). We evaluate four architectural families across Track 1's leakage-free Strategy 1 partitions (`Train = 350,821`, `Validation = 75,172`, `Internal Test = 75,105`) and `Cross-Capture Clean = 57,280`:
+This study evaluates whether hierarchical Flood vs. Non-Flood specialization improves 34-class IoT intrusion detection—especially minority-class detection—over both an existing Track 1 flat baseline (**E1**) and an equally parameterized, class-aware flat classifier (**E4**). We evaluate all four architectural families across Track 1's leakage-free Strategy 1 partitions (`Train = 350,821`, `Validation = 75,172`, `Internal Test = 75,105`) and `Cross-Capture Clean = 57,280`, including the finalized **E2 Fast Cascade (`binary_lightgbm.joblib` Stage 1)** latency fix and **E4 Merged-Flood Operational Taxonomy (29-class)** evaluation:
 
 | Architecture Family | Model Status | Internal Test Acc | Internal Test Macro-F1 | Internal Test MCC | Test Minority F1 (Rec) | Cross Acc | Cross Macro-F1 | Cross MCC | Cross Minority F1 (Rec) | Single-Flow P50 (Test) | Model Execs / Flow | Disk Size |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **E1: `E1_Flat34_LGBM_Balanced`** | Reused Track 1 | 72.65% | 0.6145 | 0.7170 | 0.1624 (**0.3360**) | 69.64% | **0.6498** | 0.6861 | **0.3142** (**0.3495**) | **3.43 ms** | 1.00 | **11.33 MB** |
 | **E1-Ref: `E1_Ref_Unweighted_Track1`** | Reused Track 1 | 74.45% | 0.6220 | 0.7346 | 0.2014 (0.1531) | 69.13% | 0.6217 | 0.6814 | 0.2343 (0.1580) | 3.63 ms | 1.00 | 11.33 MB |
-| **E2 Default: `E2_Cascade_Default_T050`** | Reused S1 + New S2/3 | 73.59% | 0.6185 | 0.7289 | 0.2115 (0.1519) | 68.61% | 0.6213 | 0.6818 | 0.2294 (0.1489) | 7.88 ms | 2.63 | 35.57 MB |
-| **E2 Tuned: `E2_Cascade_ValTuned`** | Reused S1 + New S2/3 | 75.04% | **0.6361** | 0.7405 | **0.2264** (0.2094) | 70.50% | 0.6453 | 0.6949 | 0.2954 (0.2214) | 53.30 ms* | 2.82 | 47.00 MB |
-| **E3 Naive: `E3_Parallel_NaiveMax`** | Reused S1 + New 3A/3B | 56.11% | 0.4389 | 0.5567 | 0.1757 (0.1084) | 53.26% | 0.4360 | 0.5261 | 0.1707 (0.1021) | 49.73 ms* | 2.82 | 44.65 MB |
-| **E3 Temp+Alpha: `E3_Parallel_TempAlpha`** | Reused S1 + New 3A/3B | 54.53% | 0.4301 | 0.5402 | 0.1883 (0.1208) | 51.86% | 0.4273 | 0.5108 | 0.1897 (0.1163) | 49.71 ms* | 2.82 | 44.65 MB |
-| **E3 MetaGate: `E3_Parallel_MetaGate`** | Reused S1 + New 3A/3B/Gate | 73.78% | 0.6239 | 0.7275 | 0.2253 (0.2094) | 69.41% | 0.6327 | 0.6837 | 0.2948 (0.2210) | 52.40 ms* | 2.82 | 44.65 MB |
-| **E4 Improved Flat: `E4_LGBM_Leaves63_Sqrt`** | Newly trained Track 2 | **75.37%** | 0.6352 | **0.7440** | 0.2196 (0.2063) | **70.72%** | 0.6441 | **0.6972** | 0.2872 (0.2184) | 4.15 ms | 1.00 | 33.90 MB |
+| **E2 Default: `E2_Cascade_Default_T050`** | Reused S1 LGBM (`0.50`) + S2/3 | 73.59% | 0.6185 | 0.7289 | 0.2115 (0.1519) | 68.61% | 0.6213 | 0.6818 | 0.2294 (0.1489) | 7.88 ms | 2.63 | 35.57 MB |
+| **E2 Legacy RF: `E2_Cascade_ValTuned`** | Legacy S1 RF (`0.15`) + S2/3 | 75.04% | **0.6361** | 0.7405 | **0.2264** (0.2094) | 70.50% | 0.6453 | 0.6949 | 0.2954 (**0.2214**) | 53.30 ms* | 2.82 | 47.00 MB |
+| **E2 Fast LGBM: `E2_Cascade_ValTuned_LGBM`** | **Updated S1 LGBM (`0.15`) + S2/3** | 75.13% | 0.6357 | 0.7416 | 0.2263 (0.2094) | 70.60% | 0.6444 | 0.6959 | 0.2919 (0.2175) | **8.44 ms** | 2.81 | 35.56 MB |
+| **E3 Naive: `E3_Parallel_NaiveMax`** | Unsuccessful (No S2 Gate) | 56.11% | 0.4389 | 0.5567 | 0.1757 (0.1084) | 53.26% | 0.4360 | 0.5261 | 0.1707 (0.1021) | 49.73 ms* | 2.82 | 44.65 MB |
+| **E3 Temp+Alpha: `E3_Parallel_TempAlpha`** | Unsuccessful (No S2 Gate) | 54.53% | 0.4301 | 0.5402 | 0.1883 (0.1208) | 51.86% | 0.4273 | 0.5108 | 0.1897 (0.1163) | 49.71 ms* | 2.82 | 44.65 MB |
+| **E3 MetaGate: `E3_Parallel_MetaGate`** | Unsuccessful vs S2 Router | 73.78% | 0.6239 | 0.7275 | 0.2253 (0.2094) | 69.41% | 0.6327 | 0.6837 | 0.2948 (0.2210) | 52.40 ms* | 2.82 | 44.65 MB |
+| **E4 Improved Flat: `E4_LGBM_Leaves63_Sqrt`** | **Primary Recommended Deployment** | **75.37%** | 0.6352 | **0.7440** | 0.2196 (0.2063) | **70.72%** | 0.6441 | **0.6972** | 0.2872 (0.2184) | **4.15 ms** | **1.00** | 33.90 MB |
 
-*\*Note: `E2_Cascade_ValTuned` and all E3 variants use Track 1's serialized [`binary_random_forest.joblib`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/models/binary_random_forest.joblib) (`n_estimators=50, max_depth=15, n_jobs=-1`) in Stage 1; `n_jobs=-1` thread-dispatch overhead adds ~45 ms per single-row query despite `8,042.5 flows/s` batch throughput. By contrast, `E2_bin_lgbm_cat7_sqrt` at `tau_att=0.15` achieved 0.6381 Val Macro-F1 (within 0.0013 of RF Stage 1) at single-flow LGBM latency.*
+*\*Note: Legacy `E2_Cascade_ValTuned` and all E3 architectures used Track 1's serialized [`binary_random_forest.joblib`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/models/binary_random_forest.joblib) (`n_jobs=-1`), where per-call worker thread-pool dispatch added ~45 ms per single-row query despite `8,042.5 fps` batch throughput. Replacing Stage 1 with Track 1's existing [`binary_lightgbm.joblib`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/models/binary_lightgbm.joblib) under the exact Validation-frozen thresholds (`tau_att=0.15, f_tau=0.40`) slashes E2 Test P50 latency by **6.31× (`53.30 ms -> 8.44 ms`)** and P95 by **6.28× (`64.20 ms -> 10.23 ms`)** while improving Test Accuracy (`75.04% -> 75.13%`) and MCC (`0.7405 -> 0.7416`). Even after fixing E2 latency, single-pass **`E4_LGBM_Leaves63_Sqrt`** remains faster (`4.15 ms` vs. `8.44 ms`), simpler (`1.0` vs. `2.81` model calls/flow), higher in Accuracy and MCC, and smaller (`33.90 MB` vs. `35.56 MB`), making E4 our recommended deployment IDS.*
 
 ### Key Scientific Conclusions
-1. **Hierarchical specialization improves substantially over the weaker Track 1 baseline (E1), but almost all of that gain comes from fixing Stage 1 thresholding, class weighting (`sqrt_balanced`), and tree capacity (`num_leaves=63, n_estimators=150`) rather than from hierarchy itself.** Once a single flat LightGBM (**E4**) matches those exact capacity and `sqrt_balanced` choices, **E4 essentially ties E2 on Macro-F1** (`0.6352` vs. `0.6361` on Test; `0.6441` vs. `0.6453` on Cross) while **beating E2 on overall Accuracy, MCC, Benign Recall/F1, model disk footprint, execution count (1.0 vs. 2.82), and single-flow latency (4.15 ms vs. 53.30 ms)**.
-2. **Stage 2 Flood-vs-Non-Flood routing is near-perfect (`99.98%` Flood Recall, only `50 / 75,105` misroutes on Test), yet flat E4 already separates Flood vs. Non-Flood with fewer cross-family errors (`46` vs. `50`).** Consequently, Stage 2 error propagation is *not* what limits hierarchical performance—nearly 100% of remaining errors occur *inside* Flood (`DDoS` vs. `DoS`, `SYN` vs. `SynonymousIP`) and *inside* Non-Flood/Benign (`RECON-OSSCAN` vs. `BENIGN`/`PORTSCAN`).
-3. **Parallel specialist fusion without a raw-feature router (`E3_Parallel_NaiveMax`) collapses (`0.4389` Macro-F1)** because closed-world Flood and Non-Flood specialists both output confidence `>= 0.50` simultaneously on **76.16%** (`52,083`) of passed Test attack flows, yielding `26,678` cross-family errors. A learned Logistic Regression meta-gate (`E3_Parallel_MetaGate`) eliminates 96% of those collisions (`0.6239` Test Macro-F1), yet still underperforms Stage 2 (`1,053` vs. `50` family errors) because meta-features over specialist outputs cannot replace raw packet/flow features.
-4. **Minority-class Recall vs. F1 exhibits a sharp weighting and prior-shift trade-off.** Inverse-frequency `balanced` weighting in Track 1 **E1** achieves the highest Minority Macro-Recall (`0.3360` Test; `0.3495` Cross), but extreme rare-class over-prediction crushes its precision on natural Test prevalence (`0.1624` Minority F1, e.g., `651` `VULNERABILITYSCAN` flows mislabeled `SQLINJECTION`). On Cross-Capture Clean—where minority classes were sampled to **5.67x** natural Test prevalence (`14.64%` vs. `2.58%`)—that exact aggressive prior yields higher precision and allows **E1** to reclaim the top Cross Macro-F1 (`0.6498`) despite losing overall Cross Accuracy (`69.64%` vs. `70.72%` E4).
+1. **Recommendation — Deploy `E4_LGBM_Leaves63_Sqrt`, Retain Fast `E2_Cascade_ValTuned_LGBM` as Comparative Hierarchy**: Most of E2's improvement over Track 1 **E1** (`0.6145` -> `0.6361`) came from Stage 1 threshold calibration, gentler `sqrt_balanced` weighting, and tree capacity (`num_leaves=63, n_estimators=150`) rather than cascade specialization. Once flat **E4** matches those exact settings, **E4 virtually ties E2 on Test Macro-F1** (`0.6352` vs. `0.6357` Fast E2 / `0.6361` RF E2) while **winning Test Accuracy (`75.37%`), Test MCC (`0.7440`), ROC-AUC (`0.9823`), Benign Recall among non-default models (`78.63%`), Cross Accuracy (`70.72%`), execution count (`1.0` vs. `2.81`), and single-flow latency (`4.15 ms` vs. `8.44 ms`)**. Fast E2 remains valuable only when modular policy updates require decoupling Flood and Non-Flood models.
+2. **Stage 2 Routing Is Solved (`99.98%`), E3 Parallel Fusion Was Unsuccessful**: `stage2_cat7_lgbm_sqrt_balanced` commits only `50 / 75,105` Flood/Non-Flood misroutes in Test, whereas parallel specialist fusion without Stage 2 (`E3_Parallel_NaiveMax`) collapses (`0.4389` Macro-F1) because Stage 3A & 3B fire `>= 0.50` simultaneously on **76.16%** (`52,083`) of passed attacks (`26,678` cross-family errors). Even `E3_Parallel_MetaGate` (`0.6239` Test Macro-F1) leaks `966` Flood flows into Non-Flood and is strictly inferior to E2 and E4.
+3. **IP-Stripped Protocol Twins Explain `42.4%` of All E4 Test Errors (Separate Operational 29-Class Taxonomy)**: Without IPs/ports/attacker-count in the 39 exported CICIoT2023 features, four protocol-identical twin groups (`SYN+SynonymousIP`, `TCP`, `UDP`, `HTTP`) cause **`7,840` of `18,501` E4 Test errors**. Grouping only these verified mitigation equivalents defines a **29-class operational mitigation taxonomy** where E4 achieves `85.81%` Accuracy, `0.6808` Macro-F1, `0.8504` MCC, and `0.9893` Flood Macro-F1 (versus `75.37%` / `0.6352` / `0.7440` on the original 34-class benchmark — a distinct operational label set, not an improvement on the 34-class task).
+4. **Minority-Class Recall vs. Precision & Prior-Shift Trade-Off**: Inverse-frequency `balanced` weighting (**E1**) hits the highest Minority Recall (`0.3360` Test; `0.3495` Cross) at severe precision collapse on natural Test (`0.1624` Minority F1, e.g., `651` `VULNERABILITYSCAN` flows mislabeled `SQLINJECTION`), whereas **E4** and **E2** optimize precision-recall balance (`0.2196` / `0.2263` Test Minority F1). On Cross-Capture Clean (`5.67x` minority prior inflation via `<=2,000`/class capping), `E1`'s aggressive prior artificially yields higher precision and top Cross Macro-F1 (`0.6498`) despite lower Cross Accuracy (`69.64%` vs. `70.72%` E4).
 
 ---
 
@@ -113,7 +114,8 @@ Exact metrics verified from [`final_comparison_val.csv`](file:///c:/Users/priya/
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `E1_Flat34_LGBM_Balanced` | 0.72455 | 0.61418 | 0.73206 | 0.71492 | 0.79307 (0.79907) | 0.44146 (0.51164) | 0.16560 (**0.35127**) | 0.65840 | 0.34160 | **0.02245** |
 | `E2_Cascade_Default_T050` | 0.73521 | 0.61958 | 0.72059 | 0.72807 | 0.79617 (0.80014) | 0.45483 (0.40186) | 0.21430 (0.15237) | **0.97272** | **0.02728** | 0.11429 |
-| `E2_Cascade_ValTuned` | 0.74914 | **0.63944** | 0.74362 | 0.73924 | **0.79621** (**0.80056**) | **0.48832** (0.48070) | **0.24264** (0.22528) | 0.74203 | 0.25797 | 0.03325 |
+| `E2_Cascade_ValTuned` *(Legacy RF S1)* | 0.74914 | **0.63944** | 0.74362 | 0.73924 | **0.79621** (**0.80056**) | **0.48832** (0.48070) | **0.24264** (0.22528) | 0.74203 | 0.25797 | 0.03325 |
+| `E2_Cascade_ValTuned_LGBM` *(Fast S1, P50=8.44ms)* | 0.75064 | 0.63811 | 0.74399 | 0.74082 | **0.79621** (0.80054) | 0.48504 (0.47499) | 0.23675 (0.21704) | 0.77917 | 0.22083 | 0.03640 |
 | `E3_Parallel_NaiveMax` | 0.55969 | 0.43886 | 0.52564 | 0.55565 | 0.56599 (0.62099) | 0.30383 (0.29148) | 0.17535 (0.10958) | 0.74203 | 0.25797 | 0.03325 |
 | `E3_Parallel_TempAlpha` | 0.54504 | 0.43244 | 0.51466 | 0.54032 | 0.53878 (0.56862) | 0.31661 (0.31755) | 0.19027 (0.12293) | 0.74203 | 0.25797 | 0.03325 |
 | `E3_Parallel_MetaGate` | 0.73590 | 0.62668 | 0.72708 | 0.72557 | 0.77924 (0.77920) | 0.47877 (0.47971) | 0.24248 (0.22528) | 0.74203 | 0.25797 | 0.03325 |
@@ -125,7 +127,8 @@ Exact metrics verified from [`final_comparison_val.csv`](file:///c:/Users/priya/
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `E1_Flat34_LGBM_Balanced` | 0.72653 | 0.61452 | 0.73486 | 0.71703 | 0.66186 | 0.98112 | 0.79430 | 0.44098 | 0.16241 (**0.33600**) | 0.65709 (0.34291) | **0.02196** | **3,426.7** | **4,281.4** | 7,202.6 | **11.331** | **566.2** |
 | `E2_Cascade_Default_T050` | 0.73589 | 0.61845 | 0.72132 | 0.72895 | 0.64422 | 0.97187 | **0.79714** | 0.45195 | 0.21152 (0.15191) | **0.97375** (**0.02625**) | 0.11565 | 7,884.1 | 9,167.3 | 8,329.6 | 35.566 | 576.6 |
-| `E2_Cascade_ValTuned` | 0.75035 | **0.63614** | 0.74523 | 0.74051 | 0.66220 | 0.97578 | 0.79708 | **0.48104** | **0.22641** (0.20936) | 0.73866 (0.26134) | 0.03294 | 53,297.8 | 64,204.1 | 8,042.5 | 46.996 | 585.8 |
+| `E2_Cascade_ValTuned` *(Legacy RF S1)* | 0.75035 | **0.63614** | 0.74523 | 0.74051 | 0.66220 | 0.97578 | 0.79708 | **0.48104** | **0.22641** (0.20936) | 0.73866 (0.26134) | 0.03294 | 53,297.8 | 64,204.1 | 8,042.5 | 46.996 | 585.8 |
+| `E2_Cascade_ValTuned_LGBM` *(Fast S1)* | 0.75133 | 0.63573 | 0.74505 | 0.74155 | 0.66225 | 0.97612 | 0.79711 | 0.47960 | 0.22633 (0.20937) | 0.77521 (0.22479) | 0.03611 | 8,440.3 | 10,229.0 | 7,527.6 | 35.561 | 579.8 |
 | `E3_Parallel_NaiveMax` | 0.56109 | 0.43890 | 0.52623 | 0.55671 | 0.61003 | 0.96278 | 0.56739 | 0.30273 | 0.17568 (0.10839) | 0.73866 (0.26134) | 0.03294 | 49,734.2 | 56,260.3 | 4,423.6 | 44.651 | 600.3 |
 | `E3_Parallel_TempAlpha` | 0.54529 | 0.43006 | 0.51344 | 0.54022 | 0.61184 | 0.96436 | 0.53684 | 0.31381 | 0.18832 (0.12081) | 0.73866 (0.26134) | 0.03294 | 49,713.1 | 57,852.1 | 6,068.8 | 44.651 | 613.1 |
 | `E3_Parallel_MetaGate` | 0.73775 | 0.62392 | 0.72976 | 0.72749 | 0.65613 | 0.97612 | 0.78094 | 0.47179 | 0.22529 (0.20936) | 0.73866 (0.26134) | 0.03294 | 52,403.1 | 67,203.0 | 6,016.5 | 44.652 | 627.5 |
@@ -137,7 +140,8 @@ Exact metrics verified from [`final_comparison_val.csv`](file:///c:/Users/priya/
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `E1_Flat34_LGBM_Balanced` | 0.69640 | **0.64981** | **0.69891** | 0.68606 | 0.68815 | 0.97619 | 0.80840 | **0.49940** | **0.31419** (**0.34952**) | 0.65516 (0.34484) | **0.02882** | **3,844.0** | 7,237.4 | 10,158.4 |
 | `E2_Cascade_Default_T050` | 0.68605 | 0.62134 | 0.66757 | 0.68180 | 0.65730 | 0.96031 | 0.80873 | 0.45176 | 0.22936 (0.14888) | **0.97310** (**0.02690**) | 0.17838 | 8,364.5 | 12,981.7 | **12,836.5** |
-| `E2_Cascade_ValTuned` | 0.70503 | 0.64531 | 0.69659 | 0.69493 | 0.68270 | 0.96866 | 0.80863 | 0.49066 | 0.29537 (0.22137) | 0.74528 (0.25472) | 0.04849 | 57,609.6 | 73,203.7 | 7,958.2 |
+| `E2_Cascade_ValTuned` *(Legacy RF S1)* | 0.70503 | 0.64531 | 0.69659 | 0.69493 | 0.68270 | 0.96866 | 0.80863 | 0.49066 | 0.29537 (0.22137) | 0.74528 (0.25472) | 0.04849 | 57,609.6 | 73,203.7 | 7,958.2 |
+| `E2_Cascade_ValTuned_LGBM` *(Fast S1)* | 0.70597 | 0.64441 | 0.69612 | 0.69590 | 0.68249 | 0.96861 | 0.80863 | 0.48843 | 0.29191 (0.21748) | 0.77840 (0.22160) | 0.05241 | 7,098.7 | 9,172.9 | 11,380.6 |
 | `E3_Parallel_NaiveMax` | 0.53259 | 0.43596 | 0.48947 | 0.52610 | 0.62860 | 0.95751 | 0.56835 | 0.29812 | 0.17073 (0.10212) | 0.74528 (0.25472) | 0.04849 | 66,410.2 | 84,459.7 | 5,098.8 |
 | `E3_Parallel_TempAlpha` | 0.51856 | 0.42731 | 0.48040 | 0.51075 | 0.63004 | 0.95900 | 0.53714 | 0.31019 | 0.18972 (0.11632) | 0.74528 (0.25472) | 0.04849 | 81,657.0 | 102,404.2 | 4,060.4 |
 | `E3_Parallel_MetaGate` | 0.69413 | 0.63271 | 0.68348 | 0.68365 | 0.67556 | 0.96911 | 0.79143 | 0.48166 | 0.29484 (0.22097) | 0.74528 (0.25472) | 0.04849 | 72,422.4 | 85,769.7 | 4,564.4 |
@@ -176,6 +180,8 @@ Exact class-level Recall / F1 from [`minority_attack_comparison_test.csv`](file:
 | `DICTIONARYBRUTEFORCE` (1,999) | **0.5253** / 0.5378 | 0.4552 / 0.5477 | 0.4552 / **0.5479** | 0.4517 / 0.5432 |
 | **8-Class Minority Mean** | **0.3495** / **0.3142** | 0.2214 / 0.2954 | 0.2210 / 0.2948 | 0.2184 / 0.2872 |
 
+*(Note: Updated fast `E2_Cascade_ValTuned_LGBM` in [`e2_fast_lgbm_minority_per_class.csv`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/e2_fast_lgbm_minority_per_class.csv) maintains the same Minority Mean Recall / F1: **0.2094 / 0.2263** on Test and **0.2175 / 0.2919** on Cross.)*
+
 ---
 
 ## 7. Stage-by-Stage Error Attribution & Diagnostic Analysis
@@ -187,52 +193,79 @@ Every misclassified flow falls into one of six mutually exclusive buckets:
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Test** `E1_Flat34_LGBM_Balanced` | 20,539 | **1,517** | 2,064 | 16 | 34 | 8,134 | 8,774 |
 | **Test** `E2_Cascade_Default_T050` | 19,836 | 7,990 | **158** | 21 | 29 | **8,052** | **3,586** *(masked by FN)* |
-| **Test** `E2_Cascade_ValTuned` | 18,750 | 2,276 | 1,573 | **9** | 41 | 8,055 | 6,796 |
+| **Test** `E2_Cascade_ValTuned` *(Legacy RF S1)* | 18,750 | 2,276 | 1,573 | **9** | 41 | 8,055 | 6,796 |
+| **Test** `E2_Cascade_ValTuned_LGBM` *(Fast S1)* | 18,676 | 2,495 | 1,353 | **9** | 41 | 8,055 | 6,723 |
 | **Test** `E3_Parallel_NaiveMax` | 32,964 | 2,276 | 1,573 | 13,347 | 13,331 | 1,866 | 571 |
 | **Test** `E3_Parallel_MetaGate` | 19,696 | 2,276 | 1,573 | 966 | 87 | 8,005 | 6,789 |
 | **Test** `E4_LGBM_Leaves63_Sqrt` | **18,501** | 2,379 | 1,286 | 11 | **35** | 8,087 | 6,703 |
 | **Cross** `E1_Flat34_LGBM_Balanced` | 17,390 | **1,507** | 1,718 | 19 | 15 | 4,388 | 9,743 |
 | **Cross** `E2_Cascade_Default_T050` | 17,983 | 9,329 | **134** | 30 | **14** | 4,367 | 4,109 |
-| **Cross** `E2_Cascade_ValTuned` | 16,896 | 2,536 | 1,269 | **11** | 19 | 4,377 | 8,684 |
+| **Cross** `E2_Cascade_ValTuned` *(Legacy RF S1)* | 16,896 | 2,536 | 1,269 | **11** | 19 | 4,377 | 8,684 |
+| **Cross** `E2_Cascade_ValTuned_LGBM` *(Fast S1)* | 16,842 | 2,741 | 1,104 | **11** | 19 | 4,377 | 8,590 |
 | **Cross** `E3_Parallel_NaiveMax` | 26,773 | 2,536 | 1,269 | 7,473 | 13,813 | 1,138 | 544 |
 | **Cross** `E3_Parallel_MetaGate` | 17,520 | 2,536 | 1,269 | 653 | 44 | 4,340 | 8,678 |
 | **Cross** `E4_LGBM_Leaves63_Sqrt` | **16,771** | 2,646 | **1,080** | **11** | 16 | 4,373 | **8,645** |
 
 ### 7.2 Answers to Core Architectural Questions (Experimental Evidence)
 
-1. **Why did Stage 1 fail so heavily at threshold `0.50` (`E2_Cascade_Default_T050`)?**  
-   Track 1 trained `binary_lightgbm.joblib` with `class_weight="balanced"`. Because Attacks outnumber Benign `11.6:1` in Train (`322,966 : 27,855`), each Benign sample received `~11.6×` weight, making the default `0.50` boundary overly conservative toward Benign: `97.38%` Test Benign Recall came at the cost of exiting **`7,990` (11.57%)** true Test attacks and **`9,329` (17.84%)** true Cross attacks at Stage 1 before Stage 2 ever saw them. Tuning `tau_att = 0.15` reduced missed attacks to `2,276` (Test) and `2,536` (Cross), raising Test Macro-F1 by `+0.0177` (`0.6185 -> 0.6361`) and Cross Macro-F1 by `+0.0240` (`0.6213 -> 0.6453`), while raising Benign FPR (`2.63% -> 26.13%` Test).
-2. **Is Stage 2 routing a bottleneck in E2?**  
-   **No.** On Test (`stage_diagnostics_test.json`), `stage2_cat7_lgbm_sqrt_balanced` achieved `87.08%` 7-category accuracy on passed attacks and **`99.98%` Flood Recall / `99.90%` Flood Precision**, committing only **50 total Flood/Non-Flood misroutes out of 75,105 flows** (`9` Flood->NonFlood + `41` NonFlood->Flood) on Test, and only **30 out of 57,280** (`11 + 19`) on Cross. Training Stage 2 strictly on the 7 attack categories eliminated all `2,393` invalid Stage 2 Benign exits observed with Track 1's 8-class router.
-3. **Which traffic family benefited from specialization (`E2` vs. `E1`), and did `E4` close the gap?**  
-   - On Internal Test (`E2` vs. `E1`): **Non-Flood** Macro-F1 rose from `0.4410` to **`0.4810`** (`+0.0400`), whereas **Flood** rose only `0.7943` -> `0.7971` (`+0.0028`).
-   - Comparing **`E2_Cascade_ValTuned` vs. capacity/weight-matched `E4_LGBM_Leaves63_Sqrt`**: E4 already matches Flood (`0.7960` Test, `0.8089` Cross) and virtually ties Non-Flood (`0.4789` Test, `0.4870` Cross), winning **16 of 34 classes** by F1 on Test (`16` E2 wins, `2` ties) and trailing `16` to `17` (`1` tie) on Cross. E2's slight Macro-F1 edge (`+0.0009` Test, `+0.0012` Cross) comes mostly from `RECON-PINGSWEEP` (`+0.0674` F1 Test / `+0.0419` Cross), `SQLINJECTION` (`+0.0214` Test), and `XSS` (`+0.0248` Cross), while E4 beats E2 on `BENIGN` (`+0.0230` Test / `+0.0156` Cross), `DICTIONARYBRUTEFORCE`, `VULNERABILITYSCAN`, and `UPLOADING_ATTACK`.
-   - Meanwhile, on **pairwise Test flips** ([`pairwise_error_analysis_test.json`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/pairwise_error_analysis_test.json)): `E2` fixed `3,521` E1 errors and broke `1,732` (`+1,789` net); `E4` fixed `3,472` E1 errors and broke `1,434` (`+2,038` net).
-4. **Why did `E3_Parallel_NaiveMax` & `TempAlpha` collapse, and how well did `MetaGate` recover?**  
-   - Conditionally trained specialists (`Stage 3A` on Floods, `Stage 3B` on Non-Floods) never learn to reject out-of-distribution inputs from the opposite family. Consequently, **`76.16%` (`52,083` Test)** and **`71.22%` (`36,346` Cross)** of passed attacks triggered **`>= 0.50` probability simultaneously in both 3A and 3B**! Direct score comparison caused **`26,678` cross-family errors** on Test (`43.89%` Macro-F1).
-   - Static scalar temperature scaling + `alpha=0.50` did not fix OOD overconfidence (`0.4301` Macro-F1). Adding **`E3_Parallel_MetaGate`** cut family errors by 96% (`26,678 -> 1,053` Test; `21,286 -> 697` Cross; `84.16%` accuracy when both specialists are confident), recovering Macro-F1 to `0.6239` Test / `0.6327` Cross. However, meta-features over closed-world predictions still underperformed Stage 2 (`966` Flood->NonFlood leakage, notably dropping `DOS-UDP_FLOOD` F1 from `0.6778` to `0.4573` on Test and `0.7216` to `0.4809` on Cross). Against E2's `50` Test Stage 2 misroutes, E3 MetaGate recovered only `17` while breaking `963` correct E2 predictions.
-5. **What causes the persistent error ceiling across all architectures (`~75%` Test Acc / `~0.64` Macro-F1)?**  
-   Inspecting raw [`Merged01.csv`](file:///c:/Users/priya/Downloads/capstone/data/raw/Merged01.csv) headers confirms **0 of 40 columns** include IP addresses, ports, timestamps, or distinct attacker-IP counts. Consequently, every top architecture (`E1`, `E2`, `E4`) collides on the exact same ambiguous packet/flow pairs:
-   - **Within-Flood DoS vs. DDoS & SYN pairs (42.4% of ALL E4 Test errors)**: `SYN_GROUP` (`DDOS-SYN_FLOOD`, `DOS-SYN_FLOOD`, `DDOS-SYNONYMOUSIP_FLOOD`: `4,118` errors), `TCP_GROUP` (`DDOS-TCP_FLOOD`, `DOS-TCP_FLOOD`: `1,817` errors), `UDP_GROUP` (`DDOS-UDP_FLOOD`, `DOS-UDP_FLOOD`: `1,536` errors), and `HTTP_GROUP` (`DDOS-HTTP_FLOOD`, `DOS-HTTP_FLOOD`: `369` errors) account for **`7,840` of E4's `18,501` Test errors (`42.4%`)**. Merging just those 4 protocol-identical mitigation twin groups elevates E4 Test Accuracy immediately from **75.37% → 85.81%** (while leaving all 34 labels unmerged in primary tables preserves exact comparability with Track 1 and published CICIoT2023 baselines).
-   - **Low-volume Non-Flood vs. Benign**: `RECON-OSSCAN -> BENIGN` (`758` E2 / `820` E4), `RECON-OSSCAN -> RECON-PORTSCAN` (`711` / `712`), `RECON-PORTSCAN -> VULNERABILITYSCAN` (`621` / `612`), and stealthy attack misses (`RECON-PORTSCAN`, `VULNERABILITYSCAN`, `MITM-ARPSPOOFING`, `DICTIONARYBRUTEFORCE -> BENIGN`).
+1. **Why did Stage 1 fail so heavily at threshold `0.50` (`E2_Cascade_Default_T050`)?**
+   Track 1 trained `binary_lightgbm.joblib` with `class_weight="balanced"`. Because Attacks outnumber Benign `11.6:1` in Train (`322,966 : 27,855`), each Benign sample received `~11.6×` weight, making the default `0.50` boundary overly conservative toward Benign: `97.38%` Test Benign Recall came at the cost of exiting **`7,990` (11.57%)** true Test attacks and **`9,329` (17.84%)** true Cross attacks at Stage 1 before Stage 2 ever saw them. Tuning `tau_att = 0.15` reduced missed attacks to `2,276` RF / `2,495` LGBM (Test) and `2,536` RF / `2,741` LGBM (Cross), raising Test Macro-F1 by `+0.0173` (`0.6185 -> 0.6357` LGBM), while raising Benign FPR (`2.63% -> 22.48%` LGBM).
+2. **Did replacing E2's Stage 1 Random Forest with LightGBM solve the latency bottleneck?**
+   **Yes.** Legacy `E2_Cascade_ValTuned` suffered `53.30 ms` (`53,297.8 us`) Test P50 single-flow latency solely from scikit-learn `n_jobs=-1` worker thread-pool dispatch in `binary_random_forest.joblib`. Swapping in Track 1's existing [`binary_lightgbm.joblib`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/models/binary_lightgbm.joblib) under the already Validation-selected settings (`tau_att=0.15, f_tau=0.40`) preserves Validation Macro-F1 (`0.63811`), **cuts Test P50 latency by 6.31× to `8.44 ms`** (`P95 = 10.23 ms`, batch `7,527.6 fps`), and actually improves Test Accuracy (`75.04% -> 75.13%`), Benign Recall (`73.87% -> 77.52%`), and MCC (`0.7405 -> 0.7416`). Even with this fix, single-pass E4 remains over **2.0× faster** (`4.15 ms` vs. `8.44 ms`) at single-flow inference.
+3. **Is Stage 2 routing a bottleneck in E2?**
+   **No.** On Test (`stage_diagnostics_test.json`), `stage2_cat7_lgbm_sqrt_balanced` achieved **`99.98%` Flood Recall / `99.90%` Flood Precision**, committing only **50 total Flood/Non-Flood misroutes out of 75,105 flows** (`9` Flood->NonFlood + `41` NonFlood->Flood) on Test, and only **30 out of 57,280** (`11 + 19`) on Cross. Training Stage 2 strictly on the 7 attack categories eliminated all `2,393` invalid Stage 2 Benign exits observed with Track 1's 8-class router.
+4. **Which traffic family benefited from specialization (`E2` vs. `E1`), and did `E4` close the gap?**
+   - On Internal Test (`E2` vs. `E1`): **Non-Flood** Macro-F1 rose from `0.4410` to **`0.4810`** (`0.4796` Fast E2), whereas **Flood** rose only `0.7943 -> 0.7971`.
+   - Comparing **`E2_Cascade_ValTuned_LGBM` vs. capacity/weight-matched `E4_LGBM_Leaves63_Sqrt`**: E4 matches Flood (`0.7960` vs. `0.7971` Test, `0.8089` vs. `0.8086` Cross), virtually ties Non-Flood (`0.4789` vs. `0.4796` Test), and outperforms Fast E2 in Accuracy (`75.37%` vs. `75.13%`), MCC (`0.7440` vs. `0.7416`), ROC-AUC (`0.9823` vs. `0.9761`), Benign Recall (`78.63%` vs. `77.52%`), and P50 latency (`4.15 ms` vs. `8.44 ms`).
+5. **Why was E3 Parallel Fusion unsuccessful?**
+   Conditionally trained specialists (`Stage 3A` on Floods, `Stage 3B` on Non-Floods) never learn out-of-distribution rejection: **`76.16%` (`52,083` Test)** of passed attacks triggered `>= 0.50` probability in both 3A and 3B simultaneously, causing `E3_Parallel_NaiveMax` to make **`26,678` cross-family errors** (`56.11%` Acc / `0.4389` Macro-F1). Static scaling (`E3_Parallel_TempAlpha`, `0.4301` F1) did not resolve OOD overconfidence. Adding `E3_Parallel_MetaGate` recovered Macro-F1 to `0.6239` Test (`0.6327` Cross) yet still leaked `966` Flood flows into Non-Flood (`DOS-UDP_FLOOD` F1 fell from `0.6778` to `0.4573`), remaining strictly worse than E2 and E4.
+
+### 7.3 Merged-Flood Operational Taxonomy Investigation & Recalculated E4 Results ([`merged_flood_e4_summary.csv`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/merged_flood_e4_summary.csv))
+
+> **Methodological Warning (Distinct Tasks)**: Merging Flood protocol twins defines an **alternative 29-class operational mitigation taxonomy (`OP29_MERGED_FLOOD`)** for L4/L7 firewall policy enforcement. It MUST **NOT** be reported as improving upon E4's original **34-class** classification score (`75.37%` Acc / `0.6352` Macro-F1).
+
+Direct schema inspection of raw [`Merged01.csv`](file:///c:/Users/priya/Downloads/capstone/data/raw/Merged01.csv) confirms **0 of 40 columns** record IP addresses, ports, timestamps, or distinct source host counts. Auditing E4's exact 34×34 Test confusion matrix ([`merged_flood_twin_group_audit.csv`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/merged_flood_twin_group_audit.csv)) verifies that **`7,840` of all `18,501` E4 Test errors (`42.4%`)** are swaps strictly *inside* four protocol-identical twin groups while every remaining Flood class (`RSTFINFLOOD`, `ICMP_FLOOD`, `PSHACK`, `ACK/ICMP/UDP Fragmentation`, `SLOWLORIS`) already achieves `0.933–0.9998` F1:
+
+| Group | Merged Classes (`OP29` Label) | Train Shared Vector Hashes | Test Support | Pre-Merge Swaps | In-Group Retention | Mean 34-Cls F1 -> Merged `OP29` F1 | Justified Mitigation Equivalence |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **`SYN_TRIO`** | `DDOS-SYN_FLOOD`, `DOS-SYN_FLOOD`, `DDOS-SYNONYMOUSIP_FLOOD` -> `FLOOD_SYN` | `3,072` | 7,844 | **4,118** | **99.62%** *(only 30 leaked)* | `0.4626` -> **`0.9975`** | Identical bare TCP SYN flow stats (`syn=1, ack=0, size=60`); mitigated via **SYN Cookies + half-open rate limit** (+ stateless L3 `src==dst` ACL where IPs exist). |
+| *`SYN_PAIR` Check* | *If `DDOS-SYNONYMOUSIP_FLOOD` kept separate (`OP30`, 30-cls)* | `1,339` | 5,385 | 1,028 | *56.90% (2,321 leaked!)* | Sensitivity check only | Proves empirically why omitting `SYNONYMOUSIP` leaves `2,296` SYN flows colliding into `SYNONYMOUSIP`. |
+| **`TCP_PAIR`** | `DDOS-TCP_FLOOD`, `DOS-TCP_FLOOD` -> `FLOOD_TCP` | `1,913` | 5,078 | **1,817** | **99.80%** | `0.6333` -> **`0.9989`** | Volumetric TCP FlowSpec drop & state scrub (DDoS vs. DoS indistinguishable without source IP cardinality). |
+| **`UDP_PAIR`** | `DDOS-UDP_FLOOD`, `DOS-UDP_FLOOD` -> `FLOOD_UDP` | `958` | 5,357 | **1,536** | **99.68%** | `0.7071` -> **`0.9974`** | Upstream UDP policing & QoS ingress rate-limiting. |
+| **`HTTP_PAIR`** | `DDOS-HTTP_FLOOD`, `DOS-HTTP_FLOOD` -> `FLOOD_HTTP` | `1` *(continuous rates)* | 4,244 | **369** | **98.75%** | `0.8825` -> **`0.9858`** | L7 WAF HTTP request challenge & reverse-proxy connection throttle. |
+
+Recalculating frozen `E4_LGBM_Leaves63_Sqrt` across the **exact same test samples (`N = 75,105`)** under both tasks (and cross-checking Validation `N = 75,172` and Cross-Capture `N = 57,280`):
+
+| Split & Taxonomy (Evaluated on Frozen E4 Outputs) | Classes | Acc | Macro-F1 | Weighted-F1 | MCC | Flood Macro-F1 | Non-Flood Macro-F1 | Minority Macro-F1 (Rec) | Benign F1 (Rec) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Test** `ORIG34` *(Academic Standard Benchmark)* | 34 | 0.75366 | 0.63523 | 0.74721 | 0.74402 | 0.79603 | 0.47885 | 0.21957 (0.20631) | 0.72089 (0.78634) |
+| **Test** `OP30_STRICT_4_PAIR` *(Sensitivity: SynIP Unmerged)* | 30 | 0.81691 | 0.66421 | 0.81366 | 0.80834 | 0.92206 | 0.47885 | 0.21957 (0.20631) | 0.72089 (0.78634) |
+| **Test** `OP29_MERGED_FLOOD` *(`label_mapped` -> Collapsed CM)* | **29** | **0.85805** | **0.68082** | **0.85341** | **0.85038** | **0.98931** | **0.47885** *(unchanged)* | **0.21957** *(0.20631)* | **0.72089** *(0.78634)* |
+| **Test** `OP29_MERGED_FLOOD` *(`prob_sum_argmax`)* | 29 | 0.85809 | 0.68088 | 0.85345 | 0.85042 | 0.98948 | 0.47885 | 0.21957 (0.20631) | 0.72089 (0.78634) |
+| **Val** `OP29_MERGED_FLOOD` *(`label_mapped`, N=75,172)* | 29 | 0.85822 | 0.68244 | 0.85350 | 0.85048 | 0.99015 | 0.48120 | 0.22709 (0.21942) | 0.71872 (0.78426) |
+| **Cross** `OP29_MERGED_FLOOD` *(`label_mapped`, N=57,280)* | 29 | 0.78036 | 0.68527 | 0.77081 | 0.77123 | 0.99253 | 0.48696 | 0.28715 (0.21835) | 0.67684 (0.78322) |
+
+Non-Flood (`0.47885`) and Minority (`0.21957` F1 / `0.20631` Rec) metrics are bit-identical between `ORIG34` and `OP29`—confirming all improvement lies strictly in eliminating IP-less flood twin swaps. Visual comparisons are saved in [`results/figures/e1_e4_architecture_tradeoffs.png`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/figures/e1_e4_architecture_tradeoffs.png) and [`results/figures/e4_34class_vs_merged_flood.png`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/figures/e4_34class_vs_merged_flood.png).
 
 ---
 
-## 8. Limitations & Practical Engineering Recommendation
+## 8. Limitations, Deployment Trade-Offs & Practical Engineering Recommendation
 
-### Key Limitations
-- **Same-Testbed Holdout Shift**: `cross_capture_test_clean.csv` validates temporal/capture-file generalization *within* the CICIoT2023 lab rather than cross-network deployment, and its ≤2,000/class capping alters minority class priors by `5.67×`.
-- **Stage 1 RF Single-Flow Threadpool Overhead**: Reusing Track 1's unmodified `binary_random_forest.joblib` (`n_jobs=-1`) yields strong batch throughput (`8,042.5 fps`) but high per-row latency (`53.3 ms` P50) due to per-call worker synchronization.
-- **Residual Minority Recall Ceiling**: No tested 39-feature tabular classifier exceeds `0.23` Minority Macro-F1 on Test (`0.35` Max Minority Recall with `E1`'s `0.16` F1 precision collapse) due to overlapping single-flow representations across Web/Recon attacks and Benign traffic.
+### Deployment Trade-Offs & Dataset Limitations
+- **Missing Network/Host Identifiers (`0 / 40` IP/Port/Host Columns)**: Tabular CICIoT2023 exports strip attacker IPs and concurrent host counts; flow-level models cannot separate `DoS` from `DDoS` or `DDOS-SYNONYMOUSIP_FLOOD` without perimeter packet-header/Flow-key telemetry.
+- **Same-Testbed Cross-Capture Shift**: `cross_capture_test_clean.csv` evaluates temporal/file generalization within the same CICIoT2023 testbed (`Merged26–40`) with `<=2,000`/class capping (`5.67×` minority prevalence inflation), so `Cross` rewards high-recall/low-precision priors (`E1`) differently from natural prevalence `Internal Test`.
+- **Minority Attack Feature Overlap**: All 39-feature tabular classifiers plateau near `~0.22` Minority Macro-F1 on Test (`~0.35` max recall in `E1` at `0.16` F1 precision collapse), reflecting indistinguishable L7 payload behavior (`SQLINJECTION`, `XSS`, `UPLOADING_ATTACK`) vs. `BENIGN` and `RECON-OSSCAN`.
+- **Benign FPR vs. Attack Miss Trade-Off**: Operating at calibrated `sqrt_balanced` or Stage 1 `tau_att=0.15` prevents `7,990` attack misses seen at `T=0.50`, at the cost of `~21–26%` Benign FPR on individual raw flows unless stateful alert aggregation or allow-listing is applied downstream.
+- **Merged-Flood Operational Scope Constraint**: `OP29_MERGED_FLOOD` is only valid when downstream SOAR/firewall rules share remediation across DDoS/DoS protocol twins; downstream multi-host source attribution still requires NetFlow/sFlow src-IP tracking outside the ML feature vector.
 
-### Engineering Recommendation
-- **For Production / Low-Latency Single-Flow Deployment -> Choose [`E4_LGBM_Leaves63_Sqrt`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/models/e4_lgbm_leaves63_sqrt.joblib)** (`1.0` execution/flow, `4.15 ms` Test P50 latency, `33.90 MB`, **highest Accuracy `75.37%` and MCC `0.7440`**, highest Benign Recall among non-default models `78.63%`, virtually tied Macro-F1 `0.6352` vs. `0.6361`).
-- **For Modular Policy Separation (Tuning Flood vs. Non-Flood Weights Independently) -> Choose `E2_Cascade_ValTuned`** (or its LightGBM Stage 1 variant `E2_bin_lgbm_cat7_sqrt` at `tau_att=0.15`, which keeps Val Macro-F1 `0.6381` while eliminating RF thread overhead).
-- **Avoid Naive Parallel Fusion (`E3_NaiveMax` / `E3_TempAlpha`)** unless paired with a raw-feature router; conditional specialist outputs are not comparable across disjoint class manifolds without a calibration gate or explicit Stage 2 router.
+### Final Engineering Recommendation
+- **Primary Production Deployment -> [`E4_LGBM_Leaves63_Sqrt`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/models/e4_lgbm_leaves63_sqrt.joblib)**: Highest Test Accuracy (`75.37%`), highest MCC (`0.7440`), highest ROC-AUC (`0.9823`), highest Cross Accuracy (`70.72%`), smallest single-pass latency (`4.15 ms` P50), single model call (`1.0` exec/flow), and `33.90 MB` footprint. Integrated as the default engine in [`demo_app.py`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/scripts/demo_app.py).
+- **Comparative Hierarchical Architecture -> [`E2_Cascade_ValTuned_LGBM`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/hierarchical_ids/results/e2_fast_lgbm_config.json)**: Swapping `binary_lightgbm.joblib` into Stage 1 fixes E2's latency bug (`53.30 ms -> 8.44 ms`, **6.31×** speedup) and matches E4's Macro-F1 (`0.6357` vs. `0.6352`)—recommended only if independent per-stage retraining/thresholds for Flood vs. Non-Flood branches are operationally required.
+- **Disqualified Strategy -> `E3_Parallel_*`**: Conditional specialist score fusion without a raw-feature Stage 2 router fails OOD gating (`0.4389` NaiveMax, `0.6239` MetaGate) and increases compute (`2.82` execs) without accuracy gains.
 
 ---
 
-## 9. Exact Reproduction Commands
+## 9. Exact Reproduction & SOC Console Commands
 
 All experiments were executed sequentially under Python 3.13.15 (`numpy 2.5.3`, `pandas 3.0.5`, `scikit-learn 1.9.1`, `lightgbm 4.7.0`, `xgboost 3.4.1`) from repository root `C:\Users\priya\Downloads\capstone`:
 
@@ -245,6 +278,12 @@ All experiments were executed sequentially under Python 3.13.15 (`numpy 2.5.3`, 
 .\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.train_and_tune_val --phase e2_e3
 .\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.train_and_tune_val --phase e4
 
-# 3. Run frozen read-only evaluation on Val, Internal Test, and Cross-Capture Clean
+# 3. Run frozen read-only evaluation on Val, Internal Test, and Cross-Capture Clean (E1-E4 baseline artifacts)
 .\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.run_final_evaluation
+
+# 4. Run Phase 1 cleanup additions: Fast E2 (LGBM Stage 1), Merged-Flood Operational E4 Audit, & Figures
+.\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.run_presentation_updates
+
+# 5. Launch interactive SOC Defense Console (E4 Primary + E2 Fast Toggle + Track 1 Preprocessor)
+.\.venv\Scripts\streamlit.exe run track2_ids_engineering/scripts/demo_app.py
 ```
