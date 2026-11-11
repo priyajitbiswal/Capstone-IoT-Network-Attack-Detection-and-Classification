@@ -197,6 +197,13 @@ python -c "import typst; typst.compile('track1_dataset_evaluation/paper/paper.ty
 - **Compiled Output**: `track1_dataset_evaluation/paper/research_paper.pdf`
 - **Execution Time**: < 3 seconds.
 
+### Step 10: Track 2 Hierarchical vs. Improved Flat IDS (`E1–E4`) Evaluation
+Trains Stage 2/3A/3B & E4 models strictly on Train/Val, freezes validation thresholds, and runs read-only evaluation on Val (`75,172`), Internal Test (`75,105`), and Cross-Capture (`57,280`) (summarized in [`notebooks/09_hierarchical_ids_evaluation.ipynb`](notebooks/09_hierarchical_ids_evaluation.ipynb)):
+```bash
+python -u -m track2_ids_engineering.hierarchical_ids.experiments.train_and_tune_val --phase all
+python -u -m track2_ids_engineering.hierarchical_ids.experiments.run_final_evaluation
+```
+
 ---
 
 ## 4. Expected Results Verification Matrix
@@ -227,7 +234,7 @@ To maintain a lean repository (< 15 MB excluding research papers) and ensure 100
   - All source code (`track1_dataset_evaluation/src/`, `track2_ids_engineering/src/`, `experiments/`, `scripts/`)
   - All documentation (`README.md`, `PROJECT_STRUCTURE.md`, `REPRODUCIBILITY.md`, `TRACKS_OVERVIEW.md`)
   - All historical research reports (`track1_dataset_evaluation/reports/STAGE_1_...` through `STAGE_9_...`)
-  - All evaluation results and metrics (`track1_dataset_evaluation/results/metrics/`, `track1_dataset_evaluation/results/tables/`, `track2_ids_engineering/results/`)
+  - All evaluation results and metrics (`track1_dataset_evaluation/results/`, `track2_ids_engineering/results/`, `track2_ids_engineering/hierarchical_ids/results/`)
   - All manuscript sources, bibliography, figures, and compiled PDF (`track1_dataset_evaluation/paper/`)
   - Partition metadata JSONs (`track1_dataset_evaluation/data/partitions/*.json`)
 - **Excluded from Git (`.gitignore`)**:

@@ -182,12 +182,12 @@ capstone/
 │   ├── experiments/                   # Weight calibration, tuning, pruning & 2-stage cascade ablations
 │   ├── scripts/                       # Streamlit SOC console (demo_app.py) & 10G throughput benchmark
 │   ├── docs/                          # Engineering notes (INSIGHTS.md) & roadmap (PROGRESS.md)
-│   ├── data/                          # Spec for future hierarchical IDS Datasets A, B, C1, C2
-│   └── hierarchical_ids/              # Proposed 3-Stage Flood vs. Non-Flood IDS architecture spec
+│   ├── data/                          # Track 2 data notes (hierarchical_ids reads Track 1 Strategy 1 in-memory)
+│   └── hierarchical_ids/              # Completed E1–E4 Cascade vs. Improved Flat IDS study (COMPARISON_REPORT.md)
 ├── data/                              # Shared raw CICIoT2023 captures & curated stratified sample
 │   ├── raw/                           # 63 full raw captures from CICIoT2023 (gitignored)
 │   └── processed/                     # Curated working sample (sample_stratified.csv, 529k flows)
-├── notebooks/                         # Exploratory Jupyter research notebooks (01 to 08)
+├── notebooks/                         # Exploratory Jupyter research notebooks (01 to 09)
 ├── research/                          # 14 peer-reviewed research papers & dataset datasheet
 ├── learning/                          # Educational modules on IoT networking fundamentals
 ├── snuc/                              # Academic capstone deliverables (Shiv Nadar University Chennai)
@@ -233,6 +233,13 @@ Evaluates all 21 pre-trained Stage 3 checkpoints on the Internal Test set (N = 7
 ### 6. Launch Security Operations Console (Streamlit Dashboard — Track 2)
 ```powershell
 .\.venv\Scripts\streamlit.exe run track2_ids_engineering/scripts/demo_app.py
+```
+
+### 7. Re-run Hierarchical vs. Improved Flat IDS Evaluation (Track 2)
+Full findings in [`track2_ids_engineering/hierarchical_ids/docs/COMPARISON_REPORT.md`](track2_ids_engineering/hierarchical_ids/docs/COMPARISON_REPORT.md) and [`notebooks/09_hierarchical_ids_evaluation.ipynb`](notebooks/09_hierarchical_ids_evaluation.ipynb):
+```powershell
+.\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.train_and_tune_val --phase all
+.\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.run_final_evaluation
 ```
 
 ---

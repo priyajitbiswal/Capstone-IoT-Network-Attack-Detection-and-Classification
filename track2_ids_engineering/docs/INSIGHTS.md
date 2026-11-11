@@ -17,6 +17,7 @@ Our investigation systematically progresses through four increasing levels of di
 4. **Step 4 &mdash; Phase 3: Fine-Grained Attribution (34 Classes)**: Precise forensic attribution across all 33 specific attack vectors + Benign traffic.
 5. **Step 5 &mdash; Feature Importance & Latency Optimization**: Pruning redundant features (39 &rarr; 20 features) to achieve a **+28.55% inference speedup** with minimal accuracy degradation.
 6. **Step 6 &mdash; Master Capstone Synthesis**: Global comparative evaluation across all model families, complexity frontiers, and hardware deployment profiles.
+7. **Step 9 (Track 2 Expansion) &mdash; Leak-Free Hierarchical vs. Improved Flat IDS (`E1–E4`)**: Controlled evaluation under Track 1's zero-overlap partitions (`Train=350,821`, `Val=75,172`, `Test=75,105`, `Cross-Capture=57,280`), proving why class weighting + capacity (`E4`) matches 3-stage specialization (`E2`) and quantifying the IP-stripped `DDoS/DoS` twin ceiling (`42.4%` of Test errors).
 
 ---
 
@@ -282,4 +283,39 @@ Literature proposals advocating CNN-LSTM or Vision Transformers require **50,000
 
 ---
 
-*Status: Project 100% Complete &mdash; All 6 Steps Fully Benchmarked, Pre-Rendered, Documented, and Verified.*
+## Step 9: Track 2 Leak-Free Hierarchical vs. Improved Flat IDS (`E1–E4`) & Feature-Space Diagnosis
+
+> **Full Artifacts**: [`../hierarchical_ids/docs/COMPARISON_REPORT.md`](../hierarchical_ids/docs/COMPARISON_REPORT.md) & Executed Notebook [`../../notebooks/09_hierarchical_ids_evaluation.ipynb`](../../notebooks/09_hierarchical_ids_evaluation.ipynb).
+
+### 1. Experimental Setup Under Strictly Non-Overlapping Splits
+Using Track 1's Strategy 1 group-hash partitions (`0` feature-vector overlap verified across all 6 pairs) and canonical taxonomy (`1` Benign + `16` Volumetric Floods [`DDoS` 12 + `DoS` 4] + `17` Non-Floods [`Mirai` 3 + `Recon` 5 + `Spoofing` 2 + `Web` 6 + `BruteForce` 1]):
+- **Internal 70 / 15 / 15 Split (`Merged01–25`, 501,098 clean flows)**: `Train = 350,821 (70.01%)`, `Validation = 75,172 (15.00%)`, `Internal Test = 75,105 (14.99%)`.
+- **Cross-Capture Clean (`Merged26–40`, 57,280 flows)**: Separate later-file holdout (`<=2,000` per attack, `<=5,000` Benign) with overlap stripped. Because big flood classes are capped at 2,000, the **8 minority attack classes jump from 2.58% (Internal Test) to 14.64% (Cross-Capture) — a 5.67x prevalence shift**.
+
+### 2. Controlled Architecture Comparison (`E1` vs. `E2` vs. `E3` vs. `E4`)
+
+| Architecture | Origin | Val Macro-F1 | Test Acc | Test Macro-F1 | Test MCC | Test Minority F1 (Rec) | Cross Acc | Cross Macro-F1 | Single-Flow P50 (Test) | Execs / Flow |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **`E1_Flat34_LGBM_Balanced`** | Track 1 | 0.6142 | 72.65% | 0.6145 | 0.7170 | 0.1624 (**0.3360**) | 69.64% | **0.6498** | **3.43 ms** | 1.00 |
+| **`E2_Cascade_Default_T050`** | S1 Reused + New S2/3 | 0.6196 | 73.59% | 0.6185 | 0.7289 | 0.2115 (0.1519) | 68.61% | 0.6213 | 7.88 ms | 2.63 |
+| **`E2_Cascade_ValTuned`** | S1 RF (`T=0.15`) + S2/3 | **0.6394** | 75.04% | **0.6361** | 0.7405 | **0.2264** (0.2094) | 70.50% | 0.6453 | 53.30 ms* | 2.82 |
+| **`E3_Parallel_NaiveMax`** | No Stage 2 | 0.4389 | 56.11% | 0.4389 | 0.5567 | 0.1757 (0.1084) | 53.26% | 0.4360 | 49.73 ms* | 2.82 |
+| **`E3_Parallel_MetaGate`** | Learned LR Gate | 0.6267 | 73.78% | 0.6239 | 0.7275 | 0.2253 (0.2094) | 69.41% | 0.6327 | 52.40 ms* | 2.82 |
+| **`E4_LGBM_Leaves63_Sqrt`** | New Improved Flat | 0.6358 | **75.37%** | 0.6352 | **0.7440** | 0.2196 (0.2063) | **70.72%** | 0.6441 | 4.15 ms | 1.00 |
+
+*\*Uses Track 1 `binary_random_forest.joblib` (`n_jobs=-1`) in Stage 1 (`8,042.5 fps` batch throughput, ~45 ms thread-dispatch penalty on single-row queries; swapping to `binary_lightgbm` holds `0.6381` Val Macro-F1 at LGBM speed).*
+
+### 3. Five Key Engineering Discoveries
+1. **Capacity + `sqrt_balanced` Weights Match the Cascade at 1/3 Compute (`E4` vs. `E2`)**: Once flat `E4` (`num_leaves=63, n_estimators=150, sqrt_balanced`) matches E2's Stage 3 hyperparameters, **E4 virtually ties E2 on Test Macro-F1 (`0.6352` vs. `0.6361`) and wins Accuracy (`75.37%`), MCC (`0.7440`), Benign Recall (`78.63%`), Model Executions (`1.0` vs. `2.82`), and Latency (`4.15 ms` vs. `53.30 ms`)**. Most of E2's improvement over Track 1 E1 (`0.6145` &rarr; `0.6361`) stemmed from gentler `sqrt_balanced` weighting and leaf capacity—not hierarchical specialization itself.
+2. **Stage 1 Threshold Bug at `0.50`**: Because Track 1's binary classifiers trained with `class_weight="balanced"` (`11.6x` weight on Benign), threshold `0.50` caused Stage 1 to prematurely drop **`7,990` (11.57%)** true Test attacks and **`9,329` (17.84%)** Cross attacks as `BENIGN`. Tuning `tau_att = 0.15` on Validation recovers `+0.0176` Test Macro-F1 (`0.6185` &rarr; `0.6361`).
+3. **Stage 2 Routing Is Already Solved (~99.98%)**: `stage2_cat7_lgbm_sqrt_balanced` commits only **50 cross-family misroutes out of 75,105** Test flows (`99.98%` Flood Recall), and flat E4 makes only **46** cross-family errors (`11` + `35`). Eliminating `BENIGN` from Stage 2 prevented the `2,393` invalid Stage 2 Benign exits observed with Track 1's 8-class checkpoint.
+4. **Why Parallel Closed-World Specialists Without Stage 2 (`E3_NaiveMax`) Fail**: Conditionally trained Stage 3A and 3B specialists both output `>= 0.50` probability simultaneously on **76.16% (`52,083`)** of passed Test attacks, generating **`26,678` family routing errors** (`56.11%` Acc). Adding a `LogisticRegression` meta-gate cuts collisions by 96% (`26,678` &rarr; `1,053`, Macro-F1 `0.6239`), still trailing E2's raw-feature router (`50` errors).
+5. **Verified Absence of IP/Host Features & The DDoS vs. DoS Twin Ceiling (`42.4%` of All E4 Errors)**:
+   - Direct header inspection of raw `Merged01.csv` and `sample_stratified.csv` confirms **0 of 40 columns** contain source/destination IPs, ports, timestamps, or concurrent attacker host counts.
+   - Without multi-host entropy, DDoS and DoS bursts of identical protocol collapse onto the same 39-dimensional flow features (Track 1 found **8,740** unique vectors carrying conflicting `DDoS`/`DoS` labels).
+   - Quantified on `cm_E4_Improved_Flat34_E4_LGBM_Leaves63_Sqrt_test.npy`: **`7,840` out of `18,501` total Test errors (`42.4%`)** occur strictly inside just four protocol-identical twin groups (`SYN/SynonymousIP`: `4,118`; `TCP`: `1,817`; `UDP`: `1,536`; `HTTP`: `369`). Merging those 4 mitigation-equivalent twins elevates E4's Test Accuracy from **75.37% &rarr; 85.81%** immediately—justifying operational mitigation merging in Track 2 while keeping 34-class results standard for academic comparison.
+   - **Cross-Capture Reversal Explained**: `E1` reclaims top Cross Macro-F1 (`0.6498`) solely because `5.67x` denser minority sampling in `Merged26–40` rewards its aggressive `balanced` recall (`0.3495`), whereas on natural Test (`2.58%` minority) `E1` suffers precision collapse (`0.1624` Minority F1 vs. `0.2264` E2 / `0.2196` E4).
+
+---
+
+*Status: Track 2 Steps 0–9 Fully Benchmarked, Pre-Rendered, Documented, and Verified.*

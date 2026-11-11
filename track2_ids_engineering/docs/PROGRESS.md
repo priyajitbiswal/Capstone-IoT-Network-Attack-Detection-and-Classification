@@ -170,7 +170,7 @@ graph TD
   - Generated multi-panel publication synthesis figure: `results/figures/capstone_master_synthesis.png` (Accuracy trajectory, Macro F1 resilience, Pareto latency frontier, and IoT line-rate throughput).
 - [x] **Task 6.3**: Final Capstone Presentation Notebook:
   - Created and executed `notebooks/06_capstone_synthesis_presentation.ipynb` with all pre-rendered charts, tables, minority defense benchmarks, and multi-tier IoT deployment blueprints.
-- [x] **Task 6.4**: Documented comprehensive project insights ledger in `PROJECT_INSIGHTS.md`.
+- [x] **Task 6.4**: Documented comprehensive project insights ledger in [`INSIGHTS.md`](INSIGHTS.md).
 
 ---
 
@@ -214,17 +214,15 @@ graph TD
 | Phase | Granularity | Classes | Status | Target Deliverable |
 | :--- | :--- | :---: | :---: | :--- |
 | **Step 0: Setup** | Environment & Config | &mdash; | Completed | `.venv`, `requirements.txt`, `src/config.py` |
-| **Step 1: Data** | Sampling & Loader | &mdash; | Completed | `src/data_loader.py`, `src/create_sample.py`, `data/sample_stratified.csv` |
+| **Step 1: Data** | Sampling & Loader | &mdash; | Completed | `src/data_loader.py`, `src/create_sample.py`, `data/processed/sample_stratified.csv` |
 | **Phase 1** | Binary Detection | 2 | Completed | `02_phase1_binary_classification.ipynb`, metrics table & models |
 | **Phase 2** | Category Detection | 8 | Completed | `03_phase2_eight_class_classification.ipynb`, 8x8 confusion matrix & models |
 | **Phase 3** | Attack Profile Detection | 34 | Completed | `04_phase3_thirtyfour_class_classification.ipynb`, 34x34 matrix & models |
 | **Optimization** | Feature Selection & Latency | 20 feats | Completed | `05_feature_selection_latency.ipynb`, latency benchmarks & speedup |
-| **Synthesis** | Final Capstone Report | All | Completed | `06_capstone_synthesis_presentation.ipynb`, `PROJECT_INSIGHTS.md` |
+| **Synthesis** | Final Capstone Report | All | Completed | `06_capstone_synthesis_presentation.ipynb`, [`INSIGHTS.md`](INSIGHTS.md) |
 | **Research Ablation** | Literature Reconciliation & Cascade | 34 & 8 | Completed | `experiments/`, `RESEARCH_PAPERS_CRITICAL_ANALYSIS.md` |
 | **Uncapped Benchmark** | Raw Uncapped Evaluation | 2 & 8 | Completed | `07_uncapped_high_accuracy_benchmark.ipynb`, accuracy paradox proof |
 | **Wire-Speed Benchmark**| 10 Gbps Throughput & Latency | All | Completed | `benchmark_throughput.py`, `08_wire_speed_throughput_benchmark.ipynb` |
 | **Live Defense System** | Real-Time SOC Ingress | 3 Tiers | Completed | `demo_app.py` live streaming application |
-| **Uncapped Benchmark** | Raw Uncapped Evaluation | 2 & 8 | Completed | `07_uncapped_high_accuracy_benchmark.ipynb`, accuracy paradox proof |
-| **Wire-Speed Benchmark**| 10 Gbps Throughput & Latency | All | Completed | `benchmark_throughput.py`, `08_wire_speed_throughput_benchmark.ipynb` |
-| **Live Defense System** | Real-Time SOC Ingress | 3 Tiers | Completed | `demo_app.py` live streaming application |
+| **Hierarchical vs. Improved Flat IDS (E1–E4)** | 3-Stage Cascade vs. Tuned Flat | 34 (16/17) | Completed | [`hierarchical_ids/docs/COMPARISON_REPORT.md`](../hierarchical_ids/docs/COMPARISON_REPORT.md), `09_hierarchical_ids_evaluation.ipynb` |
 

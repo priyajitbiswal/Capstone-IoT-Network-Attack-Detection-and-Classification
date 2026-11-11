@@ -42,11 +42,11 @@ capstone/
 │   ├── experiments/                       # Weight calibration, tuning, pruning & 2-stage cascade ablations
 │   ├── scripts/                           # Streamlit SOC console (demo_app.py) & 10G throughput benchmark
 │   ├── docs/                              # Engineering insights ledger (INSIGHTS.md) & roadmap (PROGRESS.md)
-│   ├── data/                              # Manifest for future hierarchical IDS Datasets A, B, C1, C2
-│   └── hierarchical_ids/                  # Proposed 3-Stage Flood vs. Non-Flood IDS architecture spec
+│   ├── data/                              # Track 2 data docs (hierarchical_ids reads Track 1 Strategy 1 in-memory)
+│   └── hierarchical_ids/                  # Implemented & evaluated E1-E4 Cascade vs. Improved Flat IDS study
 │
 ├── data/                                  # [SHARED] Raw captures (data/raw/) & stratified sample (data/processed/)
-├── notebooks/                             # Exploratory Jupyter Notebooks (01–08, kept at root)
+├── notebooks/                             # Exploratory Jupyter Notebooks (01–09, kept at root)
 ├── research/                              # [SHARED] 14 peer-reviewed papers, Dataset.pdf & critical survey
 ├── learning/                              # [SHARED] Educational Module 1 (networking & CICIoT2023)
 ├── snuc/                                  # Shiv Nadar University Chennai Capstone Deliverables (gitignored)
@@ -70,11 +70,11 @@ capstone/
 | **`track2_ids_engineering/results/`** | Track 2 | Evaluation figures and benchmark/ablation/throughput tables. |
 | **`track2_ids_engineering/experiments/`** | Track 2 | Standalone ablations testing class weight calibration, hyperparameter tuning, feature pruning, and 2-stage cascade. |
 | **`track2_ids_engineering/scripts/`** | Track 2 | Streamlit SOC dashboard (`demo_app.py`) and CPU throughput benchmarking (`benchmark_throughput.py`). |
-| **`track2_ids_engineering/hierarchical_ids/`** | Track 2 | Proposed 3-Stage Flood vs. Non-Flood Hierarchical IDS design specification. |
+| **`track2_ids_engineering/hierarchical_ids/`** | Track 2 | Implemented E1–E4 Hierarchical Cascade vs. Improved Flat 34-class IDS (`docs/COMPARISON_REPORT.md`, CSVs, JSONs, confusion matrices). |
 | **`track2_ids_engineering/docs/`** | Track 2 | Engineering ledger (`INSIGHTS.md`) and phased roadmap (`PROGRESS.md`). |
 | **`data/`** | Shared | Shared raw CICIoT2023 CSVs (`raw/`) and curated stratified sample (`processed/sample_stratified.csv`, 529k flows). |
 | **`research/`** | Shared | Curated academic library containing 14 peer-reviewed research papers and the CICIoT2023 dataset datasheet. |
-| **`notebooks/`** | Root | Sequential Jupyter notebooks (`01` to `08`) preserved at root pending final track review. |
+| **`notebooks/`** | Root | Sequential Jupyter notebooks (`01` to `09`) preserved at root (`09`: hierarchical vs. improved flat evaluation). |
 | **`learning/`** | Shared | Educational notebook and learning notes introducing IoT networking and dataset structure. |
 | **`snuc/`** | University | Capstone project submission deliverables for Shiv Nadar University Chennai (untouched). |
 
@@ -120,7 +120,7 @@ flowchart TD
 
 ## 4. Git Hygiene & Artifact Management Policy
 
-- **Tracked in Git**: All Python source code (`track1_dataset_evaluation/src/`, `track2_ids_engineering/src/`, `experiments/`, `scripts/`), research reports (`track1_dataset_evaluation/reports/`), documentation (`TRACKS_OVERVIEW.md`, `PROJECT_STRUCTURE.md`, `README.md`, `track2_ids_engineering/docs/`), research literature (`research/`), academic paper sources (`track1_dataset_evaluation/paper/`), exploratory notebooks (`notebooks/`, `learning/`), partition metadata JSONs, and structured summary result tables (`results/tables/*.csv`).
+- **Tracked in Git**: All Python source code (`track1_dataset_evaluation/src/`, `track2_ids_engineering/src/`, `track2_ids_engineering/hierarchical_ids/`, `experiments/`, `scripts/`), research reports (`track1_dataset_evaluation/reports/`), documentation (`TRACKS_OVERVIEW.md`, `PROJECT_STRUCTURE.md`, `README.md`, `track2_ids_engineering/docs/`), research literature (`research/`), academic paper sources (`track1_dataset_evaluation/paper/`), exploratory notebooks (`notebooks/`, `learning/`), partition metadata JSONs, structured summary result tables (`results/tables/*.csv`, `hierarchical_ids/results/*.csv`), and confusion matrices (`hierarchical_ids/results/confusion_matrices/*.npy`).
 - **Excluded via `.gitignore`**:
   - Raw and processed datasets (`data/raw/`, `data/processed/`, `track1_dataset_evaluation/data/partitions/*.csv`, `*.csv` except `results/tables/*.csv`).
   - Binary model checkpoints and serialized preprocessors (`track1_dataset_evaluation/models/*`, `track2_ids_engineering/models/*`, `*.joblib`, `*.pt`, `*.pkl`).

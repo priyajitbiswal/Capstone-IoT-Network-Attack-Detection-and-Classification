@@ -15,7 +15,7 @@ models/
 └── reduced_features/                 # 3 Top-20 edge models (RF, LGBM, XGBoost) + reduced_20_scaler.joblib + top_20_feature_names.joblib
 ```
 
-*(Future trained checkpoints for the proposed Three-Stage Hierarchical IDS — Stage 1 Binary, Stage 2 8-Class Category, Stage 3A Flood Specialist, Stage 3B Non-Flood Specialist — can be organized under `models/hierarchical/` when implemented.)*
+*(Trained checkpoints for the implemented E1–E4 Three-Stage Hierarchical vs. Improved Flat IDS study live under [`../hierarchical_ids/models/`](../hierarchical_ids/models/README.md).)*
 
 > [!IMPORTANT]
 > Model binaries (`*.joblib`, `*.pt`, `*.pkl`) are gitignored to preserve repository cleanliness.
