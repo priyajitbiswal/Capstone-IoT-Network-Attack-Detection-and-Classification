@@ -1,0 +1,9 @@
+architecture,n_samples,total_errors,attack_to_benign_fn,benign_to_attack_fp,flood_routed_to_nonflood,nonflood_routed_to_flood,within_flood_confusion,within_nonflood_confusion
+E1_Flat34_LGBM_Balanced,75172,20706,1551,2079,21,29,8326,8700
+E2_Cascade_Default_T050,75172,19905,7896,166,25,23,8224,3571
+E2_Cascade_ValTuned,75172,18858,2297,1570,9,35,8228,6719
+E3_Parallel_NaiveMax,75172,33099,2297,1570,13627,13184,1865,556
+E3_Parallel_TempAlpha,75172,34200,2297,1570,16502,11824,1110,897
+E3_Parallel_MetaGate,75172,19853,2297,1570,1019,89,8164,6714
+E4_Improved_Flat34 (E4_LGBM_Leaves63_Sqrt),75172,18693,2423,1313,10,35,8264,6648
+E1_Ref_Unweighted_Track1,75172,19294,3376,935,154,94,8437,6298

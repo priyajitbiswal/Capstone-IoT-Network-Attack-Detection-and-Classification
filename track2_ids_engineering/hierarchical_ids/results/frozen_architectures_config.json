@@ -1,0 +1,92 @@
+{
+  "random_seed": 42,
+  "feature_count": 39,
+  "preprocessor_path": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\preprocessor_strategy1.joblib",
+  "software_versions": {
+    "python": "3.13.15",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "scikit_learn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "xgboost": "3.4.1"
+  },
+  "E1": {
+    "name": "E1_Flat34_LGBM_Balanced",
+    "checkpoint": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\fine_grained_lightgbm.joblib",
+    "source": "Track 1 reused checkpoint (Strategy 1 balanced)"
+  },
+  "E2_default": {
+    "name": "E2_Cascade_Default_T050",
+    "s1_id": "bin_lgbm",
+    "s1_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\binary_lightgbm.joblib",
+    "s2_id": "stage2_cat7_lgbm_balanced",
+    "s2_mode": "cat7_attack",
+    "s2_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage2_cat7_lgbm_balanced.joblib",
+    "attack_threshold": 0.5,
+    "flood_route_threshold": null,
+    "stage3a_id": "stage3a_flood_lgbm_d63_sqrt",
+    "stage3a_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3a_flood_lgbm_d63_sqrt.joblib",
+    "stage3b_id": "stage3b_nonflood_lgbm_d63_sqrt",
+    "stage3b_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3b_nonflood_lgbm_d63_sqrt.joblib"
+  },
+  "E2_tuned": {
+    "name": "E2_Cascade_ValTuned",
+    "s1_id": "bin_rf",
+    "s1_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\binary_random_forest.joblib",
+    "s2_id": "cat7_sqrt",
+    "s2_mode": "cat7_attack",
+    "s2_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage2_cat7_lgbm_sqrt_balanced.joblib",
+    "attack_threshold": 0.15,
+    "flood_route_threshold": 0.4,
+    "stage3a_id": "stage3a_flood_lgbm_d63_sqrt",
+    "stage3a_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3a_flood_lgbm_d63_sqrt.joblib",
+    "stage3b_id": "stage3b_nonflood_lgbm_d63_sqrt",
+    "stage3b_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3b_nonflood_lgbm_d63_sqrt.joblib"
+  },
+  "E3_naive": {
+    "name": "E3_Parallel_NaiveMax",
+    "s1_id": "bin_rf",
+    "s1_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\binary_random_forest.joblib",
+    "attack_threshold": 0.15,
+    "fusion_mode": "naive_max",
+    "stage3a_id": "stage3a_flood_lgbm_d63_sqrt",
+    "stage3a_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3a_flood_lgbm_d63_sqrt.joblib",
+    "stage3b_id": "stage3b_nonflood_lgbm_d63_sqrt",
+    "stage3b_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3b_nonflood_lgbm_d63_sqrt.joblib"
+  },
+  "E3_temp_alpha": {
+    "name": "E3_Parallel_TempAlpha",
+    "s1_id": "bin_rf",
+    "s1_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\binary_random_forest.joblib",
+    "attack_threshold": 0.15,
+    "fusion_mode": "temp_alpha",
+    "temp_flood": 1.1742090050677214,
+    "temp_non_flood": 0.9042155265352694,
+    "alpha_flood": 0.5,
+    "stage3a_id": "stage3a_flood_lgbm_d63_sqrt",
+    "stage3a_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3a_flood_lgbm_d63_sqrt.joblib",
+    "stage3b_id": "stage3b_nonflood_lgbm_d63_sqrt",
+    "stage3b_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3b_nonflood_lgbm_d63_sqrt.joblib"
+  },
+  "E3_meta_gate": {
+    "name": "E3_Parallel_MetaGate",
+    "s1_id": "bin_rf",
+    "s1_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track1_dataset_evaluation\\models\\binary_random_forest.joblib",
+    "attack_threshold": 0.15,
+    "fusion_mode": "meta_gate_lr",
+    "temp_flood": 1.1742090050677214,
+    "temp_non_flood": 0.9042155265352694,
+    "meta_gate_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\e3_meta_gate_lr.joblib",
+    "stage3a_id": "stage3a_flood_lgbm_d63_sqrt",
+    "stage3a_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3a_flood_lgbm_d63_sqrt.joblib",
+    "stage3b_id": "stage3b_nonflood_lgbm_d63_sqrt",
+    "stage3b_ckpt": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\stage3b_nonflood_lgbm_d63_sqrt.joblib"
+  },
+  "E4": {
+    "name": "E4_Improved_Flat34",
+    "base_candidate_id": "E4_LGBM_Leaves63_Sqrt",
+    "checkpoint": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\hierarchical_ids\\models\\e4_lgbm_leaves63_sqrt.joblib",
+    "temperature": 1.0,
+    "class_logit_bias": null
+  }
+}

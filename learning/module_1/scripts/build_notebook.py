@@ -28,7 +28,7 @@ cells.append(nbf.v4.new_markdown_cell("""# Module 1: Computer Networking & CICIo
 # Cell 2: Markdown Section 1
 cells.append(nbf.v4.new_markdown_cell("""## 1. Environment Setup & Data Ingestion
 
-In this section, we import standard analysis libraries (`pandas`, `numpy`, `matplotlib`, `seaborn`) and load a small slice of 1,000 flows from `data/sample_stratified.csv`.
+In this section, we import standard analysis libraries (`pandas`, `numpy`, `matplotlib`, `seaborn`) and load a small slice of 1,000 flows from `data/processed/sample_stratified.csv`.
 
 *Notice: We load only 1,000 flows to keep execution instantaneous and memory consumption below 50 MB on your laptop.*
 """))
@@ -45,9 +45,7 @@ sns.set_theme(style="whitegrid", palette="muted")
 plt.rcParams["figure.figsize"] = (10, 5)
 
 # Path to sampled dataset
-DATA_PATH = Path("../../data/sample_stratified.csv")
-if not DATA_PATH.exists():
-    DATA_PATH = Path("../../data/processed/sample_stratified.csv")
+DATA_PATH = Path("../../data/processed/sample_stratified.csv")
 assert DATA_PATH.exists(), f"Dataset file not found at {DATA_PATH.resolve()}"
 
 # Read 1,000 rows for educational inspection
@@ -191,11 +189,11 @@ Therefore, our project implements an 8-category functional taxonomy:
 7. `Web`
 8. `BruteForce`
 
-Let's demonstrate how this mapping is performed using the schema from `src_v2/config.py`.
+Let's demonstrate how this mapping is performed using the schema from `track1_dataset_evaluation/src/config.py`.
 """))
 
 # Cell 15: Code Cell 5
-cells.append(nbf.v4.new_code_cell("""# Define category mapping dictionary (from src_v2/config.py)
+cells.append(nbf.v4.new_code_cell("""# Define category mapping dictionary (from track1_dataset_evaluation/src/config.py)
 LABEL_MAPPING_8CLASSES = {
     "DDOS-RSTFINFLOOD": "DDoS", "DDOS-PSHACK_FLOOD": "DDoS", "DDOS-SYN_FLOOD": "DDoS",
     "DDOS-UDP_FLOOD": "DDoS", "DDOS-TCP_FLOOD": "DDoS", "DDOS-ICMP_FLOOD": "DDoS",

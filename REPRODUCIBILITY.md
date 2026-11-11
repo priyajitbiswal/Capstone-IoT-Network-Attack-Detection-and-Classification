@@ -66,7 +66,7 @@ Because the full 46-million-record benchmark is prohibitively large for repeated
 
 To regenerate `data/processed/sample_stratified.csv` from raw CSV files:
 ```bash
-python -m src.create_sample
+python -m track2_ids_engineering.src.create_sample
 ```
 - **Execution Time**: ~2–4 minutes depending on disk I/O.
 - **Expected Output**: `data/processed/sample_stratified.csv`
@@ -82,48 +82,48 @@ python -m src.create_sample
 
 ---
 
-## 3. End-to-End Execution Sequence
+## 3. End-to-End Execution Sequence (Track 1)
 
-Execute the pipeline in the strict sequential order documented below:
+Execute the pipeline from repository root in the strict sequential order documented below:
 
 ### Step 1: Zero-Leakage Atomic Hash-Grouped Partitioning (Strategy 1)
 Partitions the deduplicated unique stratum (N = 501,098) into strictly disjoint Train (70%), Validation (15%), and Internal Test (15%) splits using SHA-256 feature-coordinate hashing with random seed 42:
 ```bash
-python -m src_v2.data_partitioning
+python -m track1_dataset_evaluation.src.data_partitioning
 ```
 - **Input**: `data/processed/sample_stratified.csv`
 - **Generated Outputs**:
-  - `data/partitions/partition_assignments.csv` (501,098 partition mapping rows)
-  - `data/partitions/partition_metadata.json` (class distributions and split counts)
+  - `track1_dataset_evaluation/data/partitions/partition_assignments.csv` (501,098 partition mapping rows)
+  - `track1_dataset_evaluation/data/partitions/partition_metadata.json` (class distributions and split counts)
 - **Execution Time**: ~30 seconds.
 
 ### Step 2: Collision-Purged Partitioning (Strategy 2 Ablation)
 Purges all 8,740 conflicting-label collision coordinate hashes (18,416 rows) to construct the separable ablation stratum (N = 482,682):
 ```bash
-python -m src_v2.ablation_strategy2
+python -m track1_dataset_evaluation.src.ablation_strategy2
 ```
-- **Input**: `data/partitions/partition_assignments.csv`
+- **Input**: `track1_dataset_evaluation/data/partitions/partition_assignments.csv`
 - **Generated Outputs**:
-  - `data/partitions/ablation_strategy2/partition_assignments.csv` (482,682 rows)
-  - `data/partitions/ablation_strategy2/metadata.json`
+  - `track1_dataset_evaluation/data/partitions/ablation_strategy2/partition_assignments.csv` (482,682 rows)
+  - `track1_dataset_evaluation/data/partitions/ablation_strategy2/metadata.json`
 - **Execution Time**: ~20 seconds.
 
 ### Step 3: Independent Cross-Capture Holdout Extraction & Cleaning
 Samples unseen sequential capture files (`Merged26.csv` through `Merged40.csv`) and strictly purges any feature coordinates appearing in training, validation, or test sets:
 ```bash
-python -m src_v2.cross_capture
+python -m track1_dataset_evaluation.src.cross_capture
 ```
 - **Inputs**: `data/raw/Merged26.csv`–`Merged40.csv`, Strategy 1 partition assignments
 - **Generated Outputs**:
-  - `data/partitions/cross_capture_test.csv` (63,423 raw flows)
-  - `data/partitions/cross_capture_test_clean.csv` (Exactly **57,280 clean, uncontaminated flows**)
-  - `data/partitions/cross_capture_metadata.json`
+  - `track1_dataset_evaluation/data/partitions/cross_capture_test.csv` (63,423 raw flows)
+  - `track1_dataset_evaluation/data/partitions/cross_capture_test_clean.csv` (Exactly **57,280 clean, uncontaminated flows**)
+  - `track1_dataset_evaluation/data/partitions/cross_capture_metadata.json`
 - **Execution Time**: ~1–2 minutes.
 
 ### Step 4: Strict Multi-Partition Independence Verification
 Validates that feature leakage is strictly 0.00% across all 6 pairwise partition intersections:
 ```bash
-python -m src_v2.verify_partitions
+python -m track1_dataset_evaluation.src.verify_partitions
 ```
 - **Checks Executed**:
   1. 64-bit MurmurHash3 feature hash disjointness across all 6 partition pairs.
@@ -138,7 +138,7 @@ python -m src_v2.verify_partitions
 ### Step 5: Model Training (21 Baseline & Ablation Configurations)
 Fits preprocessors strictly on the training partition and trains all 5 model families across Binary, Category, and Fine-Grained granularities:
 ```bash
-python -m src_v2.run_stage3
+python -m track1_dataset_evaluation.src.run_stage3
 ```
 - **Architectures**:
   - SGD Logistic Regression (`loss='log_loss'`, L2 regularization)
@@ -150,58 +150,58 @@ python -m src_v2.run_stage3
   - Strategy 1 (Cost-sensitive class balanced weights, 3 granularities × 5 models = 15 models)
   - Strategy 2 Ablation (Collision-purged clean training, 4 models)
   - Unweighted Loss Ablation (Empirical risk minimization, 2 models)
-- **Output Checkpoints**: Saved to `models/active/` alongside fitted `RobustScaler` preprocessors.
+- **Output Checkpoints**: Saved to `track1_dataset_evaluation/models/` alongside fitted `RobustScaler` preprocessors.
 - **Execution Time**: ~12–18 minutes on an 8-core CPU.
 
 ### Step 6: Multi-Granularity Model Evaluation & Holdout Assessment
 Evaluates all trained models across Validation, Internal Test, and Clean Cross-Capture Holdout:
 ```bash
-python -m src_v2.run_stage4_eval
+python -m track1_dataset_evaluation.src.run_stage4_eval
 ```
 - **Generated Outputs**:
-  - Detailed per-class precision, recall, F1, and support JSONs in `results_v2/metrics/per_class/`
-  - Granular stage 4 test metrics in `results_v2/metrics/stage4/`
+  - Detailed per-class precision, recall, F1, and support JSONs in `track1_dataset_evaluation/results/metrics/per_class/`
+  - Granular stage 4 test metrics in `track1_dataset_evaluation/results/metrics/stage4/`
   - Consolidated CSV tables:
-    - `results_v2/tables/stage4_test_results.csv`
-    - `results_v2/tables/centralized_experiment_ledger.csv`
+    - `track1_dataset_evaluation/results/tables/stage4_test_results.csv`
+    - `track1_dataset_evaluation/results/tables/centralized_experiment_ledger.csv`
 - **Execution Time**: ~2–3 minutes.
 
-### Step 7: Host CPU Latency & Throughput Hardware Profiling
-Benchmarks per-flow P50 inference latency and batch throughput across model architectures:
+### Step 7: Host CPU Latency & Throughput Hardware Profiling (Track 2)
+Benchmarks per-flow P50 inference latency and batch throughput across Track 2 baseline model architectures:
 ```bash
-python -m scripts.benchmark_throughput
+python track2_ids_engineering/scripts/benchmark_throughput.py
 ```
 - **Execution Time**: ~2 minutes.
 
-### Step 8: Publication Figures Regeneration
-Generates all 5 publication-quality vector-aligned figures:
+### Step 8: Publication Figures Regeneration (Track 1)
+Generates publication-quality figures:
 ```bash
-python -m scripts.generate_paper_figures
+python track1_dataset_evaluation/scripts/generate_paper_figures.py
 ```
 - **Generated Outputs**:
-  - `paper/figures/fig1_partitioning_protocol.png` (Group-hash protocol schematic)
-  - `paper/figures/fig2_accuracy_vs_macro_f1.png` (Diagnostic boundary scatter plot)
-  - `paper/figures/fig3_minority_recall_collapse.png` (Weighting trade-off bar chart)
-  - `paper/figures/fig4_confusion_matrices.png` (Multi-class error heatmaps)
-  - `paper/figures/fig5_latency_pareto_frontier.png` (Latency vs. Macro-F1 Pareto frontier)
+  - `track1_dataset_evaluation/paper/figures/fig1_partitioning_protocol.png` (Group-hash protocol schematic)
+  - `track1_dataset_evaluation/paper/figures/fig2_accuracy_vs_macro_f1.png` (Diagnostic boundary scatter plot)
+  - `track1_dataset_evaluation/paper/figures/fig3_minority_recall_collapse.png` (Weighting trade-off bar chart)
+  - `track1_dataset_evaluation/paper/figures/fig4_threat_tier_cross_capture.png` (Threat-tier cross-capture chart)
+  - `track1_dataset_evaluation/paper/figures/fig5_latency_pareto_frontier.png` (Latency vs. Macro-F1 Pareto frontier)
 - **Execution Time**: < 15 seconds.
 
-### Step 9: Research Paper Compilation
-Compiles the complete 11-page manuscript deliverable using the native Typst compiler:
+### Step 9: Research Paper Compilation (Track 1)
+Compiles the complete manuscript deliverable using the native Typst compiler:
 ```bash
-python -c "import typst; typst.compile('paper/paper.typ', output='paper/research_paper.pdf')"
+python -c "import typst; typst.compile('track1_dataset_evaluation/paper/paper.typ', output='track1_dataset_evaluation/paper/research_paper.pdf')"
 ```
-- **Primary Source**: `paper/paper.typ`
-- **Mirrored LaTeX Source**: `paper/main.tex` (IEEEtran format)
-- **Bibliography**: `paper/references.bib`
-- **Compiled Output**: `paper/research_paper.pdf` (11 pages, ~3.73 MB, 0 errors).
+- **Primary Source**: `track1_dataset_evaluation/paper/paper.typ`
+- **Mirrored LaTeX Source**: `track1_dataset_evaluation/paper/main.tex` (IEEEtran format)
+- **Bibliography**: `track1_dataset_evaluation/paper/references.bib`
+- **Compiled Output**: `track1_dataset_evaluation/paper/research_paper.pdf`
 - **Execution Time**: < 3 seconds.
 
 ---
 
 ## 4. Expected Results Verification Matrix
 
-To verify that local execution reproduced the exact published benchmark findings, compare `results_v2/tables/stage4_test_results.csv` against these verified reference figures:
+To verify that local execution reproduced the exact published benchmark findings, compare `track1_dataset_evaluation/results/tables/stage4_test_results.csv` against these verified reference figures:
 
 | Granularity | Top Architecture | Test Accuracy | Macro-F1 | Weighted-F1 | Cross-Capture Macro-F1 |
 | :--- | :--- | :---: | :---: | :---: | :---: |
@@ -224,15 +224,15 @@ To verify that local execution reproduced the exact published benchmark findings
 To maintain a lean repository (< 15 MB excluding research papers) and ensure 100% compatibility with GitHub limits:
 
 - **Tracked in Git**:
-  - All source code (`src/`, `src_v2/`, `scripts/`)
-  - All documentation (`README.md`, `PROJECT_STRUCTURE.md`, `REPRODUCIBILITY.md`)
-  - All historical research reports (`reports/STAGE_1_...` through `STAGE_9_...`)
-  - All evaluation results and metrics (`results_v2/metrics/`, `results_v2/tables/`)
-  - All manuscript sources, bibliography, figures, and compiled 11-page PDF (`paper/`)
-  - Partition metadata JSONs (`data/partitions/*.json`)
+  - All source code (`track1_dataset_evaluation/src/`, `track2_ids_engineering/src/`, `experiments/`, `scripts/`)
+  - All documentation (`README.md`, `PROJECT_STRUCTURE.md`, `REPRODUCIBILITY.md`, `TRACKS_OVERVIEW.md`)
+  - All historical research reports (`track1_dataset_evaluation/reports/STAGE_1_...` through `STAGE_9_...`)
+  - All evaluation results and metrics (`track1_dataset_evaluation/results/metrics/`, `track1_dataset_evaluation/results/tables/`, `track2_ids_engineering/results/`)
+  - All manuscript sources, bibliography, figures, and compiled PDF (`track1_dataset_evaluation/paper/`)
+  - Partition metadata JSONs (`track1_dataset_evaluation/data/partitions/*.json`)
 - **Excluded from Git (`.gitignore`)**:
   - Raw multi-gigabyte CSVs (`data/raw/*.csv`)
   - Working sample CSVs (`data/processed/sample_stratified.csv`, `data/*.csv`)
-  - Generated partition CSVs (`data/partitions/*.csv`)
-  - Compiled model binaries and weights (`models/active/*.joblib`, `*.pt`)
+  - Generated partition CSVs (`track1_dataset_evaluation/data/partitions/*.csv`)
+  - Compiled model binaries and weights (`track1_dataset_evaluation/models/*.joblib`, `track2_ids_engineering/models/**/*`, `*.pt`)
   - Python virtual environments (`.venv/`) and local bytecode caches (`__pycache__/`)

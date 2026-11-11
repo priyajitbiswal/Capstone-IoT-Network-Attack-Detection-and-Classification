@@ -1,0 +1,16 @@
+stage,candidate,weight_scheme,train_sec,val_samples,val_accuracy,val_macro_f1,val_attack_recall,val_benign_recall,val_flood_route_f1,val_flood_route_recall,notes,val_nll
+Stage1_Binary,binary_lightgbm_reused,balanced (Track1),0.0,75172,0.89275,0.76655,0.88571,0.97272,,,,
+Stage1_Binary,binary_random_forest_reused,balanced (Track1),0.0,75172,0.89815,0.77331,0.89238,0.96369,,,,
+Stage2_Category,stage2_cat7_lgbm_balanced,balanced,0.0,69086,0.80475,0.69775,,,0.99939,0.99934,,
+Stage2_Category,stage2_cat7_lgbm_sqrt_balanced,sqrt_balanced,0.0,69086,0.86468,0.76071,,,0.99942,0.99961,,
+Stage2_Category,stage2_cat8_lgbm_reused,balanced (Track1),0.0,69086,0.78883,0.61201,,,0.99935,0.99921,Predicted Benign on 2393 true attacks,
+Stage3A_Flood_16,stage3a_flood_lgbm_balanced,balanced,0.0,40760,0.79605,0.79337,,,,,,0.38628
+Stage3B_NonFlood_17,stage3b_nonflood_lgbm_balanced,balanced,0.0,28326,0.65495,0.46451,,,,,,0.9621
+Stage3A_Flood_16,stage3a_flood_lgbm_sqrt,sqrt_balanced,0.0,40760,0.79755,0.79512,,,,,,0.38411
+Stage3B_NonFlood_17,stage3b_nonflood_lgbm_sqrt,sqrt_balanced,0.0,28326,0.70561,0.5007,,,,,,0.82098
+Stage3A_Flood_16,stage3a_flood_lgbm_d63_sqrt,sqrt_balanced,0.0,40760,0.79809,0.79682,,,,,,0.38474
+Stage3B_NonFlood_17,stage3b_nonflood_lgbm_d63_sqrt,sqrt_balanced,0.0,28326,0.7156,0.51033,,,,,,0.78037
+Stage3A_Flood_16,stage3a_flood_xgb_balanced,balanced,0.0,40760,0.7906,0.78482,,,,,,0.42538
+Stage3B_NonFlood_17,stage3b_nonflood_xgb_balanced,balanced,0.0,28326,0.62695,0.44666,,,,,,1.07486
+Stage3A_Flood_16,stage3a_flood_xgb_sqrt,sqrt_balanced,0.0,40760,0.79097,0.78577,,,,,,0.42167
+Stage3B_NonFlood_17,stage3b_nonflood_xgb_sqrt,sqrt_balanced,0.0,28326,0.69212,0.49376,,,,,,0.91233

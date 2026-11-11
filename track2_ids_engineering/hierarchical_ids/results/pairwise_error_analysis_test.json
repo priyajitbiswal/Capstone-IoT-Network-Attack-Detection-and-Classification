@@ -1,0 +1,27 @@
+{
+  "split": "test",
+  "n_samples": 75105,
+  "E1_vs_E2_tuned": {
+    "both_correct": 52834,
+    "E2_fixed_E1_error": 3521,
+    "E2_broke_E1_correct": 1732,
+    "both_wrong": 17018
+  },
+  "E1_vs_E3_meta_gate": {
+    "both_correct": 51894,
+    "E3_fixed_E1_error": 3515,
+    "E3_broke_E1_correct": 2672,
+    "both_wrong": 17024
+  },
+  "E2_vs_E3_meta_gate": {
+    "E2_stage2_misrouted_total": 50,
+    "E2_misrouted_recovered_by_E3": 17,
+    "E3_fixed_E2_error": 17,
+    "E3_broke_E2_correct": 963
+  },
+  "E1_vs_E4": {
+    "both_correct": 53132,
+    "E4_fixed_E1_error": 3472,
+    "E4_broke_E1_correct": 1434
+  }
+}

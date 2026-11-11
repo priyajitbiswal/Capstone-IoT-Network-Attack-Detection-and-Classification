@@ -1,0 +1,27 @@
+{
+  "split": "cross",
+  "n_samples": 57280,
+  "E1_vs_E2_tuned": {
+    "both_correct": 37759,
+    "E2_fixed_E1_error": 2625,
+    "E2_broke_E1_correct": 2131,
+    "both_wrong": 14765
+  },
+  "E1_vs_E3_meta_gate": {
+    "both_correct": 37144,
+    "E3_fixed_E1_error": 2616,
+    "E3_broke_E1_correct": 2746,
+    "both_wrong": 14774
+  },
+  "E2_vs_E3_meta_gate": {
+    "E2_stage2_misrouted_total": 30,
+    "E2_misrouted_recovered_by_E3": 9,
+    "E3_fixed_E2_error": 9,
+    "E3_broke_E2_correct": 633
+  },
+  "E1_vs_E4": {
+    "both_correct": 37886,
+    "E4_fixed_E1_error": 2623,
+    "E4_broke_E1_correct": 2004
+  }
+}

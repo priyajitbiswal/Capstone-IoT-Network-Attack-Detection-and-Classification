@@ -8,19 +8,23 @@ ENV/
 MERGED_CSV/
 data/raw/
 data/processed/
-data/sample_stratified.csv
 data/*.csv
-data/partitions/*.csv
-data/partitions/*/*.csv
+track1_dataset_evaluation/data/partitions/*.csv
+track1_dataset_evaluation/data/partitions/*/*.csv
+track2_ids_engineering/data/*.csv
+track2_ids_engineering/data/*/*.csv
 *.csv
-!results/tables/*.csv
-!results_v2/tables/*.csv
-!data/partitions/*.json
-!data/partitions/*/*.json
+!track2_ids_engineering/results/tables/*.csv
+!track2_ids_engineering/hierarchical_ids/results/*.csv
+!track1_dataset_evaluation/results/tables/*.csv
+!track1_dataset_evaluation/data/partitions/*.json
+!track1_dataset_evaluation/data/partitions/*/*.json
 
 # Model Checkpoints & Large Artifacts
-models/*
-!models/README.md
+track1_dataset_evaluation/models/*
+!track1_dataset_evaluation/models/README.md
+track2_ids_engineering/models/*
+!track2_ids_engineering/models/README.md
 models_saved/
 models_saved_v2/
 *.pkl

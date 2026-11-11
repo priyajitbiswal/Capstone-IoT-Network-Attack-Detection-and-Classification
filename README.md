@@ -82,25 +82,25 @@ By introducing an open-source **Atomic SHA-256 Group-Hash Partitioning Protocol*
 
 ---
 
-## 4. Master Research Trajectory & Reports
+## 4. Master Research Trajectory & Reports (Track 1)
 
-All formal stage reports, consistency audits, verification documents, and blueprints are organized chronologically in [`reports/`](reports/):
+All formal stage reports, consistency audits, verification documents, and blueprints are organized chronologically in [`track1_dataset_evaluation/reports/`](track1_dataset_evaluation/reports/) (see [`TRACKS_OVERVIEW.md`](TRACKS_OVERVIEW.md) for the two-track project layout):
 
 | Stage | Report Document | Scope & Key Finding / Milestone |
 |:---:|---|---|
-| **Stage 1** | [`reports/STAGE_1_AUDIT_REPORT.md`](reports/STAGE_1_AUDIT_REPORT.md) | Forensic dataset audit; identified 8,740 conflicting feature-label collision hashes. |
-| **Stage 2** | [`reports/STAGE_2_INVESTIGATION_REPORT.md`](reports/STAGE_2_INVESTIGATION_REPORT.md) | Zero-leakage atomic hash partitioning protocol & temporal cross-capture design. |
-| **Stage 3** | [`reports/STAGE_3_COMPLETE_REPORT.md`](reports/STAGE_3_COMPLETE_REPORT.md) | Training of 21 model checkpoints, preprocessor isolation, and decomposed validation. |
-| **Stage 4** | [`reports/STAGE_4_EVALUATION_REPORT.md`](reports/STAGE_4_EVALUATION_REPORT.md) | Read-only dual-test evaluation across Internal Test (N = 75,105) and Cross-Capture (N = 57,280). |
-| **Stage 5** | [`reports/STAGE_5_ERROR_ANALYSIS.md`](reports/STAGE_5_ERROR_ANALYSIS.md) | Fine-grained error analysis, confusion topology, and class weighting ablations. |
-| **Stage 6** | [`reports/STAGE_6_RESEARCH_SYNTHESIS.md`](reports/STAGE_6_RESEARCH_SYNTHESIS.md) | Calibrated scientific claims synthesis, trade-offs, and boundary definitions. |
-| **Stage 7** | [`reports/STAGE_7_LITERATURE_REVIEW.md`](reports/STAGE_7_LITERATURE_REVIEW.md) | Systematic review of 14 peer-reviewed IoT NIDS studies (2021–2026). |
-| **Stage 8A** | [`reports/STAGE_8A_RESEARCH_CONSOLIDATION.md`](reports/STAGE_8A_RESEARCH_CONSOLIDATION.md) | Consolidation across Stages 1–7, research problem formulation, and contribution mapping. |
-| **Stage 8A.1**| [`reports/STAGE_8A1_CONSISTENCY_AUDIT.md`](reports/STAGE_8A1_CONSISTENCY_AUDIT.md) | Independent consistency audit; uncovered 18 numerical and conceptual discrepancies. |
-| **Stage 8A.2**| [`reports/STAGE_8A2_AUDIT_VERIFICATION.md`](reports/STAGE_8A2_AUDIT_VERIFICATION.md) | Mathematical verification & certification of ground truth constants across the repository. |
-| **Stage 8B** | [`reports/STAGE_8B_MANUSCRIPT_PLAN.md`](reports/STAGE_8B_MANUSCRIPT_PLAN.md) | Comprehensive manuscript blueprint, 9-section architecture, and 3-tier claim ledger. |
-| **Stage 8C** | [`reports/STAGE_8C_DRAFTING_NOTES.md`](reports/STAGE_8C_DRAFTING_NOTES.md) | Working drafting inventory, visuals generation, and manuscript assembly notes. |
-| **Stage 8D** | [`reports/STAGE_8D_FINAL_REVIEW.md`](reports/STAGE_8D_FINAL_REVIEW.md) | Final manuscript audit, computational profiling reconciliation, and packaging. |
+| **Stage 1** | [`STAGE_1_AUDIT_REPORT.md`](track1_dataset_evaluation/reports/STAGE_1_AUDIT_REPORT.md) | Forensic dataset audit; identified 8,740 conflicting feature-label collision hashes. |
+| **Stage 2** | [`STAGE_2_INVESTIGATION_REPORT.md`](track1_dataset_evaluation/reports/STAGE_2_INVESTIGATION_REPORT.md) | Zero-leakage atomic hash partitioning protocol & temporal cross-capture design. |
+| **Stage 3** | [`STAGE_3_COMPLETE_REPORT.md`](track1_dataset_evaluation/reports/STAGE_3_COMPLETE_REPORT.md) | Training of 21 model checkpoints, preprocessor isolation, and decomposed validation. |
+| **Stage 4** | [`STAGE_4_EVALUATION_REPORT.md`](track1_dataset_evaluation/reports/STAGE_4_EVALUATION_REPORT.md) | Read-only dual-test evaluation across Internal Test (N = 75,105) and Cross-Capture (N = 57,280). |
+| **Stage 5** | [`STAGE_5_ERROR_ANALYSIS.md`](track1_dataset_evaluation/reports/STAGE_5_ERROR_ANALYSIS.md) | Fine-grained error analysis, confusion topology, and class weighting ablations. |
+| **Stage 6** | [`STAGE_6_RESEARCH_SYNTHESIS.md`](track1_dataset_evaluation/reports/STAGE_6_RESEARCH_SYNTHESIS.md) | Calibrated scientific claims synthesis, trade-offs, and boundary definitions. |
+| **Stage 7** | [`STAGE_7_LITERATURE_REVIEW.md`](track1_dataset_evaluation/reports/STAGE_7_LITERATURE_REVIEW.md) | Systematic review of 14 peer-reviewed IoT NIDS studies (2021–2026). |
+| **Stage 8A** | [`STAGE_8A_RESEARCH_CONSOLIDATION.md`](track1_dataset_evaluation/reports/STAGE_8A_RESEARCH_CONSOLIDATION.md) | Consolidation across Stages 1–7, research problem formulation, and contribution mapping. |
+| **Stage 8A.1**| [`STAGE_8A1_CONSISTENCY_AUDIT.md`](track1_dataset_evaluation/reports/STAGE_8A1_CONSISTENCY_AUDIT.md) | Independent consistency audit; uncovered 18 numerical and conceptual discrepancies. |
+| **Stage 8A.2**| [`STAGE_8A2_AUDIT_VERIFICATION.md`](track1_dataset_evaluation/reports/STAGE_8A2_AUDIT_VERIFICATION.md) | Mathematical verification & certification of ground truth constants across the repository. |
+| **Stage 8B** | [`STAGE_8B_MANUSCRIPT_PLAN.md`](track1_dataset_evaluation/reports/STAGE_8B_MANUSCRIPT_PLAN.md) | Comprehensive manuscript blueprint, 9-section architecture, and 3-tier claim ledger. |
+| **Stage 8C** | [`STAGE_8C_DRAFTING_NOTES.md`](track1_dataset_evaluation/reports/STAGE_8C_DRAFTING_NOTES.md) | Working drafting inventory, visuals generation, and manuscript assembly notes. |
+| **Stage 8D** | [`STAGE_8D_FINAL_REVIEW.md`](track1_dataset_evaluation/reports/STAGE_8D_FINAL_REVIEW.md) | Final manuscript audit, computational profiling reconciliation, and packaging. |
 
 ---
 
@@ -165,28 +165,34 @@ Measured on host CPU hardware (**Intel Core i5-1135G7 @ 2.40GHz**, single-thread
 
 ```text
 capstone/
-├── src_v2/             # [ACTIVE] Verified Stage 2–8 leak-free research pipeline
-├── src/                # [LEGACY] Generation 1 exploratory baseline code
-├── data/               # Datasets, processed samples, and leak-free partition maps
-│   ├── raw/            # 63 full raw captures from CICIoT2023 (gitignored)
-│   ├── processed/      # Curated working sample (sample_stratified.csv, 529k flows)
-│   └── partitions/     # Strategy 1 & Strategy 2 partition assignment maps
-├── models/             # Serialized model weights & preprocessors (gitignored)
-│   ├── active/         # 21 verified Stage 3 checkpoints + 2 preprocessors
-│   └── legacy/         # Generation 1 baseline model checkpoints
-├── reports/            # Consolidated Stage 1–8D research reports, audits & blueprints
-├── results_v2/         # Active experimental outputs (ledger, stage4 CSV, JSONs)
-├── results/            # Legacy Generation 1 figures and tables
-├── research/           # 14 peer-reviewed research papers & dataset datasheet
-├── paper/              # Academic paper package (LaTeX, Typst, PDF, references.bib)
-├── snuc/               # Academic capstone deliverables (Shiv Nadar University Chennai)
-├── notebooks/          # Exploratory Jupyter research notebooks (01 to 08)
-├── learning/           # Educational modules on IoT networking fundamentals
-├── experiments/        # Standalone ablation scripts & parameter sweeps
-├── scripts/            # Standalone demonstration tools & figure generation scripts
-├── docs/               # Engineering notes (INSIGHTS.md) & roadmap (PROGRESS.md)
-├── PROJECT_STRUCTURE.md# Detailed guide to repository architecture & directory roles
-└── requirements.txt    # Project dependencies
+├── TRACKS_OVERVIEW.md                 # Two-track research organization guide
+├── track1_dataset_evaluation/         # TRACK 1: Dataset integrity audit, leak-free benchmark & paper
+│   ├── src/                           # Stage 2–4 zero-leakage partitioning, training & evaluation
+│   ├── data/partitions/               # Strategy 1 & Strategy 2 partition maps + cross-capture test sets
+│   ├── models/                        # 21 verified Stage 3 checkpoints + 2 preprocessors (gitignored)
+│   ├── results/                       # Stage 4 CSVs, centralized ledger, per-class & stage4 JSONs
+│   ├── reports/                       # Stage 1–9 formal research reports & audits
+│   ├── paper/                         # Academic paper package (LaTeX, Typst, PDF, references.bib, figures)
+│   ├── experiments/                   # Natural vs. uncapped dataset distribution scripts
+│   └── scripts/                       # 300 DPI publication figure generator
+├── track2_ids_engineering/            # TRACK 2: Practical IDS architectures, baselines & hierarchical IDS
+│   ├── src/                           # 2-class, 8-class, 34-class baselines & feature selection
+│   ├── models/                        # Baseline binary, 8-class, 34-class & top-20 checkpoints (gitignored)
+│   ├── results/                       # Baseline confusion matrices, ROC/PR curves & benchmark tables
+│   ├── experiments/                   # Weight calibration, tuning, pruning & 2-stage cascade ablations
+│   ├── scripts/                       # Streamlit SOC console (demo_app.py) & 10G throughput benchmark
+│   ├── docs/                          # Engineering notes (INSIGHTS.md) & roadmap (PROGRESS.md)
+│   ├── data/                          # Spec for future hierarchical IDS Datasets A, B, C1, C2
+│   └── hierarchical_ids/              # Proposed 3-Stage Flood vs. Non-Flood IDS architecture spec
+├── data/                              # Shared raw CICIoT2023 captures & curated stratified sample
+│   ├── raw/                           # 63 full raw captures from CICIoT2023 (gitignored)
+│   └── processed/                     # Curated working sample (sample_stratified.csv, 529k flows)
+├── notebooks/                         # Exploratory Jupyter research notebooks (01 to 08)
+├── research/                          # 14 peer-reviewed research papers & dataset datasheet
+├── learning/                          # Educational modules on IoT networking fundamentals
+├── snuc/                              # Academic capstone deliverables (Shiv Nadar University Chennai)
+├── PROJECT_STRUCTURE.md               # Detailed guide to repository architecture & directory roles
+└── requirements.txt                   # Project dependencies
 ```
 
 ---
@@ -203,44 +209,44 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 2. Verify Data Partitions (Zero Feature Overlap)
+### 2. Verify Data Partitions (Zero Feature Overlap — Track 1)
 ```powershell
-.\.venv\Scripts\python.exe -m src_v2.verify_partitions
+.\.venv\Scripts\python.exe -m track1_dataset_evaluation.src.verify_partitions
 ```
 
-### 3. Re-run Stage 4 Read-Only Test Evaluation
+### 3. Re-run Stage 4 Read-Only Test Evaluation (Track 1)
 Evaluates all 21 pre-trained Stage 3 checkpoints on the Internal Test set (N = 75,105) and Cross-Capture Test set (N = 57,280) in strictly read-only mode:
 ```powershell
-.\.venv\Scripts\python.exe -m src_v2.run_stage4_eval
+.\.venv\Scripts\python.exe -m track1_dataset_evaluation.src.run_stage4_eval
 ```
 
-### 4. Regenerate Publication Figures (300 DPI)
+### 4. Regenerate Publication Figures (300 DPI — Track 1)
 ```powershell
-.\.venv\Scripts\python.exe scripts/generate_paper_figures.py
+.\.venv\Scripts\python.exe track1_dataset_evaluation/scripts/generate_paper_figures.py
 ```
 
-### 5. Re-compile Academic Manuscript (Typst)
+### 5. Re-compile Academic Manuscript (Typst — Track 1)
 ```powershell
-.\.venv\Scripts\python.exe -c "import typst; typst.compile('paper/paper.typ', output='paper/research_paper.pdf')"
+.\.venv\Scripts\python.exe -c "import typst; typst.compile('track1_dataset_evaluation/paper/paper.typ', output='track1_dataset_evaluation/paper/research_paper.pdf')"
 ```
 
-### 6. Launch Security Operations Console (Streamlit Dashboard)
+### 6. Launch Security Operations Console (Streamlit Dashboard — Track 2)
 ```powershell
-.\.venv\Scripts\streamlit.exe run scripts/demo_app.py
+.\.venv\Scripts\streamlit.exe run track2_ids_engineering/scripts/demo_app.py
 ```
 
 ---
 
-## 9. Academic Manuscript Package
+## 9. Academic Manuscript Package (Track 1)
 
 - **Title**: *Empirical Evaluation of Data Leakage, Class Imbalance, and Temporal Fragility in IoT Network Intrusion Detection on CICIoT2023*
 - **Authors**: Priyajit Biswal, Rohit K Manoj, Rishab Rajeev (Dept. of Computer Science & Engineering, Shiv Nadar University Chennai)
 - **Faculty In Charge**: Dr. Vegesna S M Srinivasavarma
-- **LaTeX Source**: [`paper/main.tex`](paper/main.tex) (IEEEtran / Elsevier layout, 100% verified syntax and citations)
-- **Typst Source**: [`paper/paper.typ`](paper/paper.typ) (Modern Typst markup)
-- **Compiled PDF**: [`paper/research_paper.pdf`](paper/research_paper.pdf) (11-page publication-ready PDF, 3.91 MB, Stage 9 verified)
-- **Bibliography**: [`paper/references.bib`](paper/references.bib) (23 BibTeX entries including all 14 audited peer-reviewed literature studies)
-- **Visuals**: [`paper/figures/`](paper/figures/) (Figures 1 to 6)
+- **LaTeX Source**: [`track1_dataset_evaluation/paper/main.tex`](track1_dataset_evaluation/paper/main.tex) (IEEEtran / Elsevier layout, 100% verified syntax and citations)
+- **Typst Source**: [`track1_dataset_evaluation/paper/paper.typ`](track1_dataset_evaluation/paper/paper.typ) (Modern Typst markup)
+- **Compiled PDF**: [`track1_dataset_evaluation/paper/research_paper.pdf`](track1_dataset_evaluation/paper/research_paper.pdf) (publication-ready PDF, Stage 9 verified)
+- **Bibliography**: [`track1_dataset_evaluation/paper/references.bib`](track1_dataset_evaluation/paper/references.bib) (23 BibTeX entries including all 14 audited peer-reviewed literature studies)
+- **Visuals**: [`track1_dataset_evaluation/paper/figures/`](track1_dataset_evaluation/paper/figures/) (Figures 1 to 6)
 
 ---
 

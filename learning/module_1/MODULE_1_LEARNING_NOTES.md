@@ -431,7 +431,7 @@ graph TD
 
 ### 5.2 The 39 Numerical Features: Complete Physical & Mathematical Dictionary
 
-Below is the definitive, audited dictionary of all 39 features present in our repository's CSV files (as defined in [`src_v2/config.py`](file:///c:/Users/priya/Downloads/capstone/src_v2/config.py#L32-L73)):
+Below is the definitive, audited dictionary of all 39 features present in our repository's CSV files (as defined in [`track1_dataset_evaluation/src/config.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/config.py)):
 
 | Index | Feature Name | Protocol Layer | Unit / Range | Mathematical / Physical Meaning | Relevance to IoT Attack Detection |
 | :---: | :--- | :---: | :---: | :--- | :--- |
@@ -479,7 +479,7 @@ Below is the definitive, audited dictionary of all 39 features present in our re
 
 ### 5.3 The 34 Attack Labels & 8 Functional Attack Profiles
 
-The 34 classes in CICIoT2023 map into **8 functional categories** as defined in [`src_v2/config.py`](file:///c:/Users/priya/Downloads/capstone/src_v2/config.py#L75-L113):
+The 34 classes in CICIoT2023 map into **8 functional categories** as defined in [`track1_dataset_evaluation/src/config.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/config.py):
 
 ```
 +-----------------------------------------------------------------------------------------------+
@@ -543,14 +543,14 @@ To defend our research with academic rigor, we must clearly acknowledge what thi
 
 | Concept | Where it Appears in Our Codebase | What it Does in the Code |
 | :--- | :--- | :--- |
-| **39 Feature Definitions** | [`src_v2/config.py#L32-L73`](file:///c:/Users/priya/Downloads/capstone/src_v2/config.py#L32-L73) | Defines `FEATURE_COLUMNS` list used by preprocessors. |
-| **8-Class Mapping** | [`src_v2/config.py#L75-L113`](file:///c:/Users/priya/Downloads/capstone/src_v2/config.py#L75-L113) | Maps 34 raw strings into 8 functional categories (`LABEL_MAPPING_8CLASSES`). |
-| **Streaming Chunk Loader** | [`src/data_loader.py#L15-L45`](file:///c:/Users/priya/Downloads/capstone/src/data_loader.py#L15-L45) | Uses `pd.read_csv(chunksize=100000)` to stream multi-gigabyte CSVs safely. |
-| **Stratified Sampling** | [`src/create_sample.py#L25-L75`](file:///c:/Users/priya/Downloads/capstone/src/create_sample.py#L25-L75) | Capped floods at 20,000 flows while retaining 100% of rare attacks. |
-| **Leak-Free Partitioning** | [`src_v2/data_partitioning.py`](file:///c:/Users/priya/Downloads/capstone/src_v2/data_partitioning.py) | Groups identical feature vectors via MD5 hashes into 70/15/15 partitions. |
-| **Cross-Capture Holdout** | [`src_v2/cross_capture.py`](file:///c:/Users/priya/Downloads/capstone/src_v2/cross_capture.py) | Samples unvisited files `Merged26`–`Merged40` to test cross-capture generalization. |
-| **Balanced Class Weights** | [`src_v2/models.py#L19-L39`](file:///c:/Users/priya/Downloads/capstone/src_v2/models.py#L19-L39) | `BalancedXGBClassifier` computes $w_c = \frac{N}{K \cdot N_c}$ during `.fit()`. |
-| **Metric Profiling** | [`src_v2/evaluate.py#L20-L80`](file:///c:/Users/priya/Downloads/capstone/src_v2/evaluate.py#L20-L80) | Evaluates Macro F1, Recall, Precision, Latency ($\mu\text{s}$), and Throughput. |
+| **39 Feature Definitions** | [`track1_dataset_evaluation/src/config.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/config.py) | Defines `FEATURE_COLUMNS` list used by preprocessors. |
+| **8-Class Mapping** | [`track1_dataset_evaluation/src/config.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/config.py) | Maps 34 raw strings into 8 functional categories (`LABEL_MAPPING_8CLASSES`). |
+| **Streaming Chunk Loader** | [`track2_ids_engineering/src/data_loader.py`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/src/data_loader.py) | Uses `pd.read_csv(chunksize=100000)` to stream multi-gigabyte CSVs safely. |
+| **Stratified Sampling** | [`track2_ids_engineering/src/create_sample.py`](file:///c:/Users/priya/Downloads/capstone/track2_ids_engineering/src/create_sample.py) | Capped floods at 20,000 flows while retaining 100% of rare attacks. |
+| **Leak-Free Partitioning** | [`track1_dataset_evaluation/src/data_partitioning.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/data_partitioning.py) | Groups identical feature vectors via hashes into 70/15/15 partitions. |
+| **Cross-Capture Holdout** | [`track1_dataset_evaluation/src/cross_capture.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/cross_capture.py) | Samples unvisited files `Merged26`–`Merged40` to test cross-capture generalization. |
+| **Balanced Class Weights** | [`track1_dataset_evaluation/src/models.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/models.py) | `BalancedXGBClassifier` computes $w_c = \frac{N}{K \cdot N_c}$ during `.fit()`. |
+| **Metric Profiling** | [`track1_dataset_evaluation/src/evaluate.py`](file:///c:/Users/priya/Downloads/capstone/track1_dataset_evaluation/src/evaluate.py) | Evaluates Macro F1, Recall, Precision, Latency ($\mu\text{s}$), and Throughput. |
 
 ---
 
