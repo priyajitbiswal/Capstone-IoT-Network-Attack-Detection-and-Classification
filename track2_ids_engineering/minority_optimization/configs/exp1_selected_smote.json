@@ -1,0 +1,176 @@
+{
+  "selections": {
+    "ORIG34": {
+      "selected_model": "Exp1_SMOTE_ProtoSafe_Cap4000_34",
+      "mode": "SMOTE_ProtoSafe_Cap4000",
+      "passed_guardrail": true,
+      "val_accuracy": 0.7552,
+      "val_macro_f1": 0.64214,
+      "val_minority_f1": 0.25322,
+      "val_minority_recall": 0.18152,
+      "val_benign_fpr": 0.1515
+    },
+    "OP29": {
+      "selected_model": "Exp1_SMOTE_ProtoSafe_Cap4000_op29",
+      "mode": "SMOTE_ProtoSafe_Cap4000",
+      "passed_guardrail": true,
+      "val_accuracy": 0.86166,
+      "val_macro_f1": 0.6842,
+      "val_minority_f1": 0.23336,
+      "val_minority_recall": 0.16655,
+      "val_benign_fpr": 0.15396
+    }
+  },
+  "generation_logs": {
+    "Exp1_SMOTE_Std_Cap4000_34": {
+      "mode": "SMOTE_Std_Cap4000",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 21276,
+      "train_rows_after": 372097,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 2184,
+        "RECON-PINGSWEEP": 3402,
+        "BACKDOOR_MALWARE": 3234,
+        "XSS": 3113,
+        "COMMANDINJECTION": 2814,
+        "SQLINJECTION": 2788,
+        "BROWSERHIJACKING": 2676,
+        "DICTIONARYBRUTEFORCE": 1065
+      },
+      "skipped_classes": [],
+      "train_time_sec": 210.07
+    },
+    "Exp1_SMOTE_ProtoSafe_Cap4000_34": {
+      "mode": "SMOTE_ProtoSafe_Cap4000",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 21276,
+      "train_rows_after": 372097,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 2184,
+        "RECON-PINGSWEEP": 3402,
+        "BACKDOOR_MALWARE": 3234,
+        "XSS": 3113,
+        "COMMANDINJECTION": 2814,
+        "SQLINJECTION": 2788,
+        "BROWSERHIJACKING": 2676,
+        "DICTIONARYBRUTEFORCE": 1065
+      },
+      "skipped_classes": [],
+      "train_time_sec": 208.53
+    },
+    "Exp1_SMOTE_ProtoSafe_Cap8000_34": {
+      "mode": "SMOTE_ProtoSafe_Cap8000",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 46532,
+      "train_rows_after": 397353,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 2808,
+        "RECON-PINGSWEEP": 4374,
+        "BACKDOOR_MALWARE": 6894,
+        "XSS": 7114,
+        "COMMANDINJECTION": 6814,
+        "SQLINJECTION": 6788,
+        "BROWSERHIJACKING": 6676,
+        "DICTIONARYBRUTEFORCE": 5064
+      },
+      "skipped_classes": [],
+      "train_time_sec": 214.57
+    },
+    "Exp1_SMOTE_ProtoSafe_Selective_34": {
+      "mode": "SMOTE_ProtoSafe_Selective",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 27691,
+      "train_rows_after": 378512,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 0,
+        "RECON-PINGSWEEP": 0,
+        "BACKDOOR_MALWARE": 5234,
+        "XSS": 5113,
+        "COMMANDINJECTION": 4815,
+        "SQLINJECTION": 4788,
+        "BROWSERHIJACKING": 4676,
+        "DICTIONARYBRUTEFORCE": 3065
+      },
+      "skipped_classes": [
+        "UPLOADING_ATTACK (same_5nn=12.5% < 15%)",
+        "RECON-PINGSWEEP (same_5nn=10.5% < 15%)"
+      ],
+      "train_time_sec": 300.82
+    },
+    "Exp1_SMOTE_Std_Cap4000_op29": {
+      "mode": "SMOTE_Std_Cap4000",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 21276,
+      "train_rows_after": 372097,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 2184,
+        "RECON-PINGSWEEP": 3402,
+        "BACKDOOR_MALWARE": 3234,
+        "XSS": 3113,
+        "COMMANDINJECTION": 2814,
+        "SQLINJECTION": 2788,
+        "BROWSERHIJACKING": 2676,
+        "DICTIONARYBRUTEFORCE": 1065
+      },
+      "skipped_classes": [],
+      "train_time_sec": 199.3
+    },
+    "Exp1_SMOTE_ProtoSafe_Cap4000_op29": {
+      "mode": "SMOTE_ProtoSafe_Cap4000",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 21276,
+      "train_rows_after": 372097,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 2184,
+        "RECON-PINGSWEEP": 3402,
+        "BACKDOOR_MALWARE": 3234,
+        "XSS": 3113,
+        "COMMANDINJECTION": 2814,
+        "SQLINJECTION": 2788,
+        "BROWSERHIJACKING": 2676,
+        "DICTIONARYBRUTEFORCE": 1065
+      },
+      "skipped_classes": [],
+      "train_time_sec": 193.41
+    },
+    "Exp1_SMOTE_ProtoSafe_Cap8000_op29": {
+      "mode": "SMOTE_ProtoSafe_Cap8000",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 46532,
+      "train_rows_after": 397353,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 2808,
+        "RECON-PINGSWEEP": 4374,
+        "BACKDOOR_MALWARE": 6894,
+        "XSS": 7114,
+        "COMMANDINJECTION": 6814,
+        "SQLINJECTION": 6788,
+        "BROWSERHIJACKING": 6676,
+        "DICTIONARYBRUTEFORCE": 5064
+      },
+      "skipped_classes": [],
+      "train_time_sec": 205.2
+    },
+    "Exp1_SMOTE_ProtoSafe_Selective_op29": {
+      "mode": "SMOTE_ProtoSafe_Selective",
+      "train_rows_before": 350821,
+      "synthetic_rows_added": 27691,
+      "train_rows_after": 378512,
+      "per_class_generated": {
+        "UPLOADING_ATTACK": 0,
+        "RECON-PINGSWEEP": 0,
+        "BACKDOOR_MALWARE": 5234,
+        "XSS": 5113,
+        "COMMANDINJECTION": 4815,
+        "SQLINJECTION": 4788,
+        "BROWSERHIJACKING": 4676,
+        "DICTIONARYBRUTEFORCE": 3065
+      },
+      "skipped_classes": [
+        "UPLOADING_ATTACK (same_5nn=12.5% < 15%)",
+        "RECON-PINGSWEEP (same_5nn=10.5% < 15%)"
+      ],
+      "train_time_sec": 231.03
+    }
+  }
+}

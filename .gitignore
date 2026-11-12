@@ -9,24 +9,26 @@ MERGED_CSV/
 data/raw/
 data/processed/
 data/*.csv
-track1_dataset_evaluation/data/partitions/*.csv
-track1_dataset_evaluation/data/partitions/*/*.csv
 track2_ids_engineering/data/*.csv
 track2_ids_engineering/data/*/*.csv
 *.csv
 !track2_ids_engineering/results/tables/*.csv
 !track2_ids_engineering/hierarchical_ids/results/*.csv
+!track2_ids_engineering/minority_optimization/results/*.csv
 !track1_dataset_evaluation/results/tables/*.csv
+!track1_dataset_evaluation/data/partitions/*.csv
+!track1_dataset_evaluation/data/partitions/*/*.csv
 !track1_dataset_evaluation/data/partitions/*.json
 !track1_dataset_evaluation/data/partitions/*/*.json
 
-# Model Checkpoints & Large Artifacts
-track1_dataset_evaluation/models/*
-track2_ids_engineering/models/*
+# Model Checkpoints & Heavy Binary Artifacts
+track1_dataset_evaluation/models/*.joblib
+track2_ids_engineering/models/**/*.joblib
+track2_ids_engineering/hierarchical_ids/models/*.joblib
+track2_ids_engineering/minority_optimization/models/**/*.joblib
 models_saved/
 models_saved_v2/
 *.pkl
-*.pt
 *.pth
 *.onnx
 *.joblib

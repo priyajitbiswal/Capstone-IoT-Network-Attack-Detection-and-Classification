@@ -1,0 +1,26 @@
+{
+  "selections": {
+    "ORIG34": {
+      "selected_model": "Exp2_Power_a025_34",
+      "weight_label": "Power_a025",
+      "alpha": 0.25,
+      "passed_guardrail": true,
+      "val_accuracy": 0.75342,
+      "val_macro_f1": 0.63802,
+      "val_minority_f1": 0.23608,
+      "val_minority_recall": 0.20041,
+      "val_benign_fpr": 0.18156
+    },
+    "OP29": {
+      "selected_model": "Exp2_SqrtBalanced_a050_op29",
+      "weight_label": "SqrtBalanced_a050",
+      "alpha": 0.5,
+      "passed_guardrail": true,
+      "val_accuracy": 0.85926,
+      "val_macro_f1": 0.68692,
+      "val_minority_f1": 0.24124,
+      "val_minority_recall": 0.2322,
+      "val_benign_fpr": 0.21574
+    }
+  }
+}

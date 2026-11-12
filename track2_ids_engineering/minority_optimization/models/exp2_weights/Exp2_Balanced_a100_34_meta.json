@@ -1,0 +1,8 @@
+{
+  "model_name": "Exp2_Balanced_a100_34",
+  "taxonomy": "ORIG34",
+  "alpha": 1.0,
+  "weight_label": "Balanced_a100",
+  "max_min_weight_ratio": 89.2788,
+  "train_time_sec": 198.58
+}

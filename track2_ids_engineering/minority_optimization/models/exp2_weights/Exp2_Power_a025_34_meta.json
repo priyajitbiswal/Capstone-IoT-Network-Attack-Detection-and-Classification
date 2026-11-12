@@ -1,0 +1,8 @@
+{
+  "model_name": "Exp2_Power_a025_34",
+  "taxonomy": "ORIG34",
+  "alpha": 0.25,
+  "weight_label": "Power_a025",
+  "max_min_weight_ratio": 3.0739,
+  "train_time_sec": 207.48
+}

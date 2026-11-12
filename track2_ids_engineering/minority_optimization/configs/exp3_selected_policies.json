@@ -1,0 +1,66 @@
+{
+  "stage_a_model": "StageA_Bin_unweighted",
+  "stage_a_checkpoint": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\minority_optimization\\models\\exp3_specialist\\StageA_Bin_unweighted.joblib",
+  "stage_b_model": "StageB_Rare8_sqrt_a050",
+  "stage_b_checkpoint": "C:\\Users\\priya\\Downloads\\capstone\\track2_ids_engineering\\minority_optimization\\models\\exp3_specialist\\StageB_Rare8_sqrt_a050.joblib",
+  "policies": {
+    "ORIG34": {
+      "naive": {
+        "tau_rare": 0.5,
+        "tau_cls": 0.0,
+        "tau_e4_keep": 1.01,
+        "val_accuracy": 0.75145,
+        "val_macro_f1": 0.63752,
+        "val_minority_f1": 0.2345,
+        "val_benign_fpr": 0.21574,
+        "n_overrides": 75
+      },
+      "gated": {
+        "tau_rare": 0.3,
+        "tau_cls": 0.25,
+        "tau_e4_keep": 0.65,
+        "passed_guardrail": true,
+        "val_accuracy": 0.75118,
+        "val_macro_f1": 0.64032,
+        "val_minority_f1": 0.24643,
+        "val_minority_recall": 0.25375,
+        "val_benign_fpr": 0.21706,
+        "delta_macro_f1": 0.00456,
+        "delta_minority_f1": 0.01934,
+        "delta_benign_fpr": 0.00132,
+        "n_overrides": 378,
+        "overrides_beneficial": 69,
+        "overrides_harmful": 80
+      }
+    },
+    "OP29": {
+      "naive": {
+        "tau_rare": 0.5,
+        "tau_cls": 0.0,
+        "tau_e4_keep": 1.01,
+        "val_accuracy": 0.85831,
+        "val_macro_f1": 0.68452,
+        "val_minority_f1": 0.2345,
+        "val_benign_fpr": 0.21574,
+        "n_overrides": 75
+      },
+      "gated": {
+        "tau_rare": 0.3,
+        "tau_cls": 0.25,
+        "tau_e4_keep": 0.65,
+        "passed_guardrail": true,
+        "val_accuracy": 0.85805,
+        "val_macro_f1": 0.6878,
+        "val_minority_f1": 0.24643,
+        "val_minority_recall": 0.25375,
+        "val_benign_fpr": 0.21706,
+        "delta_macro_f1": 0.00534,
+        "delta_minority_f1": 0.01934,
+        "delta_benign_fpr": 0.00132,
+        "n_overrides": 378,
+        "overrides_beneficial": 69,
+        "overrides_harmful": 80
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "model_name": "Exp2_Balanced_a100_op29",
+  "taxonomy": "OP29",
+  "alpha": 1.0,
+  "weight_label": "Balanced_a100",
+  "max_min_weight_ratio": 119.0288,
+  "train_time_sec": 176.77
+}

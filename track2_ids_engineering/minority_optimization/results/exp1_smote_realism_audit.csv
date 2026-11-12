@@ -1,0 +1,9 @@
+class_34,train_count,n_synthetic_std,n_synthetic_protosafe,protocol_breakdown,real_5nn_same_class_mean,real_pct_seeds_ge1_same_5nn,real_pct_seeds_majority_benign_5nn,std_proto_pair_mismatch_pct,std_invalid_nonint_proto_pct,std_variance_identity_err_pct,std_any_int_col_fractional_pct,std_tcp_udp_dual_active_pct,std_syn_1nn_wrong_class_pct,std_syn_1nn_benign_pct,protosafe_syn_1nn_wrong_class_pct,protosafe_syn_1nn_benign_pct
+UPLOADING_ATTACK,312,2184,2184,6:199|17:99|0:7|1:7,0.0256,12.5,6.09,12.18,12.04,57.28,96.7,83.01,34.11,7.14,37.0,5.86
+RECON-PINGSWEEP,486,3402,3402,6:368|0:59|17:59,0.028,10.49,16.05,5.61,5.53,53.82,95.09,67.7,41.33,9.79,40.83,9.61
+BACKDOOR_MALWARE,766,3234,3234,6:551|17:205|0:7|1:3,0.0843,20.76,13.05,5.16,5.1,54.73,91.84,75.54,31.32,8.72,29.07,7.33
+XSS,887,3113,3113,6:631|17:238|0:16|1:2,0.0428,17.14,12.06,6.84,6.75,52.1,94.99,75.14,31.48,7.52,33.5,7.84
+COMMANDINJECTION,1186,2814,2814,6:880|17:288|0:14|1:4,0.23,39.04,7.34,5.22,5.19,53.16,78.78,64.53,23.81,5.54,23.49,5.26
+SQLINJECTION,1212,2788,2788,6:944|17:262|0:5|1:1,0.0591,18.81,7.26,5.34,5.34,58.75,99.39,85.65,24.75,3.98,25.25,3.59
+BROWSERHIJACKING,1324,2676,2676,6:1121|17:186|0:17,0.1876,37.01,9.97,3.48,3.48,50.0,85.35,56.54,23.24,4.9,24.18,5.12
+DICTIONARYBRUTEFORCE,2935,1065,1065,6:2440|17:464|0:25|1:6,0.2933,47.67,14.0,3.57,3.57,49.67,95.12,64.88,18.78,6.2,17.46,6.01

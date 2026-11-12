@@ -1,0 +1,7 @@
+component,model,weight_alpha,val_nf_pr_auc,val_nf_roc_auc,val_nf_f1_at_05,val_nf_recall_at_05,val_nf_fpr_at_05,val_all_pr_auc,val_all_roc_auc,val_all_fpr_floods_at_05,size_mb,val_rare_accuracy,val_rare_macro_f1,val_rare_mcc
+StageA_Binary,StageA_Bin_unweighted,0.0,0.51752,0.91494,0.35513,0.22234,0.00169,0.5172,0.96219,2e-05,0.444,,,
+StageA_Binary,StageA_Bin_sqrt_a050,0.5,0.50419,0.91419,0.45469,0.46529,0.03292,0.5041,0.96188,2e-05,0.443,,,
+StageA_Binary,StageA_Bin_balanced_a100,1.0,0.48661,0.91268,0.30007,0.86985,0.2224,0.48656,0.9612,5e-05,0.444,,,
+StageB_8Class_Oracle,StageB_Rare8_unweighted,0.0,,,,,,,,,3.543,0.55911,0.42254,0.44386
+StageB_8Class_Oracle,StageB_Rare8_sqrt_a050,0.5,,,,,,,,,3.545,0.55098,0.43647,0.44295
+StageB_8Class_Oracle,StageB_Rare8_balanced_a100,1.0,,,,,,,,,3.546,0.52766,0.42862,0.42771

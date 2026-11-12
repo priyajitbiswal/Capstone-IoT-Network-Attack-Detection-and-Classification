@@ -1,0 +1,8 @@
+{
+  "model_name": "Exp2_Power_a075_op29",
+  "taxonomy": "OP29",
+  "alpha": 0.75,
+  "weight_label": "Power_a075",
+  "max_min_weight_ratio": 36.0362,
+  "train_time_sec": 176.11
+}

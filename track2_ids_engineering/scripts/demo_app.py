@@ -1,10 +1,12 @@
 """
-Track 2 SOC Defense Console (Streamlit) — Final Presentation Version.
+Track 2 SOC Defense Console (Streamlit) — Final Presentation & Promoted Hybrid Version.
 
-Primary IDS Architecture:
+Promoted Primary IDS Architecture:
+  - Hybrid_E4_Exp3_Gated (E4 Flat34 + Flood-Free Rare Specialist Gate: Stage A + Stage B;
+    Improves both Internal Test Min-F1 0.2196->0.2288 and Cross-Capture Min-F1 0.2872->0.2930)
+
+Comparative Architectures:
   - E4_LGBM_Leaves63_Sqrt (Single-pass 34-class LightGBM, 75.37% Test Acc, 0.7440 MCC, 4.15 ms Test P50)
-
-Comparative Hierarchical IDS Architecture:
   - E2_Cascade_ValTuned_LGBM (3-Stage Hierarchy using Track 1 binary_lightgbm.joblib in Stage 1,
     tau_att=0.15, Stage 2 malicious-only 7-cat router f_tau=0.40, Stages 3A/3B specialists;
     75.13% Test Acc, 0.6357 Macro-F1, 8.44 ms Test P50)
@@ -51,6 +53,14 @@ from track2_ids_engineering.hierarchical_ids.src.data_utils import (
     HIER_MODELS_DIR,
     HIER_RESULTS_DIR,
 )
+from track2_ids_engineering.minority_optimization.src.common import RESULTS_DIR as MIN_OPT_RESULTS_DIR
+from track2_ids_engineering.minority_optimization.src.specialist import RARE_8_CLASSES
+from track2_ids_engineering.src.hybrid_pipeline import (
+    DEFAULT_STAGE_A_PATH,
+    DEFAULT_STAGE_B_PATH,
+    HybridE4SpecialistIDS,
+    load_gated_policy_thresholds,
+)
 
 # Color mappings (preserved SOC console palette)
 STATUS_COLORS: Dict[str, str] = {
@@ -68,10 +78,12 @@ DEFAULT_OP29_MERGE_GROUPS: Dict[str, List[str]] = {
     "FLOOD_HTTP": ["DDOS-HTTP_FLOOD", "DOS-HTTP_FLOOD"],
 }
 
+ARCH_HYBRID_KEY = "Hybrid_E4_Exp3_Gated"
 ARCH_E4_KEY = "E4_Primary_Flat34"
 ARCH_E2_KEY = "E2_Fast_Cascade"
 ARCH_DISPLAY_OPTIONS: Dict[str, str] = {
-    ARCH_E4_KEY: "E4: Improved Flat LightGBM (Primary Recommended — 4.15 ms P50)",
+    ARCH_HYBRID_KEY: "Promoted Hybrid: E4 + Exp3 Rare Specialist (Primary Recommended)",
+    ARCH_E4_KEY: "E4: Improved Flat LightGBM Baseline (4.15 ms P50)",
     ARCH_E2_KEY: "E2: 3-Stage Fast Cascade (LightGBM Stage 1 Comparison — 8.44 ms P50)",
 }
 
@@ -199,23 +211,39 @@ def _build_op29_map() -> Dict[str, str]:
 
 
 def load_soc_resources() -> Dict[str, Any]:
-    """Loads Track 1 Strategy 1 preprocessor, E4 primary model, and Fast E2 cascade."""
+    """Loads Track 1 Strategy 1 preprocessor, Promoted Hybrid E4+Exp3, E4 baseline, and Fast E2 cascade."""
     prep_path = TRACK1_MODELS_DIR / "preprocessor_strategy1.joblib"
     e4_path = HIER_MODELS_DIR / "e4_lgbm_leaves63_sqrt.joblib"
     s1_path = TRACK1_MODELS_DIR / "binary_lightgbm.joblib"
     s2_path = HIER_MODELS_DIR / "stage2_cat7_lgbm_sqrt_balanced.joblib"
     s3a_path = HIER_MODELS_DIR / "stage3a_flood_lgbm_d63_sqrt.joblib"
     s3b_path = HIER_MODELS_DIR / "stage3b_nonflood_lgbm_d63_sqrt.joblib"
+    sp_a_path = DEFAULT_STAGE_A_PATH
+    sp_b_path = DEFAULT_STAGE_B_PATH
 
-    required = [prep_path, e4_path, s1_path, s2_path, s3a_path, s3b_path]
+    required = [prep_path, e4_path, s1_path, s2_path, s3a_path, s3b_path, sp_a_path, sp_b_path]
     missing = [str(p) for p in required if not p.exists()]
     if missing:
         raise FileNotFoundError(f"Missing required model/preprocessor checkpoint(s): {missing}")
 
     preprocessor = joblib.load(prep_path)
+    e4_model = joblib.load(e4_path)
+    thresholds = load_gated_policy_thresholds(taxonomy="ORIG34")
+
+    hybrid_arch = HybridE4SpecialistIDS(
+        e4_model=e4_model,
+        stage_a_model=joblib.load(sp_a_path),
+        stage_b_model=joblib.load(sp_b_path),
+        taxonomy="ORIG34",
+        tau_rare=thresholds["tau_rare"],
+        tau_cls=thresholds["tau_cls"],
+        tau_e4_keep=thresholds["tau_e4_keep"],
+        checkpoint_paths=[e4_path, sp_a_path, sp_b_path],
+        name="Hybrid_E4_Exp3_Gated",
+    )
     e4_arch = Flat34BaselineArchitecture(
         name="E4_LGBM_Leaves63_Sqrt",
-        model=joblib.load(e4_path),
+        model=e4_model,
         checkpoint_path=e4_path,
     )
     e2_arch = HierarchicalCascade3Stage(
@@ -233,6 +261,7 @@ def load_soc_resources() -> Dict[str, Any]:
     return {
         "preprocessor": preprocessor,
         "architectures": {
+            ARCH_HYBRID_KEY: hybrid_arch,
             ARCH_E4_KEY: e4_arch,
             ARCH_E2_KEY: e2_arch,
         },
@@ -390,7 +419,20 @@ def infer_batch(
             "non_flood_prob": float(np.sum(probs[non_flood_indices])),
             "executions": int(trace["executions_per_flow"][i]),
         }
-        if "stage1_prob_attack" in trace:
+        if "flood_bypass" in trace:
+            b_idx = int(trace["stage_b_top_idx"][i])
+            e4_base = THIRTY_FOUR_CLASSES[int(trace["e4_pred"][i])]
+            stage_info.update({
+                "mode": "HYBRID_E4_EXP3",
+                "flood_bypass": bool(trace["flood_bypass"][i]),
+                "routed_to_specialist": bool(trace["routed_to_specialist"][i]),
+                "e4_base_34": e4_base,
+                "stage_a_rare_prob": float(trace["stage_a_rare_prob"][i]),
+                "stage_b_top_rare": RARE_8_CLASSES[b_idx],
+                "stage_b_top_conf": float(trace["stage_b_top_conf"][i]),
+                "override_applied": bool(trace["override_applied"][i]),
+            })
+        elif "stage1_prob_attack" in trace:
             stage_info.update({
                 "mode": "E2_CASCADE",
                 "s1_prob_attack": float(trace["stage1_prob_attack"][i]),
@@ -447,6 +489,7 @@ def load_benchmark_tables() -> Dict[str, Optional[pd.DataFrame]]:
         "final_test": HIER_RESULTS_DIR / "final_comparison_test.csv",
         "e2_fast": HIER_RESULTS_DIR / "e2_fast_lgbm_evaluation.csv",
         "merged": HIER_RESULTS_DIR / "merged_flood_e4_summary.csv",
+        "min_opt_op29": MIN_OPT_RESULTS_DIR / "phase4_summary_op29.csv",
     }
     return {k: (pd.read_csv(p) if p.exists() else None) for k, p in paths.items()}
 
@@ -522,7 +565,7 @@ def run_ui() -> None:
         st.markdown("### Inference Engine Control")
         arch_key = st.radio(
             "Select Active IDS Model:",
-            options=[ARCH_E4_KEY, ARCH_E2_KEY],
+            options=[ARCH_HYBRID_KEY, ARCH_E4_KEY, ARCH_E2_KEY],
             format_func=lambda k: ARCH_DISPLAY_OPTIONS[k],
             index=0,
         )
@@ -535,13 +578,22 @@ def run_ui() -> None:
             ),
         )
         st.divider()
-        if arch_key == ARCH_E4_KEY:
+        if arch_key == ARCH_HYBRID_KEY:
+            st.info(
+                "**Promoted Hybrid (`E4 + Exp3 Gated`)**\n"
+                "- Role: **Primary Recommended IDS**\n"
+                "- Flood flows bypass Stage A/B (`0` rare flows lost)\n"
+                "- OP29 Test: **85.76% Acc**, `0.6834` Macro-F1, `0.2288` Min-F1\n"
+                "- OP29 Cross: **78.16% Acc**, `0.6878` Macro-F1, **`0.2930` Min-F1**\n"
+                "- Test P50: **`5.09 ms`** (OP29) | Disk: `37.88 MB`"
+            )
+        elif arch_key == ARCH_E4_KEY:
             st.info(
                 "**E4 (`E4_LGBM_Leaves63_Sqrt`)**\n"
-                "- Role: **Primary Recommended IDS**\n"
+                "- Role: **Single-Pass Baseline**\n"
                 "- Executions / Flow: `1.0` single pass\n"
                 "- Internal Test (34-cls): **75.37% Acc**, `0.6352` Macro-F1, **`0.7440` MCC**\n"
-                "- Test P50 Latency: **`4.15 ms`** | Disk: `33.90 MB`"
+                "- Test P50 Latency: **`3.41–4.15 ms`** | Disk: `33.90 MB`"
             )
         else:
             st.info(
@@ -556,7 +608,12 @@ def run_ui() -> None:
         st.caption("Preprocessor: Track 1 `preprocessor_strategy1.joblib` (39 features)")
 
     # ----------------- Header Banner -----------------
-    active_badge = "PRIMARY: E4 FLAT L63" if arch_key == ARCH_E4_KEY else "COMPARATIVE: E2 FAST CASCADE"
+    if arch_key == ARCH_HYBRID_KEY:
+        active_badge = "PRIMARY: E4 + EXP3 RARE SPECIALIST"
+    elif arch_key == ARCH_E4_KEY:
+        active_badge = "BASELINE: E4 FLAT L63"
+    else:
+        active_badge = "COMPARATIVE: E2 FAST CASCADE"
     st.markdown(
         f"""
         <div class="header-card">
@@ -645,11 +702,18 @@ def run_ui() -> None:
 
                 act = res["action"]
                 display_pred = res["pred_op29"] if show_op29 else res["pred_34"]
-                stage_tag = (
-                    f"Single-Pass Flat34 | Conf: {res['confidence']*100:.1f}%"
-                    if res["stage"]["mode"] == "E4_FLAT34"
-                    else f"S1 Att: {res['stage']['s1_prob_attack']*100:.1f}% -> {res['stage']['route']}"
-                )
+                stg_live = res["stage"]
+                if stg_live["mode"] == "HYBRID_E4_EXP3":
+                    if stg_live["flood_bypass"]:
+                        stage_tag = f"E4 Flood Bypass | Conf: {res['confidence']*100:.1f}%"
+                    elif stg_live["override_applied"]:
+                        stage_tag = f"Specialist Override (P_rare={stg_live['stage_a_rare_prob']*100:.1f}% -> {res['pred_34']})"
+                    else:
+                        stage_tag = f"E4 Held (P_rare={stg_live['stage_a_rare_prob']*100:.1f}%)"
+                elif stg_live["mode"] == "E4_FLAT34":
+                    stage_tag = f"Single-Pass Flat34 | Conf: {res['confidence']*100:.1f}%"
+                else:
+                    stage_tag = f"S1 Att: {stg_live['s1_prob_attack']*100:.1f}% -> {stg_live['route']}"
                 with feed_holder.container():
                     st.markdown(
                         f"""
@@ -678,11 +742,16 @@ def run_ui() -> None:
             log_rows = []
             for i, h in enumerate(history):
                 stg = h["stage"]
-                route_desc = (
-                    f"Single-Pass ({stg['executions']}x)"
-                    if stg["mode"] == "E4_FLAT34"
-                    else f"S1={stg['s1_prob_attack']:.2f} -> {stg['s2_cat']} -> {stg['route']}"
-                )
+                if stg["mode"] == "HYBRID_E4_EXP3":
+                    route_desc = (
+                        "E4 Flood Bypass (1x)"
+                        if stg["flood_bypass"]
+                        else f"P_rare={stg['stage_a_rare_prob']:.2f} | {'OVERRIDE->' + stg['stage_b_top_rare'] if stg['override_applied'] else 'E4 Kept'} ({stg['executions']}x)"
+                    )
+                elif stg["mode"] == "E4_FLAT34":
+                    route_desc = f"Single-Pass ({stg['executions']}x)"
+                else:
+                    route_desc = f"S1={stg['s1_prob_attack']:.2f} -> {stg['s2_cat']} -> {stg['route']}"
                 log_rows.append({
                     "Seq": i + 1,
                     "True Label (34-Cls)": h["true_34"],
@@ -761,7 +830,26 @@ def run_ui() -> None:
         stg = res["stage"]
 
         col1, col2, col3 = st.columns(3)
-        if stg["mode"] == "E4_FLAT34":
+        if stg["mode"] == "HYBRID_E4_EXP3":
+            with col1:
+                st.markdown("#### Pass 1: Frozen E4 Base Router")
+                st.caption("Single-pass LightGBM (`leaves=63, sqrt_balanced`)")
+                st.write(f"E4 Base Prediction: **{stg['e4_base_34']}**")
+                st.write(f"Routing Decision: **{'FLOOD BYPASS' if stg['flood_bypass'] else 'NON-FLOOD -> SPECIALIST'}**")
+                st.write(f"Executions: **{stg['executions']} model pass(es)** ({res['inf_us']} us)")
+            with col2:
+                st.markdown("#### Pass 2: Flood-Free Specialist (Exp 3)")
+                st.caption("Stage A Binary (`tau_rare=0.30`) + Stage B 8-Rare (`tau_cls=0.25`)")
+                st.write(f"Stage A P(Rare-8): **{stg['stage_a_rare_prob']*100:.2f}%**")
+                st.write(f"Stage B Top Class: **{stg['stage_b_top_rare']}** ({stg['stage_b_top_conf']*100:.2f}%)")
+                st.write(f"Gate Override Applied: **{'YES (Corrected)' if stg['override_applied'] else 'NO (E4 Kept)'}**")
+            with col3:
+                st.markdown("#### Pass 3: Final Policy & Top-3 View")
+                st.caption("Hybrid gated posterior (34-Cls / OP29)")
+                for rank_i, (cname, cprob) in enumerate(res["top3"], start=1):
+                    st.write(f"#{rank_i} **{cname}**: `{cprob*100:.2f}%`")
+                st.write(f"OP29 Group: **{res['pred_op29']}** ({'MATCH' if res['op29_match'] else 'DIFF'})")
+        elif stg["mode"] == "E4_FLAT34":
             with col1:
                 st.markdown("#### Pass 1: Preprocessing + Flat E4")
                 st.caption("Single-pass LightGBM (`num_leaves=63, sqrt_balanced`)")
@@ -888,6 +976,7 @@ def run_ui() -> None:
         df_test_orig = bench_tables.get("final_test")
         df_e2_fast = bench_tables.get("e2_fast")
         df_merged = bench_tables.get("merged")
+        df_min_opt_op29 = bench_tables.get("min_opt_op29")
 
         if df_test_orig is not None:
             st.markdown("#### 1. Original 34-Class Internal Test Benchmark (`N = 75,105`, Including Updated Fast E2)")
@@ -911,6 +1000,16 @@ def run_ui() -> None:
                 ]],
                 width="stretch",
             )
+
+        if df_min_opt_op29 is not None:
+            st.markdown("#### 3. Promoted Hybrid & Controlled Minority Optimization (`OP29` Val-Selected + Cross-Capture)")
+            sub_mo = df_min_opt_op29[
+                df_min_opt_op29["is_val_selected"] & df_min_opt_op29["split"].isin(["test", "cross"])
+            ][[
+                "model", "split", "accuracy", "macro_f1", "mcc",
+                "minority_f1", "minority_recall", "benign_fpr", "model_size_mb",
+            ]]
+            st.dataframe(sub_mo, width="stretch")
 
         fig_tradeoff = HIER_RESULTS_DIR / "figures" / "e1_e4_architecture_tradeoffs.png"
         fig_merged = HIER_RESULTS_DIR / "figures" / "e4_34class_vs_merged_flood.png"

@@ -1,0 +1,8 @@
+{
+  "model_name": "Exp2_SqrtBalanced_a050_op29",
+  "taxonomy": "OP29",
+  "alpha": 0.5,
+  "weight_label": "SqrtBalanced_a050",
+  "max_min_weight_ratio": 10.91,
+  "train_time_sec": 173.93
+}

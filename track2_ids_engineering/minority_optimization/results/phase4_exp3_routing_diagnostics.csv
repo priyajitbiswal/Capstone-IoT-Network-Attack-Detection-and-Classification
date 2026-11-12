@@ -1,0 +1,13 @@
+model,taxonomy,split,tau_rare,tau_cls,tau_e4_keep,n_total,n_e4_flood_bypass,n_routed_to_specialist,n_specialist_overrides,override_rate_of_routed,true_rare_total,true_rare_bypassed_by_e4_flood,true_rare_reached_specialist,overrides_total,overrides_beneficial_wrong_to_right,overrides_harmful_right_to_wrong,overrides_benign_turned_into_rare_fp,overrides_common_nf_turned_into_rare,overrides_true_rare_reclassified_to_right,overrides_true_rare_reclassified_to_wrong
+Exp3_Hybrid_Naive_34,ORIG34,val,0.5,0.0,1.01,75172,40785,34387,465,0.01352,1844,0,1844,75,23,14,0,19,23,9
+Exp3_Hybrid_Naive_34,ORIG34,test,0.5,0.0,1.01,75105,40535,34570,525,0.01519,1939,0,1939,81,17,19,0,19,17,13
+Exp3_Hybrid_Naive_34,ORIG34,cross,0.5,0.0,1.01,57280,26251,31029,1856,0.05982,8384,0,8384,285,81,72,0,15,81,68
+Exp3_Hybrid_Gated_34,ORIG34,val,0.3,0.25,0.65,75172,40785,34387,1059,0.0308,1844,0,1844,378,69,80,8,178,69,16
+Exp3_Hybrid_Gated_34,ORIG34,test,0.3,0.25,0.65,75105,40535,34570,1082,0.0313,1939,0,1939,373,54,92,5,169,54,18
+Exp3_Hybrid_Gated_34,ORIG34,cross,0.3,0.25,0.65,57280,26251,31029,3242,0.10448,8384,0,8384,955,245,180,3,135,245,128
+Exp3_Hybrid_Naive_op29,OP29,val,0.5,0.0,1.01,75172,40785,34387,465,0.01352,1844,0,1844,75,23,14,0,19,23,9
+Exp3_Hybrid_Naive_op29,OP29,test,0.5,0.0,1.01,75105,40535,34570,525,0.01519,1939,0,1939,81,17,19,0,19,17,13
+Exp3_Hybrid_Naive_op29,OP29,cross,0.5,0.0,1.01,57280,26251,31029,1856,0.05982,8384,0,8384,285,81,72,0,15,81,68
+Exp3_Hybrid_Gated_op29,OP29,val,0.3,0.25,0.65,75172,40785,34387,1059,0.0308,1844,0,1844,378,69,80,8,178,69,16
+Exp3_Hybrid_Gated_op29,OP29,test,0.3,0.25,0.65,75105,40535,34570,1082,0.0313,1939,0,1939,373,54,92,5,169,54,18
+Exp3_Hybrid_Gated_op29,OP29,cross,0.3,0.25,0.65,57280,26251,31029,3242,0.10448,8384,0,8384,955,245,180,3,135,245,128

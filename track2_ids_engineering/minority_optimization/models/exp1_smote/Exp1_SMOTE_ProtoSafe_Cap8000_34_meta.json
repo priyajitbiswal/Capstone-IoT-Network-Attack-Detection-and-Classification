@@ -1,0 +1,18 @@
+{
+  "mode": "SMOTE_ProtoSafe_Cap8000",
+  "train_rows_before": 350821,
+  "synthetic_rows_added": 46532,
+  "train_rows_after": 397353,
+  "per_class_generated": {
+    "UPLOADING_ATTACK": 2808,
+    "RECON-PINGSWEEP": 4374,
+    "BACKDOOR_MALWARE": 6894,
+    "XSS": 7114,
+    "COMMANDINJECTION": 6814,
+    "SQLINJECTION": 6788,
+    "BROWSERHIJACKING": 6676,
+    "DICTIONARYBRUTEFORCE": 5064
+  },
+  "skipped_classes": [],
+  "train_time_sec": 214.57
+}

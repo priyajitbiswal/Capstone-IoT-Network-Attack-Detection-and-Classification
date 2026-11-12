@@ -1,0 +1,18 @@
+{
+  "mode": "SMOTE_Std_Cap4000",
+  "train_rows_before": 350821,
+  "synthetic_rows_added": 21276,
+  "train_rows_after": 372097,
+  "per_class_generated": {
+    "UPLOADING_ATTACK": 2184,
+    "RECON-PINGSWEEP": 3402,
+    "BACKDOOR_MALWARE": 3234,
+    "XSS": 3113,
+    "COMMANDINJECTION": 2814,
+    "SQLINJECTION": 2788,
+    "BROWSERHIJACKING": 2676,
+    "DICTIONARYBRUTEFORCE": 1065
+  },
+  "skipped_classes": [],
+  "train_time_sec": 199.3
+}

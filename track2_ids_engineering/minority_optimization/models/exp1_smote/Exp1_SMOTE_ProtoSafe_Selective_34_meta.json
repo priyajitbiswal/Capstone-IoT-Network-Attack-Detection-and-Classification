@@ -1,0 +1,21 @@
+{
+  "mode": "SMOTE_ProtoSafe_Selective",
+  "train_rows_before": 350821,
+  "synthetic_rows_added": 27691,
+  "train_rows_after": 378512,
+  "per_class_generated": {
+    "UPLOADING_ATTACK": 0,
+    "RECON-PINGSWEEP": 0,
+    "BACKDOOR_MALWARE": 5234,
+    "XSS": 5113,
+    "COMMANDINJECTION": 4815,
+    "SQLINJECTION": 4788,
+    "BROWSERHIJACKING": 4676,
+    "DICTIONARYBRUTEFORCE": 3065
+  },
+  "skipped_classes": [
+    "UPLOADING_ATTACK (same_5nn=12.5% < 15%)",
+    "RECON-PINGSWEEP (same_5nn=10.5% < 15%)"
+  ],
+  "train_time_sec": 300.82
+}

@@ -9,7 +9,7 @@ Leak-free benchmarking, hierarchical vs. flat multi-class IDS engineering, and w
 | Path | Track / Role | Key Contents |
 |---|---|---|
 | [`track1_dataset_evaluation/`](track1_dataset_evaluation/) | **Track 1 — Dataset Integrity & Paper (Frozen)** | Zero-leakage SHA-256 hash partitioning (`src/`), 21 baseline/ablation models (`models/`, gitignored), Stage 1–9 audit reports (`reports/`), and IEEE/Typst manuscript ([`paper/research_paper.pdf`](track1_dataset_evaluation/paper/research_paper.pdf)). |
-| [`track2_ids_engineering/`](track2_ids_engineering/) | **Track 2 — Practical IDS Engineering (Active)** | 2/8/34-class & Top-20 baselines (`src/`), Streamlit SOC console & 10G throughput benchmark (`scripts/`), technical ledger ([`docs/INSIGHTS.md`](track2_ids_engineering/docs/INSIGHTS.md)), and E1–E4 Hierarchical vs. Improved Flat IDS study ([`hierarchical_ids/`](track2_ids_engineering/hierarchical_ids/docs/COMPARISON_REPORT.md)). |
+| [`track2_ids_engineering/`](track2_ids_engineering/) | **Track 2 — Practical IDS Engineering (Active)** | Promoted **E4 + Exp3 Hybrid Specialist** pipeline (`src/hybrid_pipeline.py`, `scripts/run_hybrid_ids.py`, Streamlit console `scripts/demo_app.py`), E1–E4 study (`hierarchical_ids/`), minority optimization study (`minority_optimization/`), 10G throughput benchmark, and technical ledger ([`docs/INSIGHTS.md`](track2_ids_engineering/docs/INSIGHTS.md)). |
 | [`notebooks/`](notebooks/) | **Interactive Notebooks (`01`–`09`)** | `01`–`06`, `08`, `09` cover Track 2 (`09`: E1 vs. E2 vs. E4 evaluation); `07` covers Track 1 uncapped raw distribution evaluation. |
 | [`data/`](data/) | **Shared Dataset (Gitignored CSVs)** | Raw CICIoT2023 captures (`raw/Merged01–63.csv`) and stratified working sample (`processed/sample_stratified.csv`: 529,562 rows × 40 cols, SHA-256 `39370152e9b2cf95e64e1df650d3bc677241f811cd38983894502fd1f8baa227`). |
 | [`research/`](research/) & [`learning/`](learning/) | **Literature & Notes** | 14 surveyed papers + critical analysis (`research/`) and educational notes (`learning/module_1/`). |
@@ -58,7 +58,8 @@ All Track 1 benchmarks and Track 2 E1–E4 models evaluate strictly on Track 1 S
 .\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.run_final_evaluation
 .\.venv\Scripts\python.exe -u -m track2_ids_engineering.hierarchical_ids.experiments.run_presentation_updates
 
-# 4. Run 10 Gbps throughput benchmark or launch interactive SOC console (Track 2)
+# 4. Run Promoted Track 2 Hybrid Pipeline (E4 + Exp3 Rare Specialist), 10G benchmark, or interactive SOC console
+.\.venv\Scripts\python.exe -m track2_ids_engineering.scripts.run_hybrid_ids --taxonomy OP29 --split test
 .\.venv\Scripts\python.exe track2_ids_engineering\scripts\benchmark_throughput.py --samples 50000 --warmup 1000
 .\.venv\Scripts\streamlit.exe run track2_ids_engineering/scripts/demo_app.py
 
@@ -67,4 +68,4 @@ All Track 1 benchmarks and Track 2 E1–E4 models evaluate strictly on Track 1 S
 .\.venv\Scripts\python.exe -c "import typst; typst.compile('track1_dataset_evaluation/paper/paper.typ', output='track1_dataset_evaluation/paper/research_paper.pdf')"
 ```
 
-**Git Policy**: Source code, docs, notebooks, Track 1/Track 2 summary tables & JSONs, and the compiled PDF are tracked. Large CSVs (`data/`, `track1_dataset_evaluation/data/partitions/*.csv`), binary models (`*.joblib`, `*.pt`), `.venv/`, and `snuc/` are excluded via [`.gitignore`](.gitignore).
+**Git Policy**: Source code, docs, notebooks, configs, Track 1/Track 2 summary CSV/JSON tables, partition metadata & Cross-Capture CSVs (`track1_dataset_evaluation/data/partitions/`), lightweight PyTorch checkpoints (`*.pt`), confusion-matrix `.npy` arrays, generated PNG plots, and research PDFs stay tracked. Heavy artifacts—raw CICIoT2023 datasets (`data/`, `MERGED_CSV/`), `.joblib`/`.pkl` model weights, `.venv/`, and `snuc/`—are excluded via [`.gitignore`](.gitignore).
